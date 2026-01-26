@@ -1,0 +1,16 @@
+# ---------- Python ----------
+__pycache__/
+*.pyc
+.env
+
+# ---------- MySQL data (Docker volume) ----------
+mysql/
+
+# ---------- OS / Editor junk ----------
+.DS_Store
+.vscode/
+
+# ---------- Frontend (if using npm) ----------
+node_modules/
+dist/
+build/
