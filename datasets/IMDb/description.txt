@@ -1,0 +1,1 @@
+We first identified the first 10,000 movies that received reviews, as this dataset was more limited than the basic and crew datasets. After joining the relevant data for these movies, we filtered the directors and writers table to retain only individuals who directed or wrote at least one movie within our 10000 movie subset.
