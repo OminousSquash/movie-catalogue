@@ -62,12 +62,54 @@ class imdbScraper:
         except Exception as e:
             print(f"Failed to parse rating: {e}")
             return None
+        
+    def get_awards(self, imdb_id):
+        url = f"https://www.imdb.com/title/{imdb_id}/awards/"
+        
+        try:
+            response = self.session.get(url)
+            if response.status_code != 200:
+                return None
+
+            pattern = r'"categories":\s*(\[.*?\])\s*\}\s*,\s*"requestContext"'
+            match = re.search(pattern, response.text, re.DOTALL)
+
+            if match:
+                awards_data = json.loads(match.group(1))
+                parsed_awards = []
+
+                for category in awards_data:
+                    event_name = category.get('name')
+                    items = category.get('section', {}).get('items', [])
+
+                    for item in items:
+                        award_list = item.get('listContent', [])
+                        award_name = award_list[0].get('text') if award_list else "Unknown Award"
+                        sub_list = item.get('subListContent', [])
+                        recipients = [r.get('text') for r in sub_list if r.get('text')] # Currently, the recipient will be empty if the movie itself receives an award and not a person
+
+                        parsed_awards.append({
+                            "event": event_name,
+                            "type": f"{item.get('rowTitle', '')} {item.get('rowSubTitle', '')}".strip(),
+                            "award": award_name,
+                            "all_recipients": recipients
+                        })
+                return parsed_awards
+            else:
+                print("Could not find awards data in page source.")
+                return None
+
+        except Exception as e:
+            print(f"Failed to parse awards: {e}")
+            return None
+
 
 
 # scraper = imdbScraper()
+# awards = scraper.get_awards("tt0111161")
 # poster = scraper.get_poster_path("tt0111161")
 # ratings = scraper.get_rating("tt0111161")
-
+# print(awards)
 # print(f"Poster Path: https://image.tmdb.org/t/p/original{poster}")
 # for ratingData in ratings:
 #     print(f"{ratingData["rating"]} star : {ratingData["voteCount"]}")
