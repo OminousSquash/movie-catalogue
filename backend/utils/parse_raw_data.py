@@ -31,7 +31,7 @@ def extract_relevant_data(rows: List[dict]):
     result = []
     print(rows[0].keys())
     for row in rows:
-        movie_fields = ["tconst", "primaryTitle", "isAdult", "avgRating", "numVotes", "genres"]
+        movie_fields = ["tconst", "primaryTitle", "isAdult", "averageRating", "numVotes", "genres"]
         movie = {k: row[k] for k in movie_fields}
         result.append(movie)
     return result
@@ -121,31 +121,37 @@ def write_to_tsv(rows, path):
 
     print(f"Wrote {len(rows)} rows to {path}")
 
-def split_tables(rows:List[dict]):
-    movies_fields = ["tconst", "primaryTitle", "isAdult", "avgRating", "numVotes"]
+def split_tables(rows: List[dict]):
+    movies_fields = ["tconst", "primaryTitle", "isAdult", "averageRating", "numVotes"]
+
     movies = []
     genres_set = set()
-    genres_list = []
-    genre_to_id = defaultdict()
     movies_genres = []
+
     for row in rows:
-        movies.append({k:row[k] for k in movies_fields})
-        genres_list = row["genres"].split(",")
-    
-    for i, g in enumerate(genres_set):
-        genres_list.append({"genreId": i, "genre": g})
-        genre_to_id[g] = i
-    
+        movies.append({k: row[k] for k in movies_fields})
+
+        for genre in row["genres"].split(","):
+            genres_set.add(genre)
+
+    genres = []
+    genre_to_id = {}
+
+    for i, genre in enumerate(sorted(genres_set)):
+        genres.append({
+            "genreId": i,
+            "genre": genre
+        })
+        genre_to_id[genre] = i
+
     for row in rows:
-        movie_id = row["tconst"]
-        genres = row["genres"].split(",")
-        for genre in genres:
+        for genre in row["genres"].split(","):
             movies_genres.append({
-                "tconst":  movie_id,
+                "tconst": row["tconst"],
                 "genreId": genre_to_id[genre]
             })
-    
-    return movies, genres, movies_genres 
+
+    return movies, genres, movies_genres
 
 load_data()
 top_10k_movies = collect_top_rated_movies()
