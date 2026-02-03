@@ -6,6 +6,7 @@ venv/
 
 # ---------- MySQL data (Docker volume) ----------
 mysql/
+datasets/IMDB/raw
 
 # ---------- OS / Editor junk ----------
 .DS_Store
