@@ -1,7 +1,13 @@
 
 Commands: 
 
-docker compose up --build in root folder to start application
+    docker compose up --build in root folder to start application
+    
+    Whenever changes are made to the database or endpoints run these commands
+    docker compose down -v
+    rm -rf ./mysql
+    docker compose up --build
+
 
 For devs:
 
