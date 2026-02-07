@@ -20,6 +20,26 @@ CREATE TABLE IF NOT EXISTS movie_genres(
     PRIMARY KEY (tconst, genreID)
 );
 
+CREATE TABLE IF NOT EXISTS stars (
+    nconst VARCHAR(10) NOT NULL PRIMARY KEY,
+    primaryName VARCHAR(255) NOT NULL,
+    birthYear INT NOT NULL,
+    deathYear INT NOT NULL,
+);
+
+CREATE TABLE IF NOT EXISTS popular_works(
+    nconst VARCHAR(10) NOT NULL,
+    tconst VARCHAR(10) NOT NULL,
+    PRIMARY KEY(nconst, tconst)
+);
+
+CREATE TABLE IF NOT EXISTS movie_stars(
+    tconst VARCHAR(10) NOT NULL,
+    nconst VARCHAR(10) NOT NULL,
+    role   VARCHAR(10) NOT NULL,
+    PRIMARY KEY(tconst, nconst, role)
+);
+
 LOAD DATA INFILE '/datasets/IMDb/filtered/movies.tsv'
 INTO TABLE movies
 FIELDS TERMINATED BY '\t'
