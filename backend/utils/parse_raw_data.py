@@ -30,7 +30,7 @@ def extract_relevant_data(rows: List[dict]):
     result = []
     print(rows[0].keys())
     for row in rows:
-        movie_fields = ["tconst", "primaryTitle", "isAdult", "averageRating", "numVotes", "genres"] 
+        movie_fields = ["tconst", "primaryTitle", "isAdult", "averageRating", "numVotes", "genres", "startYear", "runtimeMinutes"]
         movie = {k: row[k] for k in movie_fields}
         result.append(movie)
     return result
@@ -75,6 +75,16 @@ def load_title_basics_data():
         print(title_basics_fields)
         for row in reader:
             zipped_data = dict(zip(title_basics_fields, row))
+            if (zipped_data["titleType"] != 'movie'):
+                continue
+            if zipped_data["runtimeMinutes"] == "\\N":
+                zipped_data["runtimeMinutes"] = -1
+            else:
+                zipped_data["runtimeMinutes"] = int(zipped_data["runtimeMinutes"])
+            if zipped_data["startYear"] == "\\N":
+                zipped_data["startYear"] = -1
+            else:
+                zipped_data["startYear"] = int(zipped_data["startYear"])
             title_basics_data[zipped_data["tconst"]] = zipped_data
 
 
@@ -96,8 +106,8 @@ def load_title_ratings_data():
 def load_data():
     load_title_basics_data()
     load_title_ratings_data()
-    load_name_basics_data()
-    load_principals_data()
+    # load_name_basics_data()
+    # load_principals_data()
     
 def collect_top_rated_movies():
     global title_ratings_data, top_movie_ids
@@ -110,6 +120,8 @@ def collect_top_rated_movies():
     print("Getting top rated")
     for i in range(len(title_ratings_data)):
         id = title_ratings_data[i]["tconst"]
+        if id not in title_basics_data:
+            continue
         basics_data = title_basics_data[id]
         merged = title_ratings_data[i] | title_basics_data[id]
         if basics_data["titleType"] == "movie":
@@ -168,7 +180,7 @@ def write_to_tsv(rows, path):
     print(f"Wrote {len(rows)} rows to {path}")
 
 def split_tables(rows: List[dict]):
-    movies_fields = ["tconst", "primaryTitle", "isAdult", "averageRating", "numVotes"]
+    movies_fields = ["tconst", "primaryTitle", "isAdult", "averageRating", "numVotes", "startYear", "runtimeMinutes"]
 
     movies = []
     genres_set = set()
@@ -202,13 +214,13 @@ def split_tables(rows: List[dict]):
 load_data()
 top_10k_movies = collect_top_rated_movies()
 movies, genres, movies_genres = split_tables(top_10k_movies)
-contributors, movie_contributors, popular_works = collect_contributor_information()
+# contributors, movie_contributors, popular_works = collect_contributor_information()
 write_to_tsv(movies, filtered_movies_data_path)
 write_to_tsv(genres, filtered_genres_data_path)
 write_to_tsv(movies_genres, filtered_movies_genres_data_path)
-write_to_tsv(contributors, "./datasets/IMDb/filtered/contributors.tsv")
-write_to_tsv(movie_contributors, "./datasets/IMDb/filtered/movie_contributors.tsv")
-write_to_tsv(popular_works, "./datasets/IMDb/filtered/popular_works.tsv")
+# write_to_tsv(contributors, "./datasets/IMDb/filtered/contributors.tsv")
+# write_to_tsv(movie_contributors, "./datasets/IMDb/filtered/movie_contributors.tsv")
+# write_to_tsv(popular_works, "./datasets/IMDb/filtered/popular_works.tsv")
 
 
 
