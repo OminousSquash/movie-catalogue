@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS popular_works(
 CREATE TABLE IF NOT EXISTS movie_contributors (
     tconst VARCHAR(10) NOT NULL,
     nconst VARCHAR(10) NOT NULL,
-    role   VARCHAR(10) NOT NULL,
+    role   VARCHAR(50) NOT NULL,
     PRIMARY KEY(tconst, nconst, role)
 );
 
