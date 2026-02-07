@@ -10,7 +10,7 @@ def get_db():
         host=os.getenv("DB_HOST", "db"),
         user=os.getenv("DB_USER", "appuser"),
         password=os.getenv("DB_PASSWORD", "apppass"),
-        database=os.getenv("DB_NAME", "appdb"),
+        database=os.getenv("DB_NAME", "moviedb"),
     )
 
 @app.get("/")
@@ -18,10 +18,15 @@ def home():
     return {"message": "API is working"}
 
 @app.get("/movies")
-def get_movies():
+def get_movies(limit: int = 20):
     db = get_db()
-    cursor = db.cursor()
-    cursor.execute("SELECT id, title, year FROM movies")
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT tconst, primaryTitle, averageRating, numVotes
+        FROM movies
+        ORDER BY numVotes DESC
+        LIMIT %s
+    """, (limit,))
     rows = cursor.fetchall()
     cursor.close()
     db.close()

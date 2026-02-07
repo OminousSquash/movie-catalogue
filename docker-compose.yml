@@ -3,14 +3,16 @@ services:
     image: mysql:8.0
     container_name: mysql-db
     restart: always
+    command: --secure-file-priv=""
     volumes:
       - ./mysql:/var/lib/mysql
       - ./database:/docker-entrypoint-initdb.d
+      - ./datasets:/datasets
     ports:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: appdb
+      MYSQL_DATABASE: moviedb 
       MYSQL_USER: appuser
       MYSQL_PASSWORD: apppass
 
@@ -26,7 +28,7 @@ services:
       DB_HOST: db
       DB_USER: appuser
       DB_PASSWORD: apppass
-      DB_NAME: appdb
+      DB_NAME: moviedb 
 
   phpmyadmin:
     image: phpmyadmin
