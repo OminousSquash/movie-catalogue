@@ -54,7 +54,14 @@ INTO TABLE genres
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(genreID, genre);
+(genreID, @raw_genre)
+SET genre = TRIM(
+    REPLACE(
+        REPLACE(@raw_genre, '\r', ''),
+        '\n', ''
+    )
+);
+
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/movies_genres.tsv'
 INTO TABLE movie_genres
@@ -68,7 +75,14 @@ INTO TABLE contributors
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(nconst, primaryName, birthYear, deathYear);
+(nconst, @raw_name, birthYear, deathYear)
+SET primaryName = TRIM(
+    REPLACE(
+        REPLACE(@raw_name, '\r', ''),
+        '\n', ''
+    )
+);
+
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/movie_contributors.tsv'
 IGNORE

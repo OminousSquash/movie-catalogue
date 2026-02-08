@@ -65,17 +65,17 @@ def get_movies_service(
     role_conditions = []
     if contributor_filters.actors:
         actors_placeholder = ",".join(["%s"] * len(contributor_filters.actors))
-        role_conditions.append(f"mc.role = 'actor' AND c.primaryName IN ({actors_placeholder})")
+        role_conditions.append(f"mc.role LIKE '%actor%' AND c.primaryName IN ({actors_placeholder})")
         params.extend(contributor_filters.actors)
 
     if contributor_filters.directors:
         directors_placeholders = ",".join(["%s"] * len(contributor_filters.directors))
-        role_conditions.append(f"mc.role = 'director' AND c.primaryName in ({directors_placeholders})")
+        role_conditions.append(f"mc.role LIKE '%director%' AND c.primaryName in ({directors_placeholders})")
         params.extend(contributor_filters.directors)
     
     if contributor_filters.writers:
         writers_placeholders = ",".join(["%s"] * len(contributor_filters.writers))
-        role_conditions.append(f"mc.role='writer' AND c.primaryName in ({writers_placeholders})")
+        role_conditions.append(f"mc.role LIKE '%writer%' AND c.primaryName in ({writers_placeholders})")
         params.extend(contributor_filters.writers)
 
     if role_conditions:
