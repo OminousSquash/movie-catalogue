@@ -22,9 +22,9 @@ def get_movies_service(
         conditions.append("m.primaryTitle LIKE %s")
         params.append(f"%{movie_filters.title}%")
 
-    if movie_filters.release_from:
+    if movie_filters.start_year:
         conditions.append("m.startYear >= %s")
-        params.append(movie_filters.release_from)
+        params.append(movie_filters.start_year)
 
     if movie_filters.end_year:
         conditions.append("m.startYear <= %s")

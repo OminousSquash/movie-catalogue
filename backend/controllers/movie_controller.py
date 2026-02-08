@@ -6,7 +6,7 @@ from database.database import get_db
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
-@router.get("/")
+@router.post("/")
 def get_movies(
     filters: MovieFilterDTO = Depends(),
     contributors: MovieContributorFilterDTO = Depends(),
