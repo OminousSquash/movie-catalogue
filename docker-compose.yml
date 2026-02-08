@@ -17,7 +17,7 @@ services:
       MYSQL_PASSWORD: apppass
 
   backend:
-    build: ./backend
+    build: .
     container_name: python-backend
     restart: always
     ports:
