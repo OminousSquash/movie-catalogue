@@ -16,3 +16,5 @@ datasets/IMDB/raw
 node_modules/
 dist/
 build/
+
+.idea/

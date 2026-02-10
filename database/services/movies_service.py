@@ -39,11 +39,11 @@ def get_movies_service(
         params.append(movie_filters.max_rating)
 
     if movie_filters.min_runtime:
-        conditions.append("m.runTime >= %s")
+        conditions.append("m.runtimeMinutes >= %s")
         params.append(movie_filters.min_runtime)
 
     if movie_filters.max_runtime:
-        conditions.append("m.runTime <= %s")
+        conditions.append("m.runtimeMinutes <= %s")
         params.append(movie_filters.max_runtime)
 
     if movie_filters.min_votes:
