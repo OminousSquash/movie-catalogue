@@ -81,7 +81,7 @@ def get_movies_service(
     if role_conditions:
         joins.append("JOIN movie_contributors mc on mc.tconst=m.tconst")
         joins.append("JOIN contributors c on c.nconst = mc.nconst")
-        conditions.append('(' + ' OR '.join(role_conditions ) + ')')
+        conditions.append('(' + ' AND '.join(role_conditions ) + ')')
 
     if joins:
         query += " " + " ".join(joins)
