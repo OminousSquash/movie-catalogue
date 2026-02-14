@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS movies (
     primaryTitle TEXT NOT NULL,
     isAdult TINYINT(1) NOT NULL,
     averageRating DECIMAL(3,1),
-    numVotes INT
+    numVotes INT,
+    startYear INT,
+    runtimeMinutes INT
 );
 
 CREATE TABLE IF NOT EXISTS genres (
@@ -36,7 +38,7 @@ CREATE TABLE IF NOT EXISTS popular_works(
 CREATE TABLE IF NOT EXISTS movie_contributors (
     tconst VARCHAR(10) NOT NULL,
     nconst VARCHAR(10) NOT NULL,
-    role   VARCHAR(10) NOT NULL,
+    role   VARCHAR(255) NOT NULL,
     PRIMARY KEY(tconst, nconst, role)
 );
 
@@ -45,14 +47,21 @@ INTO TABLE movies
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(tconst, primaryTitle, isAdult, averageRating, numVotes);
+(tconst, primaryTitle, isAdult, averageRating, numVotes, startYear, runtimeMinutes);
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/genres.tsv'
 INTO TABLE genres
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(genreID, genre);
+(genreID, @raw_genre)
+SET genre = TRIM(
+    REPLACE(
+        REPLACE(@raw_genre, '\r', ''),
+        '\n', ''
+    )
+);
+
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/movies_genres.tsv'
 INTO TABLE movie_genres
@@ -66,14 +75,24 @@ INTO TABLE contributors
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(nconst, primaryName, birthYear, deathYear);
+(nconst, @raw_name, birthYear, deathYear)
+SET primaryName = TRIM(
+    REPLACE(
+        REPLACE(@raw_name, '\r', ''),
+        '\n', ''
+    )
+);
+
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/movie_contributors.tsv'
+IGNORE
 INTO TABLE movie_contributors
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (tconst, nconst, role);
+
+SHOW WARNINGS;
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/popular_works.tsv'
 INTO TABLE popular_works
@@ -81,3 +100,5 @@ FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (nconst, tconst);
+
+SHOW WARNINGS;
