@@ -10,9 +10,15 @@ router = APIRouter(prefix="/movies", tags=["movies"])
 def get_movies(
     filters: MovieFilterDTO = Depends(),
     contributors: MovieContributorFilterDTO = Depends(),
+    page: int = Query(1, ge=1),
     db = Depends(get_db)
 ):
-    return get_movies_service(db=db, movie_filters=filters, contributor_filters=contributors, page=1)
+    return get_movies_service(
+        db=db, 
+        movie_filters=filters,
+        contributor_filters=contributors,
+        page=page
+    )
 
 @router.get('/recent')
 def get_recent_movies():

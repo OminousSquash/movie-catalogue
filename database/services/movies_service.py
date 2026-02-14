@@ -1,6 +1,7 @@
 from mysql.connector import MySQLConnection
 from backend.DTOs.movie_contributor_filter_dto import MovieContributorFilterDTO
 from backend.DTOs.movie_filter_dto import MovieFilterDTO
+import math
 
 PAGE_SIZE = 50
 
@@ -11,10 +12,7 @@ def get_movies_service(
     page: int
 ):
     cursor = db.cursor(dictionary=True)
-    query = """
-    SELECT DISTINCT m.*
-    FROM movies m
-    """
+    query = " FROM movies m "
     conditions = []
     params = []
     joins = []
@@ -90,11 +88,32 @@ def get_movies_service(
         query += " WHERE " + " AND ".join(conditions)
 
     offset = (page - 1) * PAGE_SIZE
-    query += " ORDER BY m.averageRating DESC LIMIT %s OFFSET %s"
-    params.extend([PAGE_SIZE, offset])
+
+    # build different queries
+    data_query = """
+    SELECT DISTINCT m.*
+    """ + query + """
+    ORDER BY m.averageRating DESC
+    LIMIT %s OFFSET %s
+    """
+
+    count_query = "SELECT COUNT(DISTINCT m.tconst) " + query
+    cursor.execute(count_query, params.copy())
+    total = cursor.fetchone()["COUNT(DISTINCT m.tconst)"]
+    data_params = params.copy()
+    data_params.extend([PAGE_SIZE, offset])
+
     print("SQL QUERY: ")
-    print(query)
+    print(data_query)
     print("SQL PARAMS: ")
-    print(params)
-    cursor.execute(query, params)
-    return cursor.fetchall()
+    print(data_params)
+    cursor.execute(data_query, data_params)
+    rows = cursor.fetchall()
+
+    return {
+        "data": rows,
+        "page": page,
+        "page_size": len(rows),
+        "total": total,
+        "total_pages": math.ceil(total / PAGE_SIZE)
+    }
