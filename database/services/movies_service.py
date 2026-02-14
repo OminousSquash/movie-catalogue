@@ -39,11 +39,11 @@ def get_movies_service(
         params.append(movie_filters.max_rating)
 
     if movie_filters.min_runtime:
-        conditions.append("m.runTime >= %s")
+        conditions.append("m.runtimeMinutes >= %s")
         params.append(movie_filters.min_runtime)
 
     if movie_filters.max_runtime:
-        conditions.append("m.runTime <= %s")
+        conditions.append("m.runtimeMinutes <= %s")
         params.append(movie_filters.max_runtime)
 
     if movie_filters.min_votes:
@@ -81,7 +81,7 @@ def get_movies_service(
     if role_conditions:
         joins.append("JOIN movie_contributors mc on mc.tconst=m.tconst")
         joins.append("JOIN contributors c on c.nconst = mc.nconst")
-        conditions.append('(' + ' OR '.join(role_conditions ) + ')')
+        conditions.append('(' + ' AND '.join(role_conditions ) + ')')
 
     if joins:
         query += " " + " ".join(joins)
