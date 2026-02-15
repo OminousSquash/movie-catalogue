@@ -30,4 +30,3 @@ def get_popularity_report_service(
     """
     cursor.execute(query)
     return cursor.fetchall()
-    

@@ -99,6 +99,13 @@ INTO TABLE popular_works
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(nconst, tconst);
+(nconst, @raw_name)
+SET tconst = TRIM(
+    REPLACE(
+        REPLACE(@raw_name, '\r', ''),
+        '\n', ''
+    )
+);
+
 
 SHOW WARNINGS;
