@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.controllers.movie_controller import router as movie_router
+from backend.controllers.popularity_controller import router as genre_popularity_router
 
 app = FastAPI(title="Movie Catalogue API")
 
@@ -20,3 +21,4 @@ app.add_middleware(
 )
 
 app.include_router(movie_router)
+app.include_router(genre_popularity_router)

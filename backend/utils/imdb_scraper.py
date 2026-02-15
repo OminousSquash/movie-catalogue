@@ -105,11 +105,11 @@ class imdbScraper:
 
 
 
-# scraper = imdbScraper()
-# awards = scraper.get_awards("tt0111161")
-# poster = scraper.get_poster_path("tt0111161")
-# ratings = scraper.get_rating("tt0111161")
-# print(awards)
-# print(f"Poster Path: https://image.tmdb.org/t/p/original{poster}")
-# for ratingData in ratings:
-#     print(f"{ratingData["rating"]} star : {ratingData["voteCount"]}")
+scraper = imdbScraper()
+awards = scraper.get_awards("tt0111161")
+poster = scraper.get_poster_path("tt0111161")
+ratings = scraper.get_rating("tt0111161")
+print(awards)
+print(f"Poster Path: https://image.tmdb.org/t/p/original{poster}")
+for ratingData in ratings:
+    print(f"{ratingData["rating"]} star : {ratingData["voteCount"]}")
