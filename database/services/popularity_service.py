@@ -1,6 +1,5 @@
 from mysql.connector import MySQLConnection
-from backend.DTOs.movie_contributor_filter_dto import MovieContributorFilterDTO
-from backend.DTOs.movie_filter_dto import MovieFilterDTO
+from typing import List
 import math
 
 PAGE_SIZE = 50
@@ -30,29 +29,3 @@ def get_popularity_report_service(
     """
     cursor.execute(popularity_query)
     return cursor.fetchall()
-
-def get_popular_contributors_by_genre_service(
-    db: MySQLConnection,
-    genre: str
-):
-    cursor = db.cursor(dictionary = True)
-    popular_contributors_query = """
-    SELECT 
-        c.primaryName,
-        COUNT(DISTINCT m.tconst) AS thriller_movies,
-        SUM(m.numVotes) AS total_votes 
-    FROM contributors c
-    JOIN movie_contributors mc ON mc.nconst = c.nconst
-    JOIN movies m ON m.tconst = mc.tconst
-    JOIN movie_genres mg ON mg.tconst = m.tconst
-    JOIN genres g ON g.genreID = mg.genreID
-    WHERE g.genre = %s
-    GROUP BY c.nconst, c.primaryName
-    ORDER BY total_votes DESC
-    LIMIT 5;
-    """
-    
-    cursor.execute(popular_contributors_query, (genre,))
-    popular_contributors = cursor.fetchall()
-
-    return popular_contributors
