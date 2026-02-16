@@ -1,9 +1,4 @@
 from mysql.connector import MySQLConnection
-from backend.DTOs.movie_contributor_filter_dto import MovieContributorFilterDTO
-from backend.DTOs.movie_filter_dto import MovieFilterDTO
-import math
-
-PAGE_SIZE = 50
 
 def polarisation_metrics_service(
     db: MySQLConnection
