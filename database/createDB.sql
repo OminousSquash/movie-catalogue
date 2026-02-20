@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS movie_genres(
 CREATE TABLE IF NOT EXISTS contributors (
     nconst VARCHAR(10) NOT NULL PRIMARY KEY,
     primaryName VARCHAR(255) NOT NULL,
-    birthYear INT NOT NULL,
-    deathYear INT NOT NULL
+    birthYear INT,
+    deathYear INT
 );
 
 CREATE TABLE IF NOT EXISTS popular_works(
@@ -40,6 +40,20 @@ CREATE TABLE IF NOT EXISTS movie_contributors (
     nconst VARCHAR(10) NOT NULL,
     role   VARCHAR(255) NOT NULL,
     PRIMARY KEY(tconst, nconst, role)
+);
+
+CREATE TABLE IF NOT EXISTS links (
+    movieId INT PRIMARY KEY,
+    imdbId VARCHAR(10),
+    tmdbId INT
+);
+
+CREATE TABLE IF NOT EXISTS movielens_tags(
+    userId INT NOT NULL,
+    movieId INT NOT NULL,
+    tag VARCHAR(255) NOT NULL,
+    timestamp BIGINT,
+    PRIMARY KEY (userId, movieId, tag)
 );
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/movies.tsv'
@@ -75,13 +89,15 @@ INTO TABLE contributors
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(nconst, @raw_name, birthYear, deathYear)
-SET primaryName = TRIM(
-    REPLACE(
-        REPLACE(@raw_name, '\r', ''),
-        '\n', ''
-    )
-);
+(nconst, @raw_name, @raw_birthYear, @raw_deathYear)
+SET 
+    primaryName = TRIM(
+        REPLACE(
+            REPLACE(@raw_name, '\r', ''),
+            '\n', '')
+    ),
+    birthYear = IF(@raw_birthYear = '-1', NULL, CAST(@raw_birthYear AS SIGNED)),
+    deathYear = IF(@raw_deathYear = '-1', NULL, CAST(@raw_deathYear AS SIGNED));
 
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/movie_contributors.tsv'
@@ -90,7 +106,10 @@ INTO TABLE movie_contributors
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(tconst, nconst, role);
+(tconst, nconst, @raw_role)
+SET role = TRIM(
+    REPLACE(@raw_role, '\r', '')
+);
 
 SHOW WARNINGS;
 
@@ -99,6 +118,32 @@ INTO TABLE popular_works
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(nconst, tconst);
+(nconst, @raw_tconst)
+SET tconst = TRIM(
+    REPLACE(
+        REPLACE(@raw_tconst, '\r', ''), 
+        '\n', '')
+);
 
+LOAD DATA INFILE '/datasets/ml-latest-small/links.csv'
+INTO TABLE links
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(movieId, imdbId, tmdbId);
+
+
+LOAD DATA INFILE '/datasets/ml-latest-small/tags.csv'
+INTO TABLE movielens_tags
+FIELDS TERMINATED BY ','
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(userId, movieId, @raw_tag, timestamp)
+SET tag = TRIM(
+    REPLACE(
+        REPLACE(
+            @raw_tag, '\r', ''),
+            '\n', '')
+);
 SHOW WARNINGS;
