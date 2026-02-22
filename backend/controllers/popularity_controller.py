@@ -1,6 +1,4 @@
 from fastapi import APIRouter, Query, Depends, FastAPI
-from backend.DTOs.movie_filter_dto import MovieFilterDTO
-from backend.DTOs.movie_contributor_filter_dto import MovieContributorFilterDTO
 from database.services.popularity_service import get_popularity_report_service
 from database.database import get_db
 

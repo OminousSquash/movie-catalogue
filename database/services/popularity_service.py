@@ -1,6 +1,5 @@
 from mysql.connector import MySQLConnection
-from backend.DTOs.movie_contributor_filter_dto import MovieContributorFilterDTO
-from backend.DTOs.movie_filter_dto import MovieFilterDTO
+from typing import List
 import math
 
 PAGE_SIZE = 50
@@ -16,7 +15,7 @@ def get_popularity_report_service(
     genre_list = cursor.fetchall()
     genre_list = [g for g in genre_list if g['genre'] != 'N']
 
-    query = """
+    popularity_query = """
         SELECT 
             g.genre,
             COUNT(*) AS num_movies,
@@ -28,6 +27,5 @@ def get_popularity_report_service(
         WHERE g.genre != 'N'
         GROUP BY g.genre
     """
-    cursor.execute(query)
+    cursor.execute(popularity_query)
     return cursor.fetchall()
-    
