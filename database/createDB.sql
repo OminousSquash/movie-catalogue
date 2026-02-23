@@ -42,6 +42,23 @@ CREATE TABLE IF NOT EXISTS movie_contributors (
     PRIMARY KEY(tconst, nconst, role)
 );
 
+CREATE TABLE IF NOT EXISTS user_ratings (
+    user_id VARCHAR(64) NOT NULL,
+    tconst VARCHAR(10) NOT NULL,
+    rating DECIMAL(3, 1) NOT NULL,
+    tstamp DATETIME,
+    PRIMARY KEY(user_id, tconst)
+);
+
+CREATE TABLE IF NOT EXISTS user_personalities (
+    user_id VARCHAR(64) NOT NULL PRIMARY KEY,
+    openness DECIMAL(3, 1) NOT NULL,
+    agreeableness DECIMAL(3, 1) NOT NULL,
+    emotional_stability DECIMAL(3, 1) NOT NULL,
+    conscientiousness DECIMAL(3, 1) NOT NULL,
+    extraversion DECIMAL(3, 1) NOT NULL
+);
+
 LOAD DATA INFILE '/datasets/IMDb/filtered/movies.tsv'
 INTO TABLE movies
 FIELDS TERMINATED BY '\t'
@@ -107,5 +124,21 @@ SET tconst = TRIM(
     )
 );
 
+LOAD DATA INFILE '/datasets/personality-isf2018/filtered/ratings.csv'
+IGNORE
+INTO TABLE user_ratings
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(user_id, tconst, rating, @raw_tstamp)
+SET tstamp = TRIM(@raw_tstamp);
+
+LOAD DATA INFILE '/datasets/personality-isf2018/filtered/personality.csv'
+IGNORE
+INTO TABLE user_personalities
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(user_id,openness,agreeableness,emotional_stability,conscientiousness,extraversion);
 
 SHOW WARNINGS;
