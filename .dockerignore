@@ -1,0 +1,9 @@
+.idea
+mysql
+mysql/
+*.sock
+datasets
+.git
+.gitignore
+__pycache__
+*.pyc
