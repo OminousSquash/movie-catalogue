@@ -1,5 +1,6 @@
 from mysql.connector import MySQLConnection
 from backend.DTOs.genre_contributor_trend_analysis_dto import GenreContributorTrendAnalysisDTO
+from sklearn.cluster import KMeans
 
 def get_rating_harshness_service(db:MySQLConnection):
     cursor = db.cursor(dictionary = True)
@@ -78,3 +79,127 @@ def get_correlation_matrix_service(db: MySQLConnection):
     correlation_matrix = user_genre_matrix.corr(method="pearson")
 
     return correlation_matrix.to_dict()
+
+
+
+def get_cluster_summary_service(db: MySQLConnection, n_clusters: int = 5):
+    cursor = db.cursor(dictionary=True)
+
+    query = """
+    SELECT ur.user_id, g.genre, AVG(ur.rating) AS avg_genre_rating
+    FROM user_ratings ur
+    JOIN movie_genres mg ON ur.tconst = mg.tconst
+    JOIN genres g ON g.genreID = mg.genreID
+    GROUP BY ur.user_id, g.genre
+    """
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    df = pd.DataFrame(rows)
+    user_genre_matrix = df.pivot_table(
+        index="user_id",
+        columns="genre",
+        values="avg_genre_rating"
+    )
+
+    user_genre_matrix = user_genre_matrix.apply(
+        lambda row: row.fillna(row.mean()), axis=1
+    )
+
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    user_genre_matrix["cluster"] = kmeans.fit_predict(user_genre_matrix)
+
+    cluster_summary = {}
+
+    for cluster_id in range(n_clusters):
+        cluster_data = user_genre_matrix[user_genre_matrix["cluster"] == cluster_id]
+        genre_means = cluster_data.drop(columns=["cluster"]).mean().sort_values(ascending=False)
+
+        cluster_summary[f"cluster_{cluster_id}"] = {
+            "num_users": len(cluster_data),
+            "top_genres": genre_means.head(3).index.tolist(),
+            "avg_rating_overall": round(cluster_data.drop(columns=["cluster"]).values.mean(), 2)
+        }
+
+    return cluster_summary
+
+def get_conditional_low_rating_service(db: MySQLConnection, genre_a: str, genre_b: str):
+    cursor = db.cursor(dictionary=True)
+
+    query = """
+    WITH user_genre_stats AS (
+        SELECT 
+            ur.user_id,
+            g.genre,
+            SUM(ur.rating <= 2) / COUNT(*) AS low_ratio
+        FROM user_ratings ur
+        JOIN movie_genres mg ON ur.tconst = mg.tconst
+        JOIN genres g ON g.genreID = mg.genreID
+        GROUP BY ur.user_id, g.genre
+        HAVING COUNT(*) >= 5
+    )
+    SELECT
+        COUNT(DISTINCT a.user_id) AS users_low_in_a,
+        COUNT(DISTINCT b.user_id) AS users_low_in_b_given_a
+    FROM user_genre_stats a
+    LEFT JOIN user_genre_stats b
+        ON a.user_id = b.user_id AND b.genre = %s AND b.low_ratio > 0.5
+    WHERE a.genre = %s AND a.low_ratio > 0.5
+    """
+
+    cursor.execute(query, (genre_b, genre_a))
+    result = cursor.fetchone()
+
+    if result["users_low_in_a"] == 0:
+        probability = 0
+    else:
+        probability = result["users_low_in_b_given_a"] / result["users_low_in_a"]
+
+    return {
+        "genre_a": genre_a,
+        "genre_b": genre_b,
+        "probability": round(probability, 3),
+        "sample_size": result["users_low_in_a"]
+    }
+
+def get_conditional_high_rating_service(db: MySQLConnection, genre_a: str, genre_b: str):
+    cursor = db.cursor(dictionary=True)
+
+    query = """
+    WITH user_genre_stats AS (
+        SELECT
+            ur.user_id,
+            g.genre,
+            SUM(ur.rating >= 4) / COUNT(*) AS high_ratio
+        FROM user_ratings ur
+        JOIN movie_genres mg ON ur.tconst = mg.tconst
+        JOIN genres g ON mg.genreID = g.genreID
+        GROUP BY ur.user_id, g.genre
+        HAVING COUNT(*) >= 5
+    )
+    SELECT
+        COUNT(DISTINCT a.user_id) AS users_high_in_a,
+        COUNT(DISTINCT b.user_id) AS users_high_in_b_given_a
+    FROM user_genre_stats a
+    LEFT JOIN user_genre_stats b
+        ON a.user_id = b.user_id
+        AND b.genre = %s
+        AND b.high_ratio > 0.5
+    WHERE a.genre = %s
+      AND a.high_ratio > 0.5
+    """
+
+    cursor.execute(query, (genre_b, genre_a))
+    result = cursor.fetchone()
+
+    if result["users_high_in_a"] == 0:
+        probability = 0
+    else:
+        probability = result["users_high_in_b_given_a"] / result["users_high_in_a"]
+
+    return {
+        "genre_a": genre_a,
+        "genre_b": genre_b,
+        "probability": round(probability, 3),
+        "sample_size": result["users_high_in_a"]
+    }

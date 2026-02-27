@@ -4,3 +4,4 @@ mysql-connector-python
 requests
 python-dotenv
 pandas
+scikit-learn
