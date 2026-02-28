@@ -59,6 +59,27 @@ CREATE TABLE IF NOT EXISTS user_personalities (
     extraversion DECIMAL(3, 1) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS user_credentials (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_lists (
+    list_id VARCHAR(64) NOT NULL PRIMARY KEY,
+    user_id INT NOT NULL,
+    list_name VARCHAR(255) NOT NULL,
+    list_note TEXT,
+    FOREIGN KEY user_id REFERENCES user_credentials(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_list_movies (
+    list_id VARCHAR(64) NOT NULL,
+    tconst VARCHAR(10) NOT NULL,
+    PRIMARY KEY(list_id, tconst)
+);
+
+
 LOAD DATA INFILE '/datasets/IMDb/filtered/movies.tsv'
 INTO TABLE movies
 FIELDS TERMINATED BY '\t'

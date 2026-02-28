@@ -6,6 +6,8 @@ from backend.controllers.contributor_controller import router as contributor_rou
 from backend.controllers.polarisation_controller import router as polarisation_router
 from backend.controllers.trend_analytics_controller import router as trend_analytics_router
 from backend.controllers.viewer_rating_controller import router as viewer_ratings_router
+from backend.controllers.personality_traits_controller import router as personality_traits_router
+from backend.controllers.login_signup_controller import router as auth_router
 
 app = FastAPI(title="Movie Catalogue API")
 
@@ -30,3 +32,5 @@ app.include_router(contributor_router)
 app.include_router(polarisation_router)
 app.include_router(trend_analytics_router)
 app.include_router(viewer_ratings_router)
+app.include_router(personality_traits_router)
+app.include_router(auth_router)
