@@ -7,7 +7,7 @@ router = APIRouter(prefix="/personality_traits", tags=["personality traits"])
 
 @router.get("/correlation")
 def get_correlation_statistics(
-    personality_corr_dto: PersonalityCorrelationDTO = Depends(),
+    personality_corr_dto: PersonalityCorrelationDTO,
     db = Depends(get_db)
 ):
     return get_personality_genre_correlations_service(

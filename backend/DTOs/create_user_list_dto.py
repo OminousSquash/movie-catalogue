@@ -5,5 +5,4 @@ from datetime import date
 class CreateUserListDTO(BaseModel):
     list_name: str
     list_note: str
-    creator_user_id: str
 

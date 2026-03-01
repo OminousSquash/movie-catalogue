@@ -2,8 +2,6 @@ from passlib.context import CryptContext
 import os
 from jose import jwt
 from datetime import datetime, timedelta
-from fastapi import HTTPException
-
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = os.getenv("SECRET_KEY")
