@@ -19,7 +19,9 @@ CREATE TABLE IF NOT EXISTS genres (
 CREATE TABLE IF NOT EXISTS movie_genres(
     tconst VARCHAR(10) NOT NULL,
     genreID INT NOT NULL,
-    PRIMARY KEY (tconst, genreID)
+    PRIMARY KEY (tconst, genreID),
+    FOREIGN KEY (tconst) REFERENCES movies(tconst),
+    FOREIGN KEY (genreID) REFERENCES genres(genreID)
 );
 
 CREATE TABLE IF NOT EXISTS contributors (
@@ -39,7 +41,9 @@ CREATE TABLE IF NOT EXISTS movie_contributors (
     tconst VARCHAR(10) NOT NULL,
     nconst VARCHAR(10) NOT NULL,
     role   VARCHAR(255) NOT NULL,
-    PRIMARY KEY(tconst, nconst, role)
+    PRIMARY KEY(tconst, nconst, role),
+    FOREIGN KEY (tconst) REFERENCES movies(tconst),
+    FOREIGN KEY (nconst) REFERENCES contributors(nconst)
 );
 
 CREATE TABLE IF NOT EXISTS user_ratings (
@@ -47,7 +51,8 @@ CREATE TABLE IF NOT EXISTS user_ratings (
     tconst VARCHAR(10) NOT NULL,
     rating DECIMAL(3, 1) NOT NULL,
     tstamp DATETIME,
-    PRIMARY KEY(user_id, tconst)
+    PRIMARY KEY(user_id, tconst),
+    FOREIGN KEY (tconst) REFERENCES movies(tconst)
 );
 
 CREATE TABLE IF NOT EXISTS user_personalities (
@@ -58,6 +63,29 @@ CREATE TABLE IF NOT EXISTS user_personalities (
     conscientiousness DECIMAL(3, 1) NOT NULL,
     extraversion DECIMAL(3, 1) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS user_credentials (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_lists (
+    list_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    user_id INT NOT NULL,
+    list_name VARCHAR(255) NOT NULL,
+    list_note TEXT,
+    FOREIGN KEY (user_id) REFERENCES user_credentials(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_list_movies (
+    list_id INT NOT NULL,
+    tconst VARCHAR(10) NOT NULL,
+    PRIMARY KEY(list_id, tconst),
+    FOREIGN KEY (list_id) REFERENCES user_lists(list_id),
+    FOREIGN KEY (tconst) REFERENCES movies(tconst)
+);
+
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/movies.tsv'
 INTO TABLE movies
