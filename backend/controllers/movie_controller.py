@@ -8,8 +8,8 @@ router = APIRouter(prefix="/movies", tags=["movies"])
 
 @router.post("/")
 def get_movies(
-    filters: MovieFilterDTO = Depends(),
-    contributors: MovieContributorFilterDTO = Depends(),
+    filters: MovieFilterDTO,
+    contributors: MovieContributorFilterDTO,
     page: int = Query(1, ge=1),
     db = Depends(get_db)
 ):

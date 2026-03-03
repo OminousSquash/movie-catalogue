@@ -7,14 +7,14 @@ def get_trend_analytics_service(
     cursor = db.cursor(dictionary = True)
     trend_analytics_query = """
     SELECT  
-        STDDEV(m.averageRating) AS std_rating,
-        FLOOR(m.startYear / 10) * 10 AS decade,
+        STDDEV(m.average_rating) AS std_rating,
+        FLOOR(m.start_year / 10) * 10 AS decade,
         g.genre,
-        AVG(m.averageRating) AS avg_rating,
-        SUM(m.numVotes) as total_votes
+        AVG(m.average_rating) AS avg_rating,
+        SUM(m.num_votes) as total_votes
     FROM movies m
     JOIN movie_genres mg ON m.tconst = mg.tconst
-    JOIN genres g ON g.genreID = mg.genreID
+    JOIN genres g ON g.genre_id = mg.genre_id
     GROUP BY g.genre, decade
     ORDER BY decade DESC, total_votes DESC
     """
@@ -29,9 +29,9 @@ def get_contributor_trends_service(
 
     query = """
         SELECT
-            c.primaryName AS name,
+            c.primary_name AS name,
             COUNT(DISTINCT m.tconst) AS movies_cnt,
-            SUM(m.numVotes) AS total_votes
+            SUM(m.num_votes) AS total_votes
         FROM contributors c
         JOIN movie_contributors mc ON mc.nconst = c.nconst
         JOIN movies m ON m.tconst = mc.tconst
@@ -48,7 +48,7 @@ def get_contributor_trends_service(
             EXISTS (
                 SELECT 1
                 FROM movie_genres mg
-                JOIN genres g ON g.genreID = mg.genreID
+                JOIN genres g ON g.genre_id = mg.genre_id
                 WHERE mg.tconst = m.tconst
                 AND g.genre IN ({placeholders})
             )
@@ -57,8 +57,8 @@ def get_contributor_trends_service(
 
     if genre_contributor_dto.last_decade:
         conditions.append("""
-            m.startYear >= (
-                SELECT FLOOR(MAX(startYear) / 10) * 10 FROM movies
+            m.start_year >= (
+                SELECT FLOOR(MAX(start_year) / 10) * 10 FROM movies
             )
         """)
 
@@ -66,7 +66,7 @@ def get_contributor_trends_service(
         query += " WHERE " + " AND ".join(conditions)
 
     query += """
-        GROUP BY c.primaryName
+        GROUP BY c.primary_name
         ORDER BY total_votes DESC
         LIMIT 5
     """

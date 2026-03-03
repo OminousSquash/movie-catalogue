@@ -24,6 +24,8 @@ services:
       - "8000:8000"
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
       DB_HOST: db
       DB_USER: appuser

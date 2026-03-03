@@ -19,11 +19,11 @@ def get_popularity_report_service(
         SELECT 
             g.genre,
             COUNT(*) AS num_movies,
-            AVG(m.averageRating) AS avg_rating,
-            AVG(m.numVotes) AS avg_num_votes
+            AVG(m.average_rating) AS avg_rating,
+            AVG(m.num_votes) AS avg_num_votes
         FROM movies m
         JOIN movie_genres mg ON m.tconst = mg.tconst
-        JOIN genres g ON g.genreID = mg.genreID
+        JOIN genres g ON g.genre_id = mg.genre_id
         WHERE g.genre != 'N'
         GROUP BY g.genre
     """
