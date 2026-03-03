@@ -178,7 +178,6 @@ def delete_user_list_service(
 
 def get_user_list_service(
     user_list_id: int,
-    user_id: int,
     db: MySQLConnection
 ):
     cursor = db.cursor(dictionary = True)

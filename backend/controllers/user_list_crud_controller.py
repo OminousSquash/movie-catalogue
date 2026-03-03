@@ -17,10 +17,9 @@ router = APIRouter(prefix="/user_list", tags=["user lists"])
 @router.get("/{list_id}")
 def get_user_list(
     list_id: int,
-    user_id: int = Depends(get_current_user),
     db = Depends(get_db)
 ):
-    return get_user_list_service(user_list_id=list_id, user_id=user_id, db=db)
+    return get_user_list_service(user_list_id=list_id, db=db)
 
 @router.post("/")
 def create_user_list(

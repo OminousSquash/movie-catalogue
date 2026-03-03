@@ -3,6 +3,7 @@ from database.database import get_db
 from backend.DTOs.signup_dto import SignupDTO
 from backend.DTOs.login_dto import LoginDTO
 from database.services.login_signup_service import login_service, signup_service
+from backend.security.dependencies import get_current_user
 
 router = APIRouter(prefix="/account", tags=["account handling"])
 
