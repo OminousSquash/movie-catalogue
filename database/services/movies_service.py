@@ -1,4 +1,5 @@
-from mysql.connector import MySQLConnection
+from mysql.connector import Error, MySQLConnection
+from fastapi import HTTPException, status
 from backend.DTOs.movie_contributor_filter_dto import MovieContributorFilterDTO
 from backend.DTOs.movie_filter_dto import MovieFilterDTO
 import math
@@ -11,6 +12,12 @@ def get_movies_service(
     contributor_filters: MovieContributorFilterDTO,
     page: int
 ):
+    if page < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Page must be greater than or equal to 1"
+        )
+
     cursor = db.cursor(dictionary=True)
     query = " FROM movies m "
     conditions = []
@@ -98,13 +105,20 @@ def get_movies_service(
     """
 
     count_query = "SELECT COUNT(DISTINCT m.tconst) " + query
-    cursor.execute(count_query, params.copy())
-    total = cursor.fetchone()["COUNT(DISTINCT m.tconst)"]
-    data_params = params.copy()
-    data_params.extend([PAGE_SIZE, offset])
 
-    cursor.execute(data_query, data_params)
-    rows = cursor.fetchall()
+    try:
+        cursor.execute(count_query, params.copy())
+        total = cursor.fetchone()["COUNT(DISTINCT m.tconst)"]
+        data_params = params.copy()
+        data_params.extend([PAGE_SIZE, offset])
+
+        cursor.execute(data_query, data_params)
+        rows = cursor.fetchall()
+    except Error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve movies"
+        )
 
     return {
         "data": rows,
