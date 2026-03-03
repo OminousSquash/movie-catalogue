@@ -17,44 +17,44 @@ def get_movies_service(
     params = []
     joins = []
     if movie_filters.title:
-        conditions.append("m.primaryTitle LIKE %s")
+        conditions.append("m.primary_title LIKE %s")
         params.append(f"%{movie_filters.title}%")
 
     if movie_filters.start_year:
-        conditions.append("m.startYear >= %s")
+        conditions.append("m.start_year >= %s")
         params.append(movie_filters.start_year)
 
     if movie_filters.end_year:
-        conditions.append("m.startYear <= %s")
+        conditions.append("m.start_year <= %s")
         params.append(movie_filters.end_year)
 
     if movie_filters.min_rating:
-        conditions.append("m.averageRating >= %s")
+        conditions.append("m.average_rating >= %s")
         params.append(movie_filters.min_rating)
 
     if movie_filters.max_rating:
-        conditions.append("m.averageRating <= %s")
+        conditions.append("m.average_rating <= %s")
         params.append(movie_filters.max_rating)
 
     if movie_filters.min_runtime:
-        conditions.append("m.runtimeMinutes >= %s")
+        conditions.append("m.runtime_minutes >= %s")
         params.append(movie_filters.min_runtime)
 
     if movie_filters.max_runtime:
-        conditions.append("m.runtimeMinutes <= %s")
+        conditions.append("m.runtime_minutes <= %s")
         params.append(movie_filters.max_runtime)
 
     if movie_filters.min_votes:
-        conditions.append("m.numVotes >= %s")
+        conditions.append("m.num_votes >= %s")
         params.append(movie_filters.min_votes)
 
     if movie_filters.max_votes:
-        conditions.append("m.numVotes <= %s")
+        conditions.append("m.num_votes <= %s")
         params.append(movie_filters.max_votes)
 
     if movie_filters.genres:
         joins.append("JOIN movie_genres mg on mg.tconst = m.tconst") 
-        joins.append("JOIN genres g on mg.genreID = g.genreID")
+        joins.append("JOIN genres g on mg.genre_id = g.genre_id")
     
         genres_placeholder = ",".join(["%s"] * len(movie_filters.genres))
         conditions.append(f"g.genre IN ({genres_placeholder})")
@@ -63,17 +63,17 @@ def get_movies_service(
     role_conditions = []
     if contributor_filters.actors:
         actors_placeholder = ",".join(["%s"] * len(contributor_filters.actors))
-        role_conditions.append(f"mc.role LIKE '%actor%' AND c.primaryName IN ({actors_placeholder})")
+        role_conditions.append(f"mc.role LIKE '%actor%' AND c.primary_name IN ({actors_placeholder})")
         params.extend(contributor_filters.actors)
 
     if contributor_filters.directors:
         directors_placeholders = ",".join(["%s"] * len(contributor_filters.directors))
-        role_conditions.append(f"mc.role LIKE '%director%' AND c.primaryName in ({directors_placeholders})")
+        role_conditions.append(f"mc.role LIKE '%director%' AND c.primary_name in ({directors_placeholders})")
         params.extend(contributor_filters.directors)
     
     if contributor_filters.writers:
         writers_placeholders = ",".join(["%s"] * len(contributor_filters.writers))
-        role_conditions.append(f"mc.role LIKE '%writer%' AND c.primaryName in ({writers_placeholders})")
+        role_conditions.append(f"mc.role LIKE '%writer%' AND c.primary_name in ({writers_placeholders})")
         params.extend(contributor_filters.writers)
 
     if role_conditions:
@@ -93,7 +93,7 @@ def get_movies_service(
     data_query = """
     SELECT DISTINCT m.*
     """ + query + """
-    ORDER BY m.averageRating DESC
+    ORDER BY m.average_rating DESC
     LIMIT %s OFFSET %s
     """
 

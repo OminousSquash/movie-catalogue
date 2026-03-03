@@ -24,12 +24,12 @@ def get_user_list(
 @router.post("/")
 def create_user_list(
     create_user_list_dto: CreateUserListDTO,
-    user_id: int = Depends(get_current_user),
+    app_user_id: int = Depends(get_current_user),
     db = Depends(get_db)
 ):
     return create_user_list_service(
         create_user_list_dto=create_user_list_dto,
-        user_id=user_id,
+        app_user_id=app_user_id,
         db=db
     )
 
@@ -37,20 +37,20 @@ def create_user_list(
 def update_list_note(
     list_id: int,
     update_list_note_dto: UpdateListNoteDTO,
-    user_id: int = Depends(get_current_user),
+    app_user_id: int = Depends(get_current_user),
     db = Depends(get_db)
 ):
-    return update_list_note_service(list_id=list_id, user_id=user_id, db=db, update_list_note_dto=update_list_note_dto)
+    return update_list_note_service(list_id=list_id, app_user_id=app_user_id, db=db, update_list_note_dto=update_list_note_dto)
 
 @router.put("/list_name/{list_id}")
 def update_list_name(
     list_id: int,
     update_list_name_dto: UpdateListNameDTO,
-    user_id: int = Depends(get_current_user),
+    app_user_id: int = Depends(get_current_user),
     db = Depends(get_db)
 ):
     return update_list_name_service(list_id=list_id, 
-                                    user_id=user_id, 
+                                    app_user_id=app_user_id, 
                                     db=db, 
                                     updated_list_name_dto=update_list_name_dto
                                     )
@@ -58,21 +58,21 @@ def update_list_name(
 @router.delete("/{list_id}")
 def delete_user_list(
     list_id: int,
-    user_id: int = Depends(get_current_user),
+    app_user_id: int = Depends(get_current_user),
     db = Depends(get_db)
 ):
-    return delete_user_list_service(list_id=list_id, user_id=user_id, db=db)
+    return delete_user_list_service(list_id=list_id, app_user_id=app_user_id, db=db)
 
 
 @router.post("/add_movie/{list_id}")
 def add_movie_to_list(
     list_id: int,
     add_movie_to_list_dto: AddMovieToListDTO,
-    user_id: int = Depends(get_current_user),
+    app_user_id: int = Depends(get_current_user),
     db = Depends(get_db)
 ):
     return add_movie_to_list_service(
-        user_id=user_id,
+        app_user_id=app_user_id,
         list_id=list_id,
         add_movie_to_list_dto=add_movie_to_list_dto,
         db=db

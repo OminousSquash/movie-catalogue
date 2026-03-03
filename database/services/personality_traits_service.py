@@ -8,29 +8,29 @@ def get_personality_genre_correlations_service(
 ):
     personality_query = """
     SELECT *
-    FROM user_personalities
+    FROM dataset_user_personalities
     """
 
     genre_query = """
-    SELECT ur.user_id, g.genre, AVG(ur.rating) AS avg_genre_rating
-    FROM user_ratings ur
+    SELECT ur.dataset_user_id, g.genre, AVG(ur.rating) AS avg_genre_rating
+    FROM dataset_user_ratings ur
     JOIN movie_genres mg ON ur.tconst = mg.tconst
-    JOIN genres g ON g.genreID = mg.genreID
-    GROUP BY ur.user_id, g.genre
+    JOIN genres g ON g.genre_id = mg.genre_id
+    GROUP BY ur.dataset_user_id, g.genre
     """
 
     personality_df = pd.read_sql(personality_query, db)
     genre_df = pd.read_sql(genre_query, db)
 
     genre_table = genre_df.pivot_table(
-        index='user_id',
+        index='dataset_user_id',
         columns='genre',
         values='avg_genre_rating'
     )
 
     merged = personality_df.merge(
         genre_table,
-        left_on='user_id',
+        left_on='dataset_user_id',
         right_index=True
     )
 

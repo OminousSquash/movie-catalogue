@@ -18,15 +18,15 @@ def get_current_user(token=Depends(security)):
             algorithms=[ALGORITHM]
         )
 
-        user_id = payload.get("sub")
+        app_user_id = payload.get("sub")
 
-        if user_id is None:
+        if app_user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token"
             )
 
-        return int(user_id)
+        return int(app_user_id)
 
     except JWTError:
         raise HTTPException(

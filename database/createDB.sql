@@ -1,40 +1,55 @@
 CREATE DATABASE IF NOT EXISTS moviedb;
 USE moviedb;
 
+
 CREATE TABLE IF NOT EXISTS movies (
     tconst VARCHAR(10) PRIMARY KEY,
-    primaryTitle TEXT NOT NULL,
-    isAdult TINYINT(1) NOT NULL,
-    averageRating DECIMAL(3,1),
-    numVotes INT,
-    startYear INT,
-    runtimeMinutes INT
+    primary_title TEXT NOT NULL, 
+    is_adult TINYINT(1) NOT NULL,
+    average_rating DECIMAL(3,1),
+    num_votes INT,
+    start_year INT,
+    runtime_minutes INT,
+    INDEX idx_movies_filter (start_year, average_rating, num_votes)
 );
 
 CREATE TABLE IF NOT EXISTS genres (
-    genreID INT PRIMARY KEY,
-    genre TEXT
+    genre_id INT PRIMARY KEY,
+    genre VARCHAR(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS movie_genres(
     tconst VARCHAR(10) NOT NULL,
-    genreID INT NOT NULL,
-    PRIMARY KEY (tconst, genreID),
-    FOREIGN KEY (tconst) REFERENCES movies(tconst),
-    FOREIGN KEY (genreID) REFERENCES genres(genreID)
+    genre_id INT NOT NULL,
+    PRIMARY KEY (tconst, genre_id),
+    FOREIGN KEY (tconst)
+        REFERENCES movies(tconst)
+        ON DELETE CASCADE,
+    FOREIGN KEY (genre_id) 
+        REFERENCES genres(genre_id)
+        ON DELETE CASCADE,
+    INDEX idx_movie_genres_genre (genre_id)
 );
 
 CREATE TABLE IF NOT EXISTS contributors (
     nconst VARCHAR(10) NOT NULL PRIMARY KEY,
-    primaryName VARCHAR(255) NOT NULL,
-    birthYear INT NOT NULL,
-    deathYear INT NOT NULL
+    primary_name VARCHAR(255) NOT NULL,
+    birth_year INT NOT NULL,
+    death_year INT,
+
+    INDEX idx_contributors_name (primary_name)
 );
 
 CREATE TABLE IF NOT EXISTS popular_works(
     nconst VARCHAR(10) NOT NULL,
     tconst VARCHAR(10) NOT NULL,
-    PRIMARY KEY(nconst, tconst)
+    PRIMARY KEY(nconst, tconst),
+    FOREIGN KEY (nconst)
+        REFERENCES contributors(nconst)
+        ON DELETE CASCADE,
+    FOREIGN KEY (tconst)
+        REFERENCES movies(tconst)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS movie_contributors (
@@ -42,21 +57,33 @@ CREATE TABLE IF NOT EXISTS movie_contributors (
     nconst VARCHAR(10) NOT NULL,
     role   VARCHAR(255) NOT NULL,
     PRIMARY KEY(tconst, nconst, role),
-    FOREIGN KEY (tconst) REFERENCES movies(tconst),
-    FOREIGN KEY (nconst) REFERENCES contributors(nconst)
+    FOREIGN KEY (tconst)
+        REFERENCES movies(tconst)
+        ON DELETE CASCADE,
+    FOREIGN KEY (nconst)
+        REFERENCES contributors(nconst)
+        ON DELETE CASCADE,
+    INDEX idx_movie_contributors_lookup (nconst, role)
 );
 
-CREATE TABLE IF NOT EXISTS user_ratings (
-    user_id VARCHAR(64) NOT NULL,
+
+CREATE TABLE IF NOT EXISTS dataset_user_ratings (
+    dataset_user_id VARCHAR(64) NOT NULL,
     tconst VARCHAR(10) NOT NULL,
     rating DECIMAL(3, 1) NOT NULL,
     tstamp DATETIME,
-    PRIMARY KEY(user_id, tconst),
-    FOREIGN KEY (tconst) REFERENCES movies(tconst)
+    PRIMARY KEY(dataset_user_id, tconst),
+    FOREIGN KEY (tconst)
+        REFERENCES movies(tconst)
+        ON DELETE CASCADE,
+
+    INDEX idx_dataset_user_ratings_user (dataset_user_id),
+    INDEX idx_dataset_user_ratings_movie (tconst)
 );
 
-CREATE TABLE IF NOT EXISTS user_personalities (
-    user_id VARCHAR(64) NOT NULL PRIMARY KEY,
+
+CREATE TABLE IF NOT EXISTS dataset_user_personalities (
+    dataset_user_id VARCHAR(64) NOT NULL PRIMARY KEY,
     openness DECIMAL(3, 1) NOT NULL,
     agreeableness DECIMAL(3, 1) NOT NULL,
     emotional_stability DECIMAL(3, 1) NOT NULL,
@@ -64,26 +91,36 @@ CREATE TABLE IF NOT EXISTS user_personalities (
     extraversion DECIMAL(3, 1) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS user_credentials (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL
+
+CREATE TABLE IF NOT EXISTS app_users (
+    app_user_id INT AUTO_INCREMENT PRIMARY KEY,
+    app_username VARCHAR(255) NOT NULL UNIQUE,
+    app_user_password_hash VARCHAR(255) NOT NULL,
+
+    INDEX idx_app_users_username (app_username)
 );
 
-CREATE TABLE IF NOT EXISTS user_lists (
+CREATE TABLE IF NOT EXISTS app_user_lists (
     list_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    user_id INT NOT NULL,
+    app_user_id INT NOT NULL,
     list_name VARCHAR(255) NOT NULL,
     list_note TEXT,
-    FOREIGN KEY (user_id) REFERENCES user_credentials(user_id)
+    FOREIGN KEY (app_user_id)
+        REFERENCES app_users(app_user_id)
+        ON DELETE CASCADE,
+    INDEX idx_app_user_lists_user(app_user_id)
 );
 
-CREATE TABLE IF NOT EXISTS user_list_movies (
+CREATE TABLE IF NOT EXISTS app_user_list_movies (
     list_id INT NOT NULL,
     tconst VARCHAR(10) NOT NULL,
     PRIMARY KEY(list_id, tconst),
-    FOREIGN KEY (list_id) REFERENCES user_lists(list_id),
-    FOREIGN KEY (tconst) REFERENCES movies(tconst)
+    FOREIGN KEY (list_id)
+        REFERENCES app_user_lists(list_id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (tconst)
+        REFERENCES movies(tconst)
+        ON DELETE CASCADE
 );
 
 
@@ -92,14 +129,14 @@ INTO TABLE movies
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(tconst, primaryTitle, isAdult, averageRating, numVotes, startYear, runtimeMinutes);
+(tconst, primary_title, is_adult, average_rating, num_votes, start_year, runtime_minutes);
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/genres.tsv'
 INTO TABLE genres
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(genreID, @raw_genre)
+(genre_id, @raw_genre)
 SET genre = TRIM(
     REPLACE(
         REPLACE(@raw_genre, '\r', ''),
@@ -113,15 +150,15 @@ INTO TABLE movie_genres
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(tconst, genreID);
+(tconst, genre_id);
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/contributors.tsv'
 INTO TABLE contributors
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(nconst, @raw_name, birthYear, deathYear)
-SET primaryName = TRIM(
+(nconst, @raw_name, birth_year, death_year)
+SET primary_name = TRIM(
     REPLACE(
         REPLACE(@raw_name, '\r', ''),
         '\n', ''
@@ -154,19 +191,19 @@ SET tconst = TRIM(
 
 LOAD DATA INFILE '/datasets/personality-isf2018/filtered/ratings.csv'
 IGNORE
-INTO TABLE user_ratings
+INTO TABLE dataset_user_ratings
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(user_id, tconst, rating, @raw_tstamp)
+(dataset_user_id, tconst, rating, @raw_tstamp)
 SET tstamp = TRIM(@raw_tstamp);
 
 LOAD DATA INFILE '/datasets/personality-isf2018/filtered/personality.csv'
 IGNORE
-INTO TABLE user_personalities
+INTO TABLE dataset_user_personalities
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(user_id,openness,agreeableness,emotional_stability,conscientiousness,extraversion);
+(dataset_user_id, openness, agreeableness, emotional_stability, conscientiousness, extraversion);
 
 SHOW WARNINGS;
