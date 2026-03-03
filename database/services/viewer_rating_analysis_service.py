@@ -81,44 +81,72 @@ def get_correlation_matrix_service(db: MySQLConnection):
     return correlation_matrix.to_dict()
 
 
-
 def get_cluster_summary_service(db: MySQLConnection, n_clusters: int = 5):
     cursor = db.cursor(dictionary=True)
 
     query = """
-    SELECT ur.user_id, g.genre, AVG(ur.rating) AS avg_genre_rating
+    SELECT 
+        ur.user_id,
+        AVG(CASE WHEN g.genre = 'Action' THEN ur.rating END) AS Action,
+        AVG(CASE WHEN g.genre = 'Comedy' THEN ur.rating END) AS Comedy,
+        AVG(CASE WHEN g.genre = 'Drama' THEN ur.rating END) AS Drama,
+        AVG(CASE WHEN g.genre = 'Horror' THEN ur.rating END) AS Horror,
+        AVG(CASE WHEN g.genre = 'Biography' THEN ur.rating END) AS Biography,
+        AVG(CASE WHEN g.genre = 'Crime' THEN ur.rating END) AS Crime,
+        AVG(CASE WHEN g.genre = 'History' THEN ur.rating END) AS History,
+        AVG(CASE WHEN g.genre = 'War' THEN ur.rating END) AS War,
+        AVG(CASE WHEN g.genre = 'Western' THEN ur.rating END) AS Western,
+        AVG(CASE WHEN g.genre = 'Thriller' THEN ur.rating END) AS Thriller
     FROM user_ratings ur
     JOIN movie_genres mg ON ur.tconst = mg.tconst
     JOIN genres g ON g.genreID = mg.genreID
-    GROUP BY ur.user_id, g.genre
+    GROUP BY ur.user_id
     """
+
     cursor.execute(query)
     rows = cursor.fetchall()
 
     df = pd.DataFrame(rows)
-    user_genre_matrix = df.pivot_table(
-        index="user_id",
-        columns="genre",
-        values="avg_genre_rating"
+
+    feature_matrix = df.drop(columns=["user_id"])
+
+
+    feature_matrix = feature_matrix.apply(pd.to_numeric, errors="coerce")
+
+    feature_matrix = feature_matrix.apply(
+        lambda row: row.fillna(row.mean()),
+        axis=1
     )
 
-    user_genre_matrix = user_genre_matrix.apply(
-        lambda row: row.fillna(row.mean()), axis=1
-    )
+    feature_matrix = feature_matrix.fillna(0)
+
+    feature_matrix = feature_matrix.astype(float)
+
+    df.loc[:, feature_matrix.columns] = feature_matrix
 
     kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-    user_genre_matrix["cluster"] = kmeans.fit_predict(user_genre_matrix)
+    clusters = kmeans.fit_predict(feature_matrix)
+
+    df["cluster"] = clusters
 
     cluster_summary = {}
 
     for cluster_id in range(n_clusters):
-        cluster_data = user_genre_matrix[user_genre_matrix["cluster"] == cluster_id]
-        genre_means = cluster_data.drop(columns=["cluster"]).mean().sort_values(ascending=False)
+        cluster_data = df[df["cluster"] == cluster_id]
+
+        genre_means = (
+            cluster_data
+            .drop(columns=["user_id", "cluster"])
+            .mean()
+            .sort_values(ascending=False)
+        )
 
         cluster_summary[f"cluster_{cluster_id}"] = {
             "num_users": len(cluster_data),
             "top_genres": genre_means.head(3).index.tolist(),
-            "avg_rating_overall": round(cluster_data.drop(columns=["cluster"]).values.mean(), 2)
+            "avg_rating_overall": round(
+                cluster_data.drop(columns=["user_id", "cluster"]).values.mean(), 2
+            )
         }
 
     return cluster_summary
