@@ -13,9 +13,9 @@ def get_rating_harshness_service(db:MySQLConnection):
     END AS rater_type,
     COUNT(*) AS num_users
     FROM (
-        SELECT user_id, AVG(rating) AS avg_rating
-        FROM user_ratings
-        GROUP BY user_id
+        SELECT dataset_user_id, AVG(rating) AS avg_rating
+        FROM dataset_user_ratings
+        GROUP BY dataset_user_id
     ) AS user_avgs
     GROUP BY rater_type; 
     """
@@ -32,15 +32,15 @@ def get_low_rating_genres_service(db:MySQLConnection):
         COUNT(*) AS num_users_with_low_preference
     FROM (
         SELECT 
-            ur.user_id,
+            ur.dataset_user_id,
             g.genre,
             AVG(ur.rating) AS avg_genre_rating,
             SUM(ur.rating <= 2) / COUNT(*) AS low_ratio,
             COUNT(*) AS ratings_in_genre
-        FROM user_ratings ur
+        FROM dataset_user_ratings ur
         JOIN movie_genres mg ON ur.tconst = mg.tconst
-        JOIN genres g ON g.genreID = mg.genreID
-        GROUP BY ur.user_id, g.genre
+        JOIN genres g ON g.genre_id = mg.genre_id
+        GROUP BY ur.dataset_user_id, g.genre
     ) u
     WHERE low_ratio > 0.5
     GROUP BY genre
@@ -56,13 +56,13 @@ def get_correlation_matrix_service(db: MySQLConnection):
 
     query = """
     SELECT
-        ur.user_id,
+        ur.dataset_user_id,
         g.genre,
         AVG(ur.rating) AS avg_genre_rating
-    FROM user_ratings ur
+    FROM dataset_user_ratings ur
     JOIN movie_genres mg ON ur.tconst = mg.tconst
-    JOIN genres g ON g.genreID = mg.genreID
-    GROUP BY ur.user_id, g.genre
+    JOIN genres g ON g.genre_id = mg.genre_id
+    GROUP BY ur.dataset_user_id, g.genre
     """
 
     cursor.execute(query)
@@ -71,7 +71,7 @@ def get_correlation_matrix_service(db: MySQLConnection):
     df = pd.DataFrame(rows)
 
     user_genre_matrix = df.pivot_table(
-        index="user_id",
+        index="dataset_user_id",
         columns="genre",
         values="avg_genre_rating"
     )
@@ -86,18 +86,18 @@ def get_cluster_summary_service(db: MySQLConnection, n_clusters: int = 5):
     cursor = db.cursor(dictionary=True)
 
     query = """
-    SELECT ur.user_id, g.genre, AVG(ur.rating) AS avg_genre_rating
-    FROM user_ratings ur
+    SELECT ur.dataset_user_id, g.genre, AVG(ur.rating) AS avg_genre_rating
+    FROM dataset_user_ratings ur
     JOIN movie_genres mg ON ur.tconst = mg.tconst
-    JOIN genres g ON g.genreID = mg.genreID
-    GROUP BY ur.user_id, g.genre
+    JOIN genres g ON g.genre_id = mg.genre_id
+    GROUP BY ur.dataset_user_id, g.genre
     """
     cursor.execute(query)
     rows = cursor.fetchall()
 
     df = pd.DataFrame(rows)
     user_genre_matrix = df.pivot_table(
-        index="user_id",
+        index="dataset_user_id",
         columns="genre",
         values="avg_genre_rating"
     )
@@ -129,21 +129,21 @@ def get_conditional_low_rating_service(db: MySQLConnection, genre_a: str, genre_
     query = """
     WITH user_genre_stats AS (
         SELECT 
-            ur.user_id,
+            ur.dataset_user_id,
             g.genre,
             SUM(ur.rating <= 2) / COUNT(*) AS low_ratio
-        FROM user_ratings ur
+        FROM dataset_user_ratings ur
         JOIN movie_genres mg ON ur.tconst = mg.tconst
-        JOIN genres g ON g.genreID = mg.genreID
-        GROUP BY ur.user_id, g.genre
+        JOIN genres g ON g.genre_id = mg.genre_id
+        GROUP BY ur.dataset_user_id, g.genre
         HAVING COUNT(*) >= 5
     )
     SELECT
-        COUNT(DISTINCT a.user_id) AS users_low_in_a,
-        COUNT(DISTINCT b.user_id) AS users_low_in_b_given_a
+        COUNT(DISTINCT a.dataset_user_id) AS users_low_in_a,
+        COUNT(DISTINCT b.dataset_user_id) AS users_low_in_b_given_a
     FROM user_genre_stats a
     LEFT JOIN user_genre_stats b
-        ON a.user_id = b.user_id AND b.genre = %s AND b.low_ratio > 0.5
+        ON a.dataset_user_id = b.dataset_user_id AND b.genre = %s AND b.low_ratio > 0.5
     WHERE a.genre = %s AND a.low_ratio > 0.5
     """
 
@@ -168,21 +168,21 @@ def get_conditional_high_rating_service(db: MySQLConnection, genre_a: str, genre
     query = """
     WITH user_genre_stats AS (
         SELECT
-            ur.user_id,
+            ur.dataset_user_id,
             g.genre,
             SUM(ur.rating >= 4) / COUNT(*) AS high_ratio
-        FROM user_ratings ur
+        FROM dataset_user_ratings ur
         JOIN movie_genres mg ON ur.tconst = mg.tconst
-        JOIN genres g ON mg.genreID = g.genreID
-        GROUP BY ur.user_id, g.genre
+        JOIN genres g ON mg.genre_id = g.genre_id
+        GROUP BY ur.dataset_user_id, g.genre
         HAVING COUNT(*) >= 5
     )
     SELECT
-        COUNT(DISTINCT a.user_id) AS users_high_in_a,
-        COUNT(DISTINCT b.user_id) AS users_high_in_b_given_a
+        COUNT(DISTINCT a.dataset_user_id) AS users_high_in_a,
+        COUNT(DISTINCT b.dataset_user_id) AS users_high_in_b_given_a
     FROM user_genre_stats a
     LEFT JOIN user_genre_stats b
-        ON a.user_id = b.user_id
+        ON a.dataset_user_id = b.dataset_user_id
         AND b.genre = %s
         AND b.high_ratio > 0.5
     WHERE a.genre = %s

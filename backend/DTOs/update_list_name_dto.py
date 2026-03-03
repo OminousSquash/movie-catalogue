@@ -1,4 +1,4 @@
 from pydantic import BaseModel
 
 class UpdateListNameDTO(BaseModel):
-    list_name: str
+    new_list_name: str

@@ -8,18 +8,18 @@ def get_contributor_info_service(
 
     stats_query = """
     SELECT
-        c.primaryName as name,
-        c.birthYear as birth_year,
-        c.deathYear as death_year,
+        c.primary_name as name,
+        c.birth_year as birth_year,
+        c.death_year as death_year,
         COUNT(DISTINCT m.tconst) AS num_movies,
-        SUM(m.numVotes) as total_votes,
-        AVG(m.averageRating) as avg_rating,
-        AVG(m.numVotes) as avg_votes,
-        STDDEV(m.averageRating) as rating_std
+        SUM(m.num_votes) as total_votes,
+        AVG(m.average_rating) as avg_rating,
+        AVG(m.num_votes) as avg_votes,
+        STDDEV(m.average_rating) as rating_std
     FROM movies m
     JOIN movie_contributors mc ON mc.tconst = m.tconst
     JOIN contributors c ON c.nconst = mc.nconst
-    WHERE c.primaryName = %s
+    WHERE c.primary_name = %s
     GROUP BY c.nconst
     """
 
@@ -27,16 +27,16 @@ def get_contributor_info_service(
     actor_info = cursor.fetchone()
 
     popular_movies_query = """
-    SELECT m.primaryTitle
+    SELECT m.primary_title
     FROM movies m
     JOIN popular_works pw ON pw.tconst = m.tconst
     JOIN contributors c ON c.nconst = pw.nconst
-    WHERE c.primaryName = %s
+    WHERE c.primary_name = %s
     """
 
     cursor.execute(popular_movies_query, (contributor,))
     popular_movies = cursor.fetchall()
 
-    actor_info["popular_works"] = [movie["primaryTitle"] for movie in popular_movies]
+    actor_info["popular_works"] = [movie["primary_title"] for movie in popular_movies]
 
     return actor_info
