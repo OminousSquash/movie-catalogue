@@ -103,10 +103,6 @@ def get_movies_service(
     data_params = params.copy()
     data_params.extend([PAGE_SIZE, offset])
 
-    print("SQL QUERY: ")
-    print(data_query)
-    print("SQL PARAMS: ")
-    print(data_params)
     cursor.execute(data_query, data_params)
     rows = cursor.fetchall()
 

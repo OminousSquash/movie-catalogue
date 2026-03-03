@@ -42,11 +42,7 @@ def signup_service(
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already exists")
 
-    print(f"password length: {len(signup_dto.password)}")
-
     hashed_pw = hash_password(signup_dto.password)
-
-    print(f"hashed password length: {len(hashed_pw)}")
 
     cursor.execute(
         "INSERT INTO user_credentials (username, password_hash) VALUES (%s, %s)",
