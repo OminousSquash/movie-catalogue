@@ -6,25 +6,11 @@ PAGE_SIZE = 50
 
 
 def get_genres_service(db: MySQLConnection):
-    """Fetches all genre names from the DB for the frontend filter list."""
     cursor = db.cursor(dictionary=True)
     cursor.execute("SELECT genre FROM genres ORDER BY genre ASC")
     rows = cursor.fetchall()
     cursor.close()
     return [r["genre"] for r in rows if r["genre"]]
-
-
-def get_distinct_roles_service(db: MySQLConnection):
-    """
-    DEBUG ONLY — returns every distinct role value stored in movie_contributors.
-    Remove before final submission.
-    """
-    cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT DISTINCT role FROM movie_contributors ORDER BY role ASC LIMIT 100")
-    rows = cursor.fetchall()
-    cursor.close()
-    return [r["role"] for r in rows]
-
 
 def get_movies_service(
     db: MySQLConnection,
@@ -45,28 +31,14 @@ def get_movies_service(
     page: int
 ):
     cursor = db.cursor(dictionary=True)
-    # CHANGED: removed joins list for contributors entirely.
-    # Previously contributors used JOINs which caused a fundamental AND logic bug:
-    # all contributor types (actor, director, writer) shared ONE join to
-    # movie_contributors, connected with OR. This meant if a movie matched the
-    # director condition, the actor condition was completely ignored — Nolan as
-    # director satisfied the OR on its own, so adding batman as actor made no
-    # difference at all.
-    #
-    # FIX: switched contributors to EXISTS subqueries. Each contributor type
-    # (actor, director, writer) becomes its own independent EXISTS check on the
-    # movie. A movie must satisfy ALL of them — if you specify both a director
-    # and an actor, the movie must have BOTH that director AND that actor.
     joins = []
     conditions = []
     params = []
 
-    # ── Title ──────────────────────────────────────────────────────────────────
     if title:
         conditions.append("m.primaryTitle LIKE %s")
         params.append(f"%{title}%")
 
-    # ── Year ───────────────────────────────────────────────────────────────────
     if start_year:
         conditions.append("m.startYear >= %s")
         params.append(start_year)
@@ -74,34 +46,30 @@ def get_movies_service(
         conditions.append("m.startYear <= %s")
         params.append(end_year)
 
-    # ── Rating ─────────────────────────────────────────────────────────────────
-    # `is not None` — 0.0 is falsy but a valid filter value.
-    # IS NOT NULL guard — SQL comparisons against NULL always evaluate to NULL
-    # not true/false, silently dropping unrated movies without it.
     if min_rating is not None:
         conditions.append("m.averageRating IS NOT NULL AND m.averageRating >= %s")
         params.append(min_rating)
+
     if max_rating is not None:
         conditions.append("m.averageRating IS NOT NULL AND m.averageRating <= %s")
         params.append(max_rating)
 
-    # ── Runtime ────────────────────────────────────────────────────────────────
     if min_runtime is not None:
         conditions.append("m.runtimeMinutes IS NOT NULL AND m.runtimeMinutes >= %s")
         params.append(min_runtime)
+
     if max_runtime is not None:
         conditions.append("m.runtimeMinutes IS NOT NULL AND m.runtimeMinutes <= %s")
         params.append(max_runtime)
 
-    # ── Votes ──────────────────────────────────────────────────────────────────
     if min_votes is not None:
         conditions.append("m.numVotes IS NOT NULL AND m.numVotes >= %s")
         params.append(min_votes)
+
     if max_votes is not None:
         conditions.append("m.numVotes IS NOT NULL AND m.numVotes <= %s")
         params.append(max_votes)
 
-    # ── Genres ─────────────────────────────────────────────────────────────────
     if genres:
         joins.append("JOIN movie_genres mg ON mg.tconst = m.tconst")
         joins.append("JOIN genres g ON mg.genreID = g.genreID")
@@ -109,8 +77,6 @@ def get_movies_service(
         conditions.append(f"g.genre IN ({placeholders})")
         params.extend(genres)
 
-    # ── Tags ───────────────────────────────────────────────────────────────────
-    # Table is movielens_tags (matches createDB.sql), not ml_tags.
     if tags:
         joins.append("JOIN links lnk ON CONCAT('tt', lnk.imdbId) = m.tconst")
         joins.append("JOIN movielens_tags mt ON mt.movieId = lnk.movieId")
@@ -118,26 +84,7 @@ def get_movies_service(
         conditions.append(f"LOWER(mt.tag) IN ({tag_placeholders})")
         params.extend([t.lower() for t in tags])
 
-    # ── Contributors — EXISTS subqueries ───────────────────────────────────────
-    # Each contributor type is an independent EXISTS subquery.
-    # A movie satisfies the condition only if it has a matching contributor row
-    # for that specific role type. Multiple types are AND'd together at the
-    # WHERE level — a movie must have ALL specified contributor types.
-    #
-    # Example: director=nolan AND actor=batman
-    #   → movie must have a director whose name contains "nolan"
-    #   AND a (separate) actor whose name contains "batman"
-    #   A movie with only Nolan as director and no batman actor is excluded.
-    #
-    # Within each type, multiple names are OR'd — actor=tom,brad means
-    # the movie needs an actor whose name contains "tom" OR "brad".
-    #
-    # LIKE '%name%' used instead of IN ('name') — IN is exact matching so
-    # IN ('tom') only matches someone literally named "tom", not "Tom Hanks".
-    # LIKE '%tom%' matches anyone whose name contains "tom".
-
     if actors:
-        # Build one LIKE condition per actor name, OR'd together
         name_conditions = " OR ".join(
             ["LOWER(c2.primaryName) LIKE %s"] * len(actors)
         )
@@ -170,9 +117,6 @@ def get_movies_service(
         params.extend([f"%{d.lower()}%" for d in directors])
 
     if writers:
-        # TRIM(mc4.role) handles any residual \r on the role value in the DB.
-        # If the DB was rebuilt after the createDB.sql fix, TRIM is a no-op.
-        # If it wasn't rebuilt, TRIM strips the \r so 'writer\r' matches 'writer'.
         name_conditions = " OR ".join(
             ["LOWER(c4.primaryName) LIKE %s"] * len(writers)
         )
@@ -188,7 +132,6 @@ def get_movies_service(
         """)
         params.extend([f"%{w.lower()}%" for w in writers])
 
-    # ── Build and execute ──────────────────────────────────────────────────────
     base = "FROM movies m " + " ".join(joins)
     where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
@@ -221,7 +164,6 @@ def get_movies_service(
     """, data_params)
     rows = cursor.fetchall()
 
-    # Attach genre list to each result in one batch query (not one per movie)
     if rows:
         tconsts = [r["tconst"] for r in rows]
         placeholders = ",".join(["%s"] * len(tconsts))

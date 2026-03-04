@@ -1,8 +1,9 @@
-from pydantic import BaseModel
+from dataclasses import dataclass
 from typing import Optional, List
-from datetime import date
+from fastapi import Query
 
-class MovieContributorFilterDTO(BaseModel):
-    actors:Optional[List[str]] = None
-    directors : Optional[List[str]] = None
-    writers : Optional[List[str]] = None
+@dataclass
+class MovieContributorFilterDTO:
+    actors: Optional[List[str]] = Query(default=None)
+    directors: Optional[List[str]] = Query(default=None)
+    writers: Optional[List[str]] = Query(default=None)
