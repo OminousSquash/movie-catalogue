@@ -123,6 +123,36 @@ CREATE TABLE IF NOT EXISTS app_user_list_movies (
         ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS oscar_movies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tconst VARCHAR(10) NOT NULL,
+    award_year INT NOT NULL,
+    award_name VARCHAR(255) NOT NULL,
+    award_status ENUM('Winner','Nominee') NOT NULL,
+    recipient_name VARCHAR(255),
+    recipient_nconst VARCHAR(10),
+
+    FOREIGN KEY (tconst)
+        REFERENCES movies(tconst)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS tags (
+    tag_id INT PRIMARY KEY NOT NULL,
+    tag_name VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS movie_tags (
+    tconst VARCHAR(10) NOT NULL,
+    tag_id INT NOT NULL,
+    PRIMARY KEY(tconst, tag_id),
+    FOREIGN KEY (tconst)
+        REFERENCES movies(tconst)
+        ON DELETE CASCADE,
+    FOREIGN KEY (tag_id)
+        REFERENCES tags(tag_id)
+        ON DELETE CASCADE
+);
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/movies.tsv'
 INTO TABLE movies
@@ -205,5 +235,36 @@ FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (dataset_user_id, openness, agreeableness, emotional_stability, conscientiousness, extraversion);
+
+LOAD DATA INFILE '/datasets/ml-latest-small/filtered/tags.csv'
+IGNORE
+INTO TABLE tags
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(tag_id, tag_name);
+
+SHOW WARNINGS;
+
+LOAD DATA INFILE '/datasets/ml-latest-small/filtered/movie_tags.csv'
+IGNORE
+INTO TABLE movie_tags 
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(tconst, tag_id);
+
+LOAD DATA INFILE '/datasets/IMDb/filtered/oscar_movies.csv'
+IGNORE
+INTO TABLE oscar_movies
+FIELDS TERMINATED BY ','
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(tconst, award_year, award_name, award_status, recipient_name, @raw_recipient_nconst)
+SET recipient_nconst = CASE
+    WHEN TRIM(REPLACE(@raw_recipient_nconst, '\r', '')) IN ('\\N', '') THEN NULL
+    ELSE TRIM(REPLACE(@raw_recipient_nconst, '\r', ''))
+END;
 
 SHOW WARNINGS;
