@@ -2,6 +2,9 @@ import requests
 import json
 import re
 import os
+import csv
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -103,13 +106,82 @@ class imdbScraper:
             print(f"Failed to parse awards: {e}")
             return None
 
+    def download_filtered_movie_posters(
+        self,
+        movies_tsv_path: str = "datasets/IMDb/filtered/movies.tsv",
+        output_dir: str = "datasets/movie-posters",
+        max_workers: int = 16,
+    ):
+        project_root = Path(__file__).resolve().parents[2]
+
+        movies_path = Path(movies_tsv_path)
+        if not movies_path.is_absolute():
+            movies_path = project_root / movies_path
+
+        posters_dir = Path(output_dir)
+        if not posters_dir.is_absolute():
+            posters_dir = project_root / posters_dir
+        posters_dir.mkdir(parents=True, exist_ok=True)
+
+        with movies_path.open("r", encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f, delimiter="\t")
+            imdb_ids = [row["tconst"] for row in reader if row.get("tconst")]
+
+        if not imdb_ids:
+            return {"total": 0, "downloaded": 0, "skipped": 0, "failed": 0}
+
+        def detect_extension(content_type: str) -> str:
+            if not content_type:
+                return ".jpg"
+            content_type = content_type.lower()
+            if "png" in content_type:
+                return ".png"
+            if "webp" in content_type:
+                return ".webp"
+            return ".jpg"
+
+        def download_one(imdb_id: str) -> str:
+            existing_files = list(posters_dir.glob(f"{imdb_id}.*"))
+            if any(file.stat().st_size > 0 for file in existing_files):
+                return "skipped"
+
+            poster_path = self.get_poster_path(imdb_id)
+            if not poster_path:
+                return "failed"
+
+            poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
+            try:
+                response = self.session.get(poster_url, timeout=10)
+                if response.status_code != 200 or not response.content:
+                    return "failed"
+                extension = detect_extension(response.headers.get("Content-Type", ""))
+                output_path = posters_dir / f"{imdb_id}{extension}"
+                output_path.write_bytes(response.content)
+                return "downloaded"
+            except requests.exceptions.RequestException:
+                return "failed"
+
+        downloaded = 0
+        skipped = 0
+        failed = 0
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            for result in executor.map(download_one, imdb_ids):
+                if result == "downloaded":
+                    downloaded += 1
+                elif result == "skipped":
+                    skipped += 1
+                else:
+                    failed += 1
+
+        return {
+            "total": len(imdb_ids),
+            "downloaded": downloaded,
+            "skipped": skipped,
+            "failed": failed,
+        }
 
 
-scraper = imdbScraper()
-awards = scraper.get_awards("tt0111161")
-poster = scraper.get_poster_path("tt0111161")
-ratings = scraper.get_rating("tt0111161")
-print(awards)
-print(f"Poster Path: https://image.tmdb.org/t/p/original{poster}")
-for ratingData in ratings:
-    print(f"{ratingData["rating"]} star : {ratingData["voteCount"]}")
+if __name__ == "__main__":
+    scraper = imdbScraper()
+    print(scraper.download_filtered_movie_posters())
