@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { AppBar, Box, Button, Dialog, DialogContent, Toolbar, Typography } from "@mui/material";
+import { Box, Dialog, DialogContent } from "@mui/material";
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import FilterPanel from "../components/dashboard/FilterPanel";
 import MovieCard from "../components/dashboard/MovieCard";
+import NavBar from "../components/NavBar";
 import { searchMovies, getRecentMovies } from "../services/movieService";
 import LoginSignup from "./LoginSignup";
 
@@ -46,22 +47,11 @@ const Dashboard = ({ isAuthenticated, onAuthSuccess, onLogout }) => {
 
   return (
     <>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Movie Catalogue
-          </Typography>
-          {!isAuthenticated ? (
-            <Button color="inherit" onClick={() => setAuthOpen(true)}>
-              Login / Sign Up
-            </Button>
-          ) : (
-            <Button color="inherit" onClick={onLogout}>
-              Logout
-            </Button>
-          )}
-        </Toolbar>
-      </AppBar>
+      <NavBar
+        isAuthenticated={isAuthenticated}
+        onLoginClick={() => setAuthOpen(true)}
+        onLogout={onLogout}
+      />
 
       <DashboardLayout
         children={{
