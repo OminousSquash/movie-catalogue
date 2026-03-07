@@ -22,6 +22,9 @@ Before starting the application run the following command from /backend/utils/:
 
 For testing endpoints using Swagger on localhost:8000
 
+For starting frontend, go to /frontend and run:
+    `npm run dev`
+
 For testing authentication and user lists (see [user_list_crud_controller.py](backend/controllers/user_list_crud_controller.py) and [login_signup_controller.py](/backend/controllers/login_signup_controller.py]) use Postman [Link to download](https://www.postman.com/downloads/]))
 
 How to test authentication:
@@ -31,4 +34,10 @@ How to test authentication:
     4. On the Authorization tab in Postman, select Bearer Token and paste the Bearer token you received from the server
     5. You now have permissions to create, update and delete lists. Reference [user_list_crud_controller.py](/backend/controllers/user_list_crud_controller.py) for endpoint structure
 
+Code Quality/Format:
+    1. All endpoints must be defined in /backend/controllers as a *_controller.py file
+    2. All interactions with the database through SQL commands must be defined in *_service.py files
+    3. Use DTOs for any JSON bodies for POST/PUT/DELETE request
+    4. No inline CSS. All styling for a React component must be in a separate file with the same name as the component it is styling. Eg: MenuDropdown.jsx component is styled by MenuDropdown.css
+    5. Use Materia UI components as much as possible. Reference: [Material UI API](https://mui.com/material-ui/getting-started/)
 
