@@ -420,5 +420,5 @@ class ImdbScraper:
 
 if __name__ == "__main__":
     scraper = ImdbScraper()
-    result = scraper.export_movie_tags()
+    result = scraper.download_filtered_movie_posters()
     pprint(result)
