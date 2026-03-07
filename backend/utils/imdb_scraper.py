@@ -314,8 +314,8 @@ class ImdbScraper:
         tags_csv_path: str = "../../datasets/ml-latest-small/tags.csv",
         links_csv_path: str = "../../datasets/ml-latest-small/links.csv",
         movies_tsv_path: str = "../../datasets/IMDb/filtered/movies.tsv",
-        output_tags_csv_path: str = "../../datasets/IMDb/filtered/tags.csv",
-        output_movie_tags_csv_path: str = "../../datasets/IMDb/filtered/movie_tags.csv",
+        output_tags_csv_path: str = "../../datasets/ml-latest-small/filtered/tags.csv",
+        output_movie_tags_csv_path: str = "../../datasets/ml-latest-small/filtered/movie_tags.csv",
     ):
         output_tags_dir = os.path.dirname(output_tags_csv_path)
         if output_tags_dir:
@@ -359,7 +359,15 @@ class ImdbScraper:
             reader = csv.DictReader(f)
             for row in reader:
                 movie_id = (row.get("movieId") or "").strip()
-                tag_name = (row.get("tag") or "").strip()
+                raw_tag_name = (row.get("tag") or "").strip()
+                tag_name = raw_tag_name
+                tag_name = tag_name.replace("\r", "").replace("\n", " ").strip()
+                if raw_tag_name in {'"""artsy"""', '"artsy"'}:
+                    continue
+                while '""' in tag_name:
+                    tag_name = tag_name.replace('""', '"')
+                while len(tag_name) >= 2 and tag_name[0] == '"' and tag_name[-1] == '"':
+                    tag_name = tag_name[1:-1].strip()
 
                 if not movie_id or not tag_name:
                     continue

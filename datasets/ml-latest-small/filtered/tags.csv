@@ -1240,236 +1240,235 @@ tag_id,tag_name
 1239,nocturnal
 1240,romantic
 1241,Unique
-1242,"""artsy"""
-1243,anger
-1244,awkward
-1245,symbolism
-1246,unconventional
-1247,wistful
-1248,grim
-1249,tragedy
-1250,tragic
-1251,Depressing
-1252,meditative
-1253,purposefulness
-1254,bleak
-1255,harsh
-1256,haunting
-1257,inhumane
-1258,arthouse
-1259,colourful
-1260,happpiness
-1261,humane
-1262,insightful
-1263,lovely
-1264,mind-bending
-1265,quirky romantic
-1266,surrealism
-1267,bizarre
-1268,twisted
-1269,trippy
-1270,character study
-1271,intense
-1272,great humor
-1273,poetic
-1274,beautiful cinematography
-1275,beautifully filmed
-1276,fatalistic
-1277,cheeky
-1278,colorful
-1279,imaginative
-1280,bad dialogue
-1281,philosophical issues
-1282,adorable
-1283,Eccentric
-1284,introspection
-1285,Great Visuals
-1286,unlikely hero
-1287,slick
-1288,Dark
-1289,Sad
-1290,Visually appealing
-1291,understated
-1292,Visually Striking
-1293,tension
-1294,Moving
-1295,contemplative
-1296,interesting
-1297,Witty
-1298,beautiful visuals
-1299,Cerebral
-1300,good cinematography
-1301,predictible plot
-1302,Suspenseful
-1303,brilliant
-1304,allegorical
-1305,uncomfortable
-1306,unsettling
-1307,bad music
-1308,seen at the cinema
-1309,Not Seen
-1310,good
-1311,really bad
-1312,Great movie
-1313,Wesley Snipes
-1314,not seen
-1315,BEST PICTURE
-1316,steve carell
-1317,HORRIBLE ACTING
-1318,assassins
-1319,awkward romance
-1320,French
-1321,Gary Oldman
-1322,great acting
-1323,Guns
-1324,Lolita theme
-1325,Luc Besson
-1326,Natalie Portman
-1327,police corruption
-1328,1990s
-1329,achronological
-1330,action packed
-1331,aggressive
-1332,amazing
-1333,amazing dialogues
-1334,anthology
-1335,AWESOME
-1336,bad ass
-1337,bad language
-1338,bad-ass
-1339,bible
-1340,biblical references
-1341,big boys with guns
-1342,big name actors
-1343,Black comedy
-1344,black humor
-1345,black humour
-1346,blood
-1347,blood splatters
-1348,bruce willis
-1349,casual violence
-1350,character development
-1351,classic movie
-1352,coke
-1353,conversation
-1354,cool
-1355,cool style
-1356,crime scene scrubbing
-1357,cult classic
-1358,dancing
-1359,different
-1360,diner
-1361,disjointed timeline
-1362,drug overdose
-1363,drugs & music
-1364,entertaining
-1365,entirely dialogue
-1366,episodic
-1367,exciting
-1368,fast paced
-1369,fast-paced
-1370,film noir
-1371,film-noir
-1372,foul language
-1373,genius
-1374,golden watch
-1375,good music
-1376,gore
-1377,great dialogue
-1378,Harvey Keitel
-1379,homosexuality
-1380,humour
-1381,iconic
-1382,innovative
-1383,intertwining storylines
-1384,interwoven storylines
-1385,irony
-1386,John Travolta
-1387,killer-as-protagonist
-1388,los angeles
-1389,meaningless violence
-1390,milkshake
-1391,mobster
-1392,mobsters
-1393,monologue
-1394,motherfucker
-1395,multiple stories
-1396,noir
-1397,non-linear timeline
-1398,nonlinear narrative
-1399,nonlinear storyline
-1400,nonlinear timeline
-1401,organised crime
-1402,out of order
-1403,Palme d'Or
-1404,pop culture references
-1405,pulp
-1406,Quotable
-1407,r:disturbing violent content including rape
-1408,r:disturbing violent images
-1409,r:graphic sexuality
-1410,r:some violence
-1411,r:strong bloody violence
-1412,r:strong language
-1413,r:sustained strong stylized violence
-1414,r:violence
-1415,random
-1416,Roger Avary
-1417,royal with cheese
-1418,sexy
-1419,smart writing
-1420,sophisticated
-1421,splatter
-1422,storytelling
-1423,travolta
-1424,Uma Thurman
-1425,unpredictable
-1426,unusual
-1427,apes
-1428,Arthur C. Clarke
-1429,computer
-1430,confusing ending
-1431,Dull
-1432,Oscar (Best Effects - Visual Effects)
-1433,relaxing
-1434,revolutionary
-1435,setting:space/space ship
-1436,slow
-1437,slow paced
-1438,spacecraft
-1439,superb soundtrack
-1440,technology
-1441,tedious
-1442,visual
-1443,bowling
-1444,coen brothers
-1445,Cult classic
-1446,deadpan
-1447,John Goodman
-1448,Julianne Moore
-1449,marijuana
-1450,Philip Seymour Hoffman
-1451,ransom
-1452,rug
-1453,satirical
-1454,challenging
-1455,Chuck Palahniuk
-1456,consumerism
-1457,David Fincher
-1458,double life
-1459,fighting
-1460,imaginary friend
-1461,mind-blowing
-1462,Nudity (Topless)
-1463,Palahnuik
-1464,postmodern
-1465,psychological thriller
-1466,societal criticism
-1467,TERRORISM
-1468,British
-1469,Romans
-1470,for katie
-1471,austere
-1472,gun fu
-1473,heroic bloodshed
-1474,Heroic Bloodshed
+1242,anger
+1243,awkward
+1244,symbolism
+1245,unconventional
+1246,wistful
+1247,grim
+1248,tragedy
+1249,tragic
+1250,Depressing
+1251,meditative
+1252,purposefulness
+1253,bleak
+1254,harsh
+1255,haunting
+1256,inhumane
+1257,arthouse
+1258,colourful
+1259,happpiness
+1260,humane
+1261,insightful
+1262,lovely
+1263,mind-bending
+1264,quirky romantic
+1265,surrealism
+1266,bizarre
+1267,twisted
+1268,trippy
+1269,character study
+1270,intense
+1271,great humor
+1272,poetic
+1273,beautiful cinematography
+1274,beautifully filmed
+1275,fatalistic
+1276,cheeky
+1277,colorful
+1278,imaginative
+1279,bad dialogue
+1280,philosophical issues
+1281,adorable
+1282,Eccentric
+1283,introspection
+1284,Great Visuals
+1285,unlikely hero
+1286,slick
+1287,Dark
+1288,Sad
+1289,Visually appealing
+1290,understated
+1291,Visually Striking
+1292,tension
+1293,Moving
+1294,contemplative
+1295,interesting
+1296,Witty
+1297,beautiful visuals
+1298,Cerebral
+1299,good cinematography
+1300,predictible plot
+1301,Suspenseful
+1302,brilliant
+1303,allegorical
+1304,uncomfortable
+1305,unsettling
+1306,bad music
+1307,seen at the cinema
+1308,Not Seen
+1309,good
+1310,really bad
+1311,Great movie
+1312,Wesley Snipes
+1313,not seen
+1314,BEST PICTURE
+1315,steve carell
+1316,HORRIBLE ACTING
+1317,assassins
+1318,awkward romance
+1319,French
+1320,Gary Oldman
+1321,great acting
+1322,Guns
+1323,Lolita theme
+1324,Luc Besson
+1325,Natalie Portman
+1326,police corruption
+1327,1990s
+1328,achronological
+1329,action packed
+1330,aggressive
+1331,amazing
+1332,amazing dialogues
+1333,anthology
+1334,AWESOME
+1335,bad ass
+1336,bad language
+1337,bad-ass
+1338,bible
+1339,biblical references
+1340,big boys with guns
+1341,big name actors
+1342,Black comedy
+1343,black humor
+1344,black humour
+1345,blood
+1346,blood splatters
+1347,bruce willis
+1348,casual violence
+1349,character development
+1350,classic movie
+1351,coke
+1352,conversation
+1353,cool
+1354,cool style
+1355,crime scene scrubbing
+1356,cult classic
+1357,dancing
+1358,different
+1359,diner
+1360,disjointed timeline
+1361,drug overdose
+1362,drugs & music
+1363,entertaining
+1364,entirely dialogue
+1365,episodic
+1366,exciting
+1367,fast paced
+1368,fast-paced
+1369,film noir
+1370,film-noir
+1371,foul language
+1372,genius
+1373,golden watch
+1374,good music
+1375,gore
+1376,great dialogue
+1377,Harvey Keitel
+1378,homosexuality
+1379,humour
+1380,iconic
+1381,innovative
+1382,intertwining storylines
+1383,interwoven storylines
+1384,irony
+1385,John Travolta
+1386,killer-as-protagonist
+1387,los angeles
+1388,meaningless violence
+1389,milkshake
+1390,mobster
+1391,mobsters
+1392,monologue
+1393,motherfucker
+1394,multiple stories
+1395,noir
+1396,non-linear timeline
+1397,nonlinear narrative
+1398,nonlinear storyline
+1399,nonlinear timeline
+1400,organised crime
+1401,out of order
+1402,Palme d'Or
+1403,pop culture references
+1404,pulp
+1405,Quotable
+1406,r:disturbing violent content including rape
+1407,r:disturbing violent images
+1408,r:graphic sexuality
+1409,r:some violence
+1410,r:strong bloody violence
+1411,r:strong language
+1412,r:sustained strong stylized violence
+1413,r:violence
+1414,random
+1415,Roger Avary
+1416,royal with cheese
+1417,sexy
+1418,smart writing
+1419,sophisticated
+1420,splatter
+1421,storytelling
+1422,travolta
+1423,Uma Thurman
+1424,unpredictable
+1425,unusual
+1426,apes
+1427,Arthur C. Clarke
+1428,computer
+1429,confusing ending
+1430,Dull
+1431,Oscar (Best Effects - Visual Effects)
+1432,relaxing
+1433,revolutionary
+1434,setting:space/space ship
+1435,slow
+1436,slow paced
+1437,spacecraft
+1438,superb soundtrack
+1439,technology
+1440,tedious
+1441,visual
+1442,bowling
+1443,coen brothers
+1444,Cult classic
+1445,deadpan
+1446,John Goodman
+1447,Julianne Moore
+1448,marijuana
+1449,Philip Seymour Hoffman
+1450,ransom
+1451,rug
+1452,satirical
+1453,challenging
+1454,Chuck Palahniuk
+1455,consumerism
+1456,David Fincher
+1457,double life
+1458,fighting
+1459,imaginary friend
+1460,mind-blowing
+1461,Nudity (Topless)
+1462,Palahnuik
+1463,postmodern
+1464,psychological thriller
+1465,societal criticism
+1466,TERRORISM
+1467,British
+1468,Romans
+1469,for katie
+1470,austere
+1471,gun fu
+1472,heroic bloodshed
+1473,Heroic Bloodshed

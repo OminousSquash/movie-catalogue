@@ -236,13 +236,17 @@ LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (dataset_user_id, openness, agreeableness, emotional_stability, conscientiousness, extraversion);
 
+
 LOAD DATA INFILE '/datasets/ml-latest-small/filtered/tags.csv'
 IGNORE
 INTO TABLE tags
 FIELDS TERMINATED BY ','
+OPTIONALLY ENCLOSED BY '"'
+ESCAPED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(tag_id, tag_name);
+(tag_id, @raw_tag_name)
+SET tag_name = TRIM(BOTH '\r' FROM @raw_tag_name);
 
 SHOW WARNINGS;
 

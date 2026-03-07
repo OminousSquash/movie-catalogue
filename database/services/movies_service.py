@@ -21,7 +21,7 @@ def _get_poster_index():
             poster_index[poster_file.stem] = poster_file.name
     return poster_index
 
-def get_movies_service(
+def     get_movies_service(
     db: MySQLConnection,
     movie_filters: MovieFilterDTO,
     contributor_filters: MovieContributorFilterDTO,
