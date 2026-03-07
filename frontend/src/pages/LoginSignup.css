@@ -1,0 +1,35 @@
+.login-signup-container {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.login-signup-paper {
+  width: 100%;
+  padding: 2rem;
+}
+
+.login-signup-title {
+  font-weight: 700;
+}
+
+.login-signup-subtitle {
+  margin-bottom: 1rem;
+}
+
+.login-signup-tabs {
+  margin-bottom: 1rem;
+}
+
+.login-signup-alert {
+  margin-bottom: 1rem;
+}
+
+.login-signup-submit {
+  margin-top: 1rem;
+  min-height: 44px;
+}
+
+.login-signup-cancel {
+  margin-top: 0.5rem;
+}

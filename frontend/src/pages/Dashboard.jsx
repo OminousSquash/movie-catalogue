@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { AppBar, Box, Button, Dialog, DialogContent, Toolbar, Typography } from "@mui/material";
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import FilterPanel from "../components/dashboard/FilterPanel";
 import MovieCard from "../components/dashboard/MovieCard";
 import { searchMovies, getRecentMovies } from "../services/movieService";
+import LoginSignup from "./LoginSignup";
 
-const Dashboard = () => {
+const Dashboard = ({ isAuthenticated, onAuthSuccess, onLogout }) => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
 
   useEffect(() => {
     fetchRecent();
@@ -42,12 +45,46 @@ const Dashboard = () => {
   );
 
   return (
-    <DashboardLayout
-      children={{
-        filters: <FilterPanel onSearch={handleSearch} />,
-        content: loading ? <p>Loading...</p> : movieCards,
-      }}
-    />
+    <>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Movie Catalogue
+          </Typography>
+          {!isAuthenticated ? (
+            <Button color="inherit" onClick={() => setAuthOpen(true)}>
+              Login / Sign Up
+            </Button>
+          ) : (
+            <Button color="inherit" onClick={onLogout}>
+              Logout
+            </Button>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      <DashboardLayout
+        children={{
+          filters: <FilterPanel onSearch={handleSearch} />,
+          content: loading ? <p>Loading...</p> : movieCards,
+        }}
+      />
+
+      <Dialog open={authOpen} onClose={() => setAuthOpen(false)} maxWidth="sm" fullWidth>
+        <DialogContent>
+          <Box sx={{ pt: 1 }}>
+            <LoginSignup
+              embedded
+              onCancel={() => setAuthOpen(false)}
+              onAuthSuccess={() => {
+                setAuthOpen(false);
+                onAuthSuccess?.();
+              }}
+            />
+          </Box>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
