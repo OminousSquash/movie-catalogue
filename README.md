@@ -17,6 +17,9 @@ Branch naming convention should be devname/purpose-of-branch eg: vsrinivasan/cre
 Raw data source downloaded from: https://datasets.imdbws.com/ 
 Download and store in datasets/IMDb/raw
 
+Before starting the application run the following command from /backend/utils/:
+    `python imdb_scraper.py`
+
 For testing endpoints using Swagger on localhost:8000
 
 For testing authentication and user lists (see [user_list_crud_controller.py](backend/controllers/user_list_crud_controller.py) and [login_signup_controller.py](/backend/controllers/login_signup_controller.py]) use Postman [Link to download](https://www.postman.com/downloads/]))
