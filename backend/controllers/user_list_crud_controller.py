@@ -10,9 +10,26 @@ from database.services.user_list_service import get_user_list_service
 from database.services.user_list_service import update_list_note_service
 from database.services.user_list_service import update_list_name_service
 from database.services.user_list_service import add_movie_to_list_service
+from database.services.user_list_service import get_public_user_lists_service
+from database.services.user_list_service import get_my_user_lists_service
 from backend.security.dependencies import get_current_user
 
 router = APIRouter(prefix="/user_list", tags=["user lists"])
+
+@router.get("/public")
+def get_public_user_lists(
+    db = Depends(get_db)
+):
+    return get_public_user_lists_service(db=db)
+
+
+@router.get("/me")
+def get_my_user_lists(
+    app_user_id: int = Depends(get_current_user),
+    db = Depends(get_db)
+):
+    return get_my_user_lists_service(app_user_id=app_user_id, db=db)
+
 
 @router.get("/{list_id}")
 def get_user_list(

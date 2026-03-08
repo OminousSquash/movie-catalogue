@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import { useNavigate } from "react-router-dom";
 
 const common_pages = ["Dashboard", "View Lists"];
 const auth_settings = ["Logout", "Your Lists"];
@@ -19,6 +20,7 @@ const auth_settings = ["Logout", "Your Lists"];
 function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const navigate = useNavigate();
 
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
@@ -114,7 +116,14 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
             {common_pages.map((page) => (
               <Button
                 key={page}
-                onClick={handleCloseNavMenu}
+                onClick={() => {
+                  handleCloseNavMenu();
+                  if (page === "Dashboard") {
+                    navigate("/");
+                  } else if (page === "View Lists") {
+                    navigate("/view-lists");
+                  }
+                }}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 {page}
@@ -151,6 +160,8 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
                         handleCloseUserMenu();
                         if (setting === "Logout") {
                           onLogout?.();
+                        } else if (setting === "Your Lists") {
+                          navigate("/user-lists");
                         }
                       }}
                     >

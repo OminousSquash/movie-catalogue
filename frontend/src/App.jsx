@@ -1,10 +1,14 @@
 import { useState } from "react";
-import Dashboard from "./pages/Dashboard";
+import { Box, Dialog, DialogContent } from "@mui/material";
+import AppRoutes from "./AppRoutes";
+import NavBar from "./components/NavBar";
+import LoginSignup from "./pages/LoginSignup";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("access_token"))
   );
+  const [authOpen, setAuthOpen] = useState(false);
 
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
@@ -16,11 +20,30 @@ function App() {
   };
 
   return (
-    <Dashboard
-      isAuthenticated={isAuthenticated}
-      onAuthSuccess={handleAuthSuccess}
-      onLogout={handleLogout}
-    />
+    <>
+      <NavBar
+        isAuthenticated={isAuthenticated}
+        onLoginClick={() => setAuthOpen(true)}
+        onLogout={handleLogout}
+      />
+
+      <AppRoutes isAuthenticated={isAuthenticated} />
+
+      <Dialog open={authOpen} onClose={() => setAuthOpen(false)} maxWidth="sm" fullWidth>
+        <DialogContent>
+          <Box sx={{ pt: 1 }}>
+            <LoginSignup
+              embedded
+              onCancel={() => setAuthOpen(false)}
+              onAuthSuccess={() => {
+                setAuthOpen(false);
+                handleAuthSuccess();
+              }}
+            />
+          </Box>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

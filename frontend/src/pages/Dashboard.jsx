@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Box, Dialog, DialogContent } from "@mui/material";
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import FilterPanel from "../components/dashboard/FilterPanel";
 import MovieCard from "../components/dashboard/MovieCard";
-import NavBar from "../components/NavBar";
 import { searchMovies, getRecentMovies } from "../services/movieService";
-import LoginSignup from "./LoginSignup";
 
-const Dashboard = ({ isAuthenticated, onAuthSuccess, onLogout }) => {
+const Dashboard = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
 
   useEffect(() => {
     fetchRecent();
@@ -46,35 +42,12 @@ const Dashboard = ({ isAuthenticated, onAuthSuccess, onLogout }) => {
   );
 
   return (
-    <>
-      <NavBar
-        isAuthenticated={isAuthenticated}
-        onLoginClick={() => setAuthOpen(true)}
-        onLogout={onLogout}
-      />
-
-      <DashboardLayout
-        children={{
-          filters: <FilterPanel onSearch={handleSearch} />,
-          content: loading ? <p>Loading...</p> : movieCards,
-        }}
-      />
-
-      <Dialog open={authOpen} onClose={() => setAuthOpen(false)} maxWidth="sm" fullWidth>
-        <DialogContent>
-          <Box sx={{ pt: 1 }}>
-            <LoginSignup
-              embedded
-              onCancel={() => setAuthOpen(false)}
-              onAuthSuccess={() => {
-                setAuthOpen(false);
-                onAuthSuccess?.();
-              }}
-            />
-          </Box>
-        </DialogContent>
-      </Dialog>
-    </>
+    <DashboardLayout
+      children={{
+        filters: <FilterPanel onSearch={handleSearch} />,
+        content: loading ? <p>Loading...</p> : movieCards,
+      }}
+    />
   );
 };
 
