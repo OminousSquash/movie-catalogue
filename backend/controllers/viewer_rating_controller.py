@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Query, Depends, FastAPI
 from database.services.viewer_rating_analysis_service import get_correlation_matrix_service
-from database.services.viewer_rating_analysis_service import get_cluster_summary_service
 from database.services.viewer_rating_analysis_service import get_conditional_high_rating_service
 from database.services.viewer_rating_analysis_service import get_conditional_low_rating_service
 from database.services.viewer_rating_analysis_service import get_low_rating_genres_service
