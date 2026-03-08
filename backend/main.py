@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from backend.controllers.movie_controller import router as movie_router
 from backend.controllers.popularity_controller import router as genre_popularity_router
 from backend.controllers.contributor_controller import router as contributor_router
@@ -11,6 +13,8 @@ from backend.controllers.login_signup_controller import router as auth_router
 from backend.controllers.user_list_crud_controller import router as user_list_crud_router
 
 app = FastAPI(title="Movie Catalogue API")
+posters_dir = Path(__file__).resolve().parents[1] / "datasets" / "movie-posters"
+app.mount("/posters", StaticFiles(directory=str(posters_dir), check_dir=False), name="posters")
 
 
 origins = [

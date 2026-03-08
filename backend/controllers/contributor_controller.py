@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Depends, FastAPI
+from fastapi import APIRouter, Depends
 from database.database import get_db
 from database.services.contributor_service import get_contributor_info_service
 

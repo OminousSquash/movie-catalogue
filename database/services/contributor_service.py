@@ -1,10 +1,17 @@
-from mysql.connector import MySQLConnection
+from mysql.connector import Error, MySQLConnection
+from fastapi import HTTPException, status
 
 def get_contributor_info_service(
     db: MySQLConnection,
     contributor: str
 ):
     cursor = db.cursor(dictionary=True)
+
+    contributor_count_query = """
+    SELECT COUNT(DISTINCT nconst) AS contributor_count
+    FROM contributors
+    WHERE primary_name = %s
+    """
 
     stats_query = """
     SELECT
@@ -23,9 +30,6 @@ def get_contributor_info_service(
     GROUP BY c.nconst
     """
 
-    cursor.execute(stats_query, (contributor,))
-    actor_info = cursor.fetchone()
-
     popular_movies_query = """
     SELECT m.primary_title
     FROM movies m
@@ -34,8 +38,40 @@ def get_contributor_info_service(
     WHERE c.primary_name = %s
     """
 
-    cursor.execute(popular_movies_query, (contributor,))
-    popular_movies = cursor.fetchall()
+    try:
+        cursor.execute(contributor_count_query, (contributor,))
+        contributor_count = cursor.fetchone()["contributor_count"]
+
+        if contributor_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Contributor not found"
+            )
+
+        if contributor_count > 1:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Multiple contributors found for the provided name"
+            )
+
+        cursor.execute(stats_query, (contributor,))
+        actor_info = cursor.fetchone()
+
+        if not actor_info:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Contributor not found"
+            )
+
+        cursor.execute(popular_movies_query, (contributor,))
+        popular_movies = cursor.fetchall()
+    except HTTPException:
+        raise
+    except Error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve contributor information"
+        )
 
     actor_info["popular_works"] = [movie["primary_title"] for movie in popular_movies]
 
