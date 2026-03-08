@@ -88,7 +88,7 @@ class RatingPrediction:
         return genre_index, actor_index, director_index, writer_index
 
 
-    def get_candidates(self, target_data):
+    def get_candidates(self, target_data: dict):
         candidates = set()
 
         # same genre
@@ -109,7 +109,7 @@ class RatingPrediction:
         return candidates
 
 
-    def similarity(self, target_data, suggested_data):
+    def similarity(self, target_data: dict, suggested_data: dict):
         GENRE_WEIGHT = 15
         RUNTIME_WEIGHT = 3
         ACTOR_WEIGHT = 2
@@ -163,7 +163,6 @@ class RatingPrediction:
         
         predicted_rating = weighted_sum / weight_total
 
-        # Calculate Weighted Standard Deviation (Uncertainty)
         variance_sum = sum(score * ((rating - predicted_rating) ** 2) for score, rating in top_k)
         weighted_variance = variance_sum / weight_total
         uncertainty = math.sqrt(weighted_variance)
