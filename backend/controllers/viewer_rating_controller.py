@@ -27,13 +27,6 @@ def get_genre_correlation_matrix(
 ):
     return get_correlation_matrix_service(db)
 
-@router.get("/cluster_summary")
-def get_cluster_summary(
-    n_clusters: int = 5,
-    db=Depends(get_db)
-):
-    return get_cluster_summary_service(db, n_clusters)
-
 @router.get("/conditional_low_rating")
 def get_conditional_low_rating(
     genre_a: str,
