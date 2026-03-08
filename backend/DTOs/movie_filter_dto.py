@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, List
-from datetime import date
+from typing import Literal
 
 class MovieFilterDTO(BaseModel):
     title: Optional[str] = None
@@ -13,3 +13,8 @@ class MovieFilterDTO(BaseModel):
     max_votes : Optional[int] = None
     min_runtime : Optional[int] = None
     max_runtime : Optional[int] = None
+    tags: Optional[List[str]] = None
+    has_oscar: Optional[bool] = None
+    oscar_year: Optional[int] = None
+    oscar_status: Optional[Literal["Winner", "Nominee"]] = None
+    oscar_awards: Optional[List[str]] = None
