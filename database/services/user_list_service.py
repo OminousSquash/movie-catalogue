@@ -273,7 +273,7 @@ def delete_user_list_service(
             detail="Failed to delete list"
         )
 
-def get_user_list_service(
+def get_user_list_movies_service(
     user_list_id: int,
     db: MySQLConnection
 ):
