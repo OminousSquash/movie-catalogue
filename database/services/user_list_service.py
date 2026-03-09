@@ -5,6 +5,62 @@ from backend.DTOs.add_movie_to_list_dto import AddMovieToListDTO
 from backend.DTOs.update_list_name_dto import UpdateListNameDTO
 from backend.DTOs.update_list_note_dto import UpdateListNoteDTO
 
+def get_public_user_lists_service(db: MySQLConnection):
+    try:
+        cursor = db.cursor(dictionary=True)
+        query = """
+        SELECT
+            ul.list_id,
+            ul.list_name,
+            ul.list_note,
+            au.app_username AS creator_username,
+            COUNT(ulm.tconst) AS movie_count,
+            MIN(ulm.tconst) AS cover_tconst
+        FROM app_user_lists ul
+        JOIN app_users au ON au.app_user_id = ul.app_user_id
+        LEFT JOIN app_user_list_movies ulm ON ulm.list_id = ul.list_id
+        GROUP BY ul.list_id, ul.list_name, ul.list_note, au.app_username
+        ORDER BY ul.list_id DESC
+        """
+        cursor.execute(query)
+        return cursor.fetchall()
+    except Error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve public lists"
+        )
+
+
+def get_my_user_lists_service(
+    app_user_id: int,
+    db: MySQLConnection
+):
+    try:
+        cursor = db.cursor(dictionary=True)
+        query = """
+        SELECT
+            ul.list_id,
+            ul.list_name,
+            ul.list_note,
+            au.app_username AS creator_username,
+            COUNT(ulm.tconst) AS movie_count,
+            MIN(ulm.tconst) AS cover_tconst
+        FROM app_user_lists ul
+        JOIN app_users au ON au.app_user_id = ul.app_user_id
+        LEFT JOIN app_user_list_movies ulm ON ulm.list_id = ul.list_id
+        WHERE ul.app_user_id = %s
+        GROUP BY ul.list_id, ul.list_name, ul.list_note, au.app_username
+        ORDER BY ul.list_id DESC
+        """
+        cursor.execute(query, (app_user_id,))
+        return cursor.fetchall()
+    except Error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve your lists"
+        )
+
+
 def create_user_list_service(
     create_user_list_dto: CreateUserListDTO,
     app_user_id: int,

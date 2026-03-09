@@ -21,7 +21,7 @@ def _get_poster_index():
             poster_index[poster_file.stem] = poster_file.name
     return poster_index
 
-def     get_movies_service(
+def get_movies_service(
     db: MySQLConnection,
     movie_filters: MovieFilterDTO,
     contributor_filters: MovieContributorFilterDTO,
@@ -108,10 +108,10 @@ def     get_movies_service(
     if movie_filters.genres:
         joins.append("JOIN movie_genres mg on mg.tconst = m.tconst") 
         joins.append("JOIN genres g on mg.genre_id = g.genre_id")
-    
-        genres_placeholder = ",".join(["%s"] * len(movie_filters.genres))
-        conditions.append(f"g.genre IN ({genres_placeholder})")
-        params.extend(movie_filters.genres)
+        genres_placeholder = " OR ".join(["g.genre LIKE %s"] * len(movie_filters.genres))
+        conditions.append(f"({genres_placeholder})")
+        params.extend(f"%{g}%" for g in movie_filters.genres)
+
     if movie_filters.tags:
         joins.append("JOIN movie_tags mt on mt.tconst = m.tconst")
         joins.append("JOIN tags t on mt.tag_id = t.tag_id")
@@ -122,24 +122,24 @@ def     get_movies_service(
 
     role_conditions = []
     if contributor_filters.actors:
-        actors_placeholder = ",".join(["%s"] * len(contributor_filters.actors))
-        role_conditions.append(f"mc.role LIKE '%actor%' AND c.primary_name IN ({actors_placeholder})")
-        params.extend(contributor_filters.actors)
+        actors_placeholder = " OR ".join(["c.primary_name LIKE %s"] * len(contributor_filters.actors))
+        role_conditions.append(f"(mc.role LIKE '%actor%' AND ({actors_placeholder}))")
+        params.extend(f"%{a}%" for a in contributor_filters.actors)
 
     if contributor_filters.directors:
-        directors_placeholders = ",".join(["%s"] * len(contributor_filters.directors))
-        role_conditions.append(f"mc.role LIKE '%director%' AND c.primary_name in ({directors_placeholders})")
-        params.extend(contributor_filters.directors)
-    
+        directors_placeholders = " OR ".join(["c.primary_name LIKE %s"] * len(contributor_filters.directors))
+        role_conditions.append(f"(mc.role LIKE '%director%' AND ({directors_placeholders}))")
+        params.extend(f"%{d}%" for d in contributor_filters.directors)
+
     if contributor_filters.writers:
-        writers_placeholders = ",".join(["%s"] * len(contributor_filters.writers))
-        role_conditions.append(f"mc.role LIKE '%writer%' AND c.primary_name in ({writers_placeholders})")
-        params.extend(contributor_filters.writers)
+        writers_placeholders = " OR ".join(["c.primary_name LIKE %s"] * len(contributor_filters.writers))
+        role_conditions.append(f"(mc.role LIKE '%writer%' AND ({writers_placeholders}))")
+        params.extend(f"%{w}%" for w in contributor_filters.writers)
 
     if role_conditions:
         joins.append("JOIN movie_contributors mc on mc.tconst=m.tconst")
         joins.append("JOIN contributors c on c.nconst = mc.nconst")
-        conditions.append('(' + ' AND '.join(role_conditions ) + ')')
+        conditions.append("(" + " OR ".join(role_conditions) + ")")
 
     if joins:
         query += " " + " ".join(joins)
@@ -185,6 +185,18 @@ def     get_movies_service(
         "total_pages": math.ceil(total / PAGE_SIZE)
     }
 
+def get_genres_service(
+    db: MySQLConnection
+):
+    try:
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("SELECT genre_id, genre FROM genres ORDER BY genre ASC")
+        return cursor.fetchall()
+    except Error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve genres"
+        )
 
 def get_oscar_movies_service(
     db: MySQLConnection

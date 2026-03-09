@@ -173,6 +173,7 @@ SET genre = TRIM(
         '\n', ''
     )
 );
+DELETE FROM genres WHERE LENGTH(TRIM(genre)) <= 1;
 
 
 LOAD DATA INFILE '/datasets/IMDb/filtered/movies_genres.tsv'
