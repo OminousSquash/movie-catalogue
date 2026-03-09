@@ -283,7 +283,7 @@ SET recipient_nconst = CASE
     ELSE TRIM(REPLACE(@raw_recipient_nconst, '\r', ''))
 END;
 
-LOAD DATA INFILE 'datasets/IMDb/filtered/recent_predicted_movies.tsv'
+LOAD DATA INFILE '/datasets/IMDb/filtered/recent_predicted_movies.tsv'
 IGNORE
 INTO TABLE predicted_ratings
 FIELDS TERMINATED BY '\t'
