@@ -1,15 +1,5 @@
 import api from "./api";
 
-const extractMovieRows = (responseData) => {
-  if (Array.isArray(responseData)) {
-    return responseData;
-  }
-  if (Array.isArray(responseData?.data)) {
-    return responseData.data;
-  }
-  return [];
-};
-
 export const searchMovies = async (filters, page = 1) => {
   const body = {};
 
@@ -32,19 +22,13 @@ export const searchMovies = async (filters, page = 1) => {
   if (filters.directors?.length) body.directors = filters.directors;
   if (filters.genres?.length) body.genres = filters.genres;
   if (filters.writers?.length) body.writers = filters.writers;
-
-  try {
-    const response = await api.post("/movies/", body, { params: { page } });
-    return extractMovieRows(response.data);
-  } catch (err) {
-    console.error("Search failed", err);
-    throw err;
-  }
+  const response = await api.post("/movies/", body, { params: { page } });
+  return response.data;
 };
 
 export const getRecentMovies = async () => {
   const response = await api.get("/movies/recent");
-  return extractMovieRows(response.data);
+  return Array.isArray(response.data) ? response.data : (response.data?.data ?? []);
 };
 
 
