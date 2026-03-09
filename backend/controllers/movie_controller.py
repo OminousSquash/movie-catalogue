@@ -2,6 +2,7 @@ from fastapi import APIRouter, Query, Depends
 from backend.DTOs.movie_search_filter_dto import MovieSearchFilterDTO
 from database.services.movies_service import (
     get_movies_service,
+    get_genres_service,
     get_oscar_movies_service,
     get_movie_oscars_service,
 )
@@ -21,6 +22,10 @@ def get_movies(
         contributor_filters=filters,
         page=page
     )
+
+@router.get("/genres")
+def get_genres(db=Depends(get_db)):
+    return get_genres_service(db=db)
 
 @router.get('/recent')
 def get_recent_movies():

@@ -55,9 +55,9 @@ def get_contributor_info_service(
             )
 
         cursor.execute(stats_query, (contributor,))
-        actor_info = cursor.fetchone()
+        contributor_info = cursor.fetchone()
 
-        if not actor_info:
+        if not contributor_info:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Contributor not found"

@@ -46,3 +46,9 @@ export const getRecentMovies = async () => {
   const response = await api.get("/movies/recent");
   return extractMovieRows(response.data);
 };
+
+
+export const getGenres = async () => {
+  const response = await api.get("/movies/genres");
+  return Array.isArray(response.data) ? response.data : [];
+};
