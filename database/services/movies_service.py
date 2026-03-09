@@ -190,7 +190,7 @@ def get_genres_service(
 ):
     try:
         cursor = db.cursor(dictionary=True)
-        cursor.execute("SELECT genre_id, genre FROM genres ORDER BY genre ASC")
+        cursor.execute("SELECT genre_id, genre FROM genres WHERE LENGTH(TRIM(genre)) > 1 ORDER BY genre ASC")
         return cursor.fetchall()
     except Error:
         raise HTTPException(
