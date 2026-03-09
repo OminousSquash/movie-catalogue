@@ -12,7 +12,7 @@ import StarIcon from "@mui/icons-material/Star";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
-const MovieCard = ({ movie }) => {
+const MovieCard = ({ movie, isAuthenticated = false, onAddClick, isAddBusy = false }) => {
   const title = movie.primary_title ?? movie.primaryTitle ?? "";
   const year = movie.start_year ?? movie.startYear ?? "";
   const rating = movie.average_rating ?? movie.averageRating ?? null;

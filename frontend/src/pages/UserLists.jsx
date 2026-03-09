@@ -13,6 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import MovieListCard from "../components/MovieListCard";
 import {
   createList,
@@ -26,6 +27,7 @@ import {
 const EMPTY_FORM = { list_name: "", list_note: "" };
 
 export default function UserLists() {
+  const navigate = useNavigate();
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -128,6 +130,7 @@ export default function UserLists() {
                 editable
                 onEdit={openEdit}
                 onDelete={handleDelete}
+                onOpenList={(listId) => navigate(`/lists/${listId}`)}
               />
             </Grid>
           ))}

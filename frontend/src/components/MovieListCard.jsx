@@ -21,6 +21,7 @@ export default function MovieListCard({
   list,
   onEdit,
   onDelete,
+  onOpenList,
   editable = false,
 }) {
   const candidates = useMemo(() => resolvePosterCandidates(list.cover_tconst), [list.cover_tconst]);
@@ -46,9 +47,19 @@ export default function MovieListCard({
         </div>
         </div>
         <CardContent>
-          <Typography variant="h6" className="movie-list-card-title">
-            {list.list_name}
-          </Typography>
+          {onOpenList ? (
+            <Button
+              variant="text"
+              className="movie-list-card-name-button"
+              onClick={() => onOpenList(list.list_id)}
+            >
+              {list.list_name}
+            </Button>
+          ) : (
+            <Typography variant="h6" className="movie-list-card-title">
+              {list.list_name}
+            </Typography>
+          )}
           <Typography variant="body2" color="text.secondary">
             Creator: {list.creator_username}
           </Typography>
