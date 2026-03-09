@@ -119,7 +119,10 @@ class RatingPrediction:
         if target_data["is_adult"] == suggested_data["is_adult"]:
             score += 1
 
-        runtime_diff = abs(target_data["runtime_minutes"] - suggested_data["runtime_minutes"])
+        target_runtime = target_data["runtime_minutes"] or 0
+        suggested_runtime = suggested_data["runtime_minutes"] or 0
+        runtime_diff = abs(target_runtime - suggested_runtime)
+
         if runtime_diff <= 20:
             runtime_score = RUNTIME_WEIGHT
         elif runtime_diff >= 60:
