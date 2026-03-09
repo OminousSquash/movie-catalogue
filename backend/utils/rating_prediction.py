@@ -48,15 +48,17 @@ class RatingPrediction:
                     movies[tconst] = {
                         "is_adult": row["is_adult"],
                         "runtime_minutes": row["runtime_minutes"],
-                        "genre": row["genre_id"],
+                        "genres": set(),
                         "actors": set(),
                         "directors": set(),
                         "writers": set(),
                         "rating": float(row["average_rating"]),
                     }
+                if row["genre_id"]:
+                    movies[tconst]["genres"].add(row["genre_id"])
+                    
                 role = row["role"]
                 person = row["nconst"]
-
                 if role and person:
                     role = role.lower()
                     if role in ("actor", "actress"):
@@ -83,8 +85,8 @@ class RatingPrediction:
         director_index = defaultdict(set)
         writer_index = defaultdict(set)
         for tconst, movie in self.movie_dict.items():
-            genre_index[movie["genre"]].add(tconst)
-
+            for genre in movie["genres"]:
+                genre_index[genre].add(tconst)
             for a in movie["actors"]:
                 actor_index[a].add(tconst)
             for d in movie["directors"]:
@@ -99,7 +101,8 @@ class RatingPrediction:
         candidates = set()
 
         # same genre
-        candidates |= self.genre_index.get(target_data["genre"], set())
+        for g in target_data["genres"]:
+            candidates |= self.genre_index.get(g, set())
 
         # same actors
         for a in target_data["actors"]:
@@ -117,11 +120,11 @@ class RatingPrediction:
 
 
     def similarity(self, target_data: dict, suggested_data: dict):
-        GENRE_WEIGHT = 15
+        GENRE_WEIGHT = 10
         RUNTIME_WEIGHT = 3
         ACTOR_WEIGHT = 2
-        DIRECTOR_WEIGHT = 4
-        WRITER_WEIGHT = 3
+        DIRECTOR_WEIGHT = 5
+        WRITER_WEIGHT = 5
         score = 0
         if target_data["is_adult"] == suggested_data["is_adult"]:
             score += 1
@@ -137,8 +140,8 @@ class RatingPrediction:
         else:
             runtime_score = RUNTIME_WEIGHT * (1 - (runtime_diff - 20) / 40)
 
-        if suggested_data["genre"] == target_data["genre"]:
-            score += GENRE_WEIGHT
+        shared_genres = len(target_data["genres"] & suggested_data["genres"])
+        score += shared_genres * GENRE_WEIGHT
         score += runtime_score
         score += len(target_data["actors"] & suggested_data["actors"]) * ACTOR_WEIGHT
         score += len(target_data["directors"] & suggested_data["directors"]) * DIRECTOR_WEIGHT
@@ -147,7 +150,7 @@ class RatingPrediction:
         return score
 
 
-    def predict_rating(self, original_tconst: str, k=50):
+    def predict_rating(self, original_tconst: str, k=100):
         target_data = self.movie_dict.get(original_tconst)
         if not target_data:
             return (None, None)
@@ -162,7 +165,7 @@ class RatingPrediction:
             suggested_data = self.movie_dict[tconst]
             similarity_score = self.similarity(target_data, suggested_data)
 
-            if similarity_score >= 15: # At least have the same genre or equivalent in other weights
+            if similarity_score >= 10: # At least have the same genre or equivalent in other weights
                 scores.append((similarity_score, suggested_data["rating"]))
 
         top_k = heapq.nlargest(k, scores)
