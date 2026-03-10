@@ -30,13 +30,6 @@ def get_recent_movies(
 ):
     return get_predicted_ratings_service(db=db)
 
-@router.get('/recent/{tconst}')
-def get_recent_movies(
-    tconst = str,
-    db = Depends(get_db)
-):
-    return get_predicted_rating_by_tconst_service(db=db, tconst=tconst)
-
 @router.get("/oscar_movies")
 def get_oscar_movies(
     db = Depends(get_db)

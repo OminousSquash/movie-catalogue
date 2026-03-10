@@ -193,8 +193,6 @@ class RatingPrediction:
                 predicted_rating, uncertainty = self.predict_rating(tconst)
                 results.append({
                     "tconst": row["tconst"],
-                    "primary_title": row["primary_title"],
-                    "start_year": row["start_year"],
                     "predicted_rating": round(predicted_rating, 1) if predicted_rating is not None else None,
                     "prediction_uncertainty": round(uncertainty, 2) if uncertainty is not None else None,
                 })

@@ -156,8 +156,6 @@ CREATE TABLE IF NOT EXISTS movie_tags (
 
 CREATE TABLE IF NOT EXISTS predicted_ratings (
     tconst VARCHAR(10) NOT NULL,
-    primary_title TEXT NOT NULL,
-    start_year INT,
     predicted_rating DECIMAL(3, 1),
     prediction_uncertainty DECIMAL(4, 2),
     PRIMARY KEY (tconst),
@@ -289,6 +287,6 @@ INTO TABLE predicted_ratings
 FIELDS TERMINATED BY '\t'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(tconst, primary_title, start_year, predicted_rating, prediction_uncertainty);
+(tconst, predicted_rating, prediction_uncertainty);
 
 SHOW WARNINGS;

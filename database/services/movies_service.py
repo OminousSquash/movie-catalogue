@@ -257,13 +257,22 @@ def get_predicted_ratings_service(
     ):
     try:
         cursor = db.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM predicted_ratings")
+        cursor.execute("""
+            SELECT
+                pr.tconst,
+                m.primary_title,
+                m.start_year,
+                pr.predicted_rating,
+                pr.prediction_uncertainty
+            FROM predicted_ratings pr
+            JOIN movies m ON pr.tconst = m.tconst
+        """)
         return cursor.fetchall()
     except Error:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve recent movies")
 
 
-def get_predicted_rating_by_tconst_service(
+def get_predicted_rating_by_tconst_service( # Currently not in use, just here in case its needed
         db: MySQLConnection,
         tconst: str
     ):
