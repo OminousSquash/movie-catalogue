@@ -11,11 +11,11 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
+import MovieIcon from '@mui/icons-material/Movie';
 import { useNavigate } from "react-router-dom";
 
-const common_pages = ["Dashboard", "View Lists"];
-const auth_settings = ["Logout", "Your Lists"];
+const common_pages = [{label: "Dashboard", path: "/"}, {label: "View Lists", path: "/view-lists"}];
+const auth_settings = [{label: "Your Lists", path: "/user-lists"}, {label: "Logout", path: null}];
 
 function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -36,23 +36,43 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
+    const handleNavClick = (path) => {
+      handleCloseNavMenu();
+      navigate(path);
+    };
+
+    const handleSettingClick = (setting) => {
+      handleCloseUserMenu();
+      if (setting.label === "Logout"){
+        onLogout?.();
+      } else if (setting.path){
+        navigate(setting.path);
+      }
+    };
     return (
-    <AppBar position="static">
+    <AppBar position="static"
+    sx={{
+        background: "linear-gradient(90deg, #111010 0%, #1a1810 100%)",
+        borderBottom: "1px solid rgba(232, 201, 126, 0.15)",
+        boxShadow: "0 1px 12px rgba(0,0,0,0.6)",
+    }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+          <MovieIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, color: 'primary.main' }} />
           <Typography
             variant="h6"
             noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
+            onClick={() => navigate("/")}
+
             sx={{
-              mr: 2,
+              mr: 3,
               display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
+              fontFamily: 'Playfair Display, serif',
               fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
+              letterSpacing: '.15rem',
+              color: 'primary.main',
+              cursor: 'pointer',
               textDecoration: 'none',
             }}
           >
@@ -62,11 +82,11 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
-              aria-label="account of current user"
+              aria-label="Navigation menwu"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
-              color="inherit"
+              color="primary.main"
             >
               <MenuIcon />
             </IconButton>
@@ -84,94 +104,113 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
               }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
-              sx={{ display: { xs: 'block', md: 'none' } }}
+              sx={{
+                display: { xs: "block", md: "none" },
+                "& .MuiPaper-root": {
+                  background: "#16161a",
+                  border: "1px solid rgba(232,201,126,0.15)",
+                  minWidth: 160,
+                },
+              }}
+            
             >
               {common_pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
+                <MenuItem key={page.label} onClick={() => handleNavClick(page.path)}
+                sx={{ '&:hover': { background: 'rgba(232,201,126,0.08' } }}>
+                  <Typography sx={{ color: 'text.primary', fontSize: '0.9 rem' }}>{page.label}</Typography>
                 </MenuItem>
               ))}
             </Menu>
           </Box>
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+          <MovieIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1, color: 'primary.main' }} />
           <Typography
-            variant="h5"
+            variant="h6"
             noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
+            onClick={() => navigate("/")}
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
               flexGrow: 1,
-              fontFamily: 'monospace',
+              fontFamily: 'Playfair Display, serif',
               fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
+              color: 'primary.main',
               textDecoration: 'none',
             }}
           >
             LOGO
           </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: 0.5 }}>
             {common_pages.map((page) => (
               <Button
-                key={page}
-                onClick={() => {
-                  handleCloseNavMenu();
-                  if (page === "Dashboard") {
-                    navigate("/");
-                  } else if (page === "View Lists") {
-                    navigate("/view-lists");
-                  }
-                }}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                key={page.label}
+                onClick={() => {handleNavClick(page.path)}}
+                sx={{ color: 'text.secondary', fontSize: '0.85rem', '&:hover': { color: 'primary.main', background: 'rgba(232, 201, 126, 0.06) '}, }}
               >
-                {page}
+                {page.label}
               </Button>
             ))}
           </Box>
           {isAuthenticated ? (
             <Box sx={{ flexGrow: 0 }}>
-                <Tooltip title="Open settings">
+                <Tooltip title="Account">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                  <Avatar
+                    sx={{
+                      width: 34,
+                      height: 34,
+                      background: "linear-gradient(135deg, #e8c97e, #c9a84c)",
+                      color: "#0d0d0f",
+                      fontSize: "0.8rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    U
+                  </Avatar>
                 </IconButton>
                 </Tooltip>
-                <Menu
-                    sx={{ mt: '45px' }}
-                    id="menu-appbar"
-                    anchorEl={anchorElUser}
-                    anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
-                    keepMounted
-                    transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
-                    open={Boolean(anchorElUser)}
-                    onClose={handleCloseUserMenu}
-                >
+              <Menu
+                sx={{
+                  mt: "45px",
+                  "& .MuiPaper-root": {
+                    background: "#16161a",
+                    border: "1px solid rgba(232,201,126,0.15)",
+                    minWidth: 150,
+                  },
+                }}
+                id="menu-user"
+                anchorEl={anchorElUser}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                keepMounted
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
                 {auth_settings.map((setting) => (
-                    <MenuItem
-                      key={setting}
-                      onClick={() => {
-                        handleCloseUserMenu();
-                        if (setting === "Logout") {
-                          onLogout?.();
-                        } else if (setting === "Your Lists") {
-                          navigate("/user-lists");
-                        }
+                  <MenuItem
+                    key={setting.label}
+                    onClick={() => handleSettingClick(setting)}
+                    sx={{ "&:hover": { background: "rgba(232,201,126,0.08)" } }}
+                  >
+                    <Typography
+                      sx={{
+                        color: setting.label === "Logout" ? "error.main" : "text.primary",
+                        fontSize: "0.9rem",
                       }}
                     >
-                        <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
-                    </MenuItem>
+                      {setting.label}
+                    </Typography>
+                  </MenuItem>
                 ))}
                 </Menu>
             </Box>
           ) : (
-            <Button color="inherit" onClick={onLoginClick}>
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              onClick={onLoginClick}
+              sx={{ fontSize: "0.8rem" }}
+            >
               Login / Sign Up
             </Button>
           )}
