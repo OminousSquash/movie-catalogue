@@ -22,7 +22,6 @@ const ViewerRatingAnalysis = () => {
   const [conditional, setConditional] = useState({ genreA: "", genreB: "", data: null });
   const [conditionalLoading, setConditionalLoading] = useState(false);
 
-  // Fetch data on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -34,9 +33,9 @@ const ViewerRatingAnalysis = () => {
         ]);
 
         setViewerHarshness(harshRes.data);
+        console.log("Viewer Harshness fetched:", harshRes.data);
         setLowRatingGenres(lowRes.data);
 
-        // Transform matrix into heatmap format
         const keys = Object.keys(matrixRes.data);
         const matrixData = keys.map((genre) => ({
           genre,
@@ -55,7 +54,6 @@ const ViewerRatingAnalysis = () => {
     fetchData();
   }, []);
 
-  // Fetch conditional probabilities
   const fetchConditional = async () => {
     if (!conditional.genreA || !conditional.genreB) return;
     try {
@@ -84,11 +82,11 @@ const ViewerRatingAnalysis = () => {
         {tabIndex === 0 && (
           <Paper sx={{ height: 400, p: 2 }}>
             <ResponsivePie
-              data={viewerHarshness.map(v => ({
+              data={Array.isArray(viewerHarshness) ? viewerHarshness.map(v => ({
                 id: v.rater_type,
                 label: v.rater_type,
                 value: v.num_users,
-              }))}
+              })) : []}
               margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
               innerRadius={0.5}
               padAngle={0.7}
