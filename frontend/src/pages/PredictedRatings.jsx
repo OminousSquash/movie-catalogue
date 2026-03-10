@@ -84,10 +84,10 @@ export default function PredictedRatings() {
               </Box>
               <Button
                 variant="contained"
-                color="primary"
+                disabled={prediction}
                 onClick={() => handlePredict(movie)}
               >
-                Predict
+                {prediction ? "Predicted" : "Predict"}
               </Button>
 
             </Paper>
