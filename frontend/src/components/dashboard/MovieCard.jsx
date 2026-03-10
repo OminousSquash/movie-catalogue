@@ -1,5 +1,7 @@
-import React from "react";
+import { useMemo, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
+  Button,
   Card,
   CardContent,
   CardMedia,
@@ -11,6 +13,7 @@ import {
 import StarIcon from "@mui/icons-material/Star";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 const FALLBACK_POSTER = "https://placehold.co/600x900?text=No+Poster";
 
@@ -89,15 +92,33 @@ const MovieCard = ({
       )}
 
       <CardContent sx={{ flex: 1, py: 1.5, px: 2, "&:last-child": { pb: 1.5 } }}>
+        {isAuthenticated && !compact ? (
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<AddCircleOutlineIcon />}
+            onClick={(event) => onAddClick?.(event, movie)}
+            disabled={isAddBusy}
+            sx={{ mb: 1, fontWeight: 700 }}
+          >
+            Add to List
+          </Button>
+        ) : null}
+
         <Typography
           variant="h6"
+          component={movie?.tconst ? Link : "h6"}
+          to={movie?.tconst ? `/movies/${movie.tconst}` : undefined}
           sx={{
+            display: "block",
             fontFamily: "Playfair Display, serif",
             fontSize: "1rem",
             fontWeight: 600,
             lineHeight: 1.3,
             color: "text.primary",
             mb: 0.75,
+            textDecoration: "none",
+            "&:hover": { textDecoration: "underline" },
           }}
         >
           {title}

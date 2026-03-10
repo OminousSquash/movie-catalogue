@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Alert,
   Box,
-  Typography,
-  CircularProgress,
   Button,
-  Stack,
+  CircularProgress,
   Fade,
+  Menu,
+  MenuItem,
+  Stack,
+  Typography,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -13,6 +16,7 @@ import DashboardLayout from "../components/dashboard/DashboardLayout";
 import FilterPanel from "../components/dashboard/FilterPanel";
 import MovieCard from "../components/dashboard/MovieCard";
 import { searchMovies, getRecentMovies, getGenres } from "../services/movieService";
+import { addMovieToList, formatApiErrorDetail, getMyLists } from "../services/userListService";
 
 const INITIAL_FILTERS = {
   title: "",
@@ -28,7 +32,7 @@ const INITIAL_FILTERS = {
   selectedGenres: new Set(),
 };
 
-const Dashboard = () => {
+const Dashboard = ({ isAuthenticated = false }) => {
   const [filterState, setFilterState] = useState(INITIAL_FILTERS);
   const [availableGenres, setAvailableGenres] = useState([]);
   const [genresOpen, setGenresOpen] = useState(true);
@@ -38,6 +42,13 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(null);
+  const [myLists, setMyLists] = useState([]);
+  const [listsLoaded, setListsLoaded] = useState(false);
+  const [listPickerAnchorEl, setListPickerAnchorEl] = useState(null);
+  const [activeMovieTconst, setActiveMovieTconst] = useState(null);
+  const [listPickerLoading, setListPickerLoading] = useState(false);
+  const [addingToListId, setAddingToListId] = useState(null);
+  const [message, setMessage] = useState({ type: "", text: "" });
   const lastFilters = useRef({});
   
   useEffect(() => {
@@ -141,6 +152,11 @@ const Dashboard = () => {
   const content = (
     <Fade in={!loading} timeout={300}>
       <Box>
+        {message.text ? (
+          <Alert severity={message.type || "info"} sx={{ mb: 1.5 }}>
+            {message.text}
+          </Alert>
+        ) : null}
         {totalResults !== null && (
           <Typography
             variant="caption"
@@ -169,7 +185,15 @@ const Dashboard = () => {
             </Typography>
           </Box>
         ) : (
-          movies.map((m) => <MovieCard key={m.tconst} movie={m} />)
+          movies.map((m) => (
+            <MovieCard
+              key={m.tconst}
+              movie={m}
+              isAuthenticated={isAuthenticated}
+              onAddClick={handleOpenAddMenu}
+              isAddBusy={Boolean(addingToListId)}
+            />
+          ))
         )}
 
         {totalPages > 1 && (
@@ -210,28 +234,51 @@ const Dashboard = () => {
   );
 
   return (
-    <DashboardLayout
-      children={{
-        filters: (
-          <FilterPanel
-            filterState={filterState}
-            setFilterState={setFilterState}
-            availableGenres={availableGenres}
-            genresOpen={genresOpen}
-            setGenresOpen={setGenresOpen}
-            onSearch={handleSearch}
-            onReset={handleReset}
-          />
-        ),
-        content: loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
-            <CircularProgress color="primary" size={36} thickness={2.5} />
-          </Box>
+    <>
+      <DashboardLayout
+        children={{
+          filters: (
+            <FilterPanel
+              filterState={filterState}
+              setFilterState={setFilterState}
+              availableGenres={availableGenres}
+              genresOpen={genresOpen}
+              setGenresOpen={setGenresOpen}
+              onSearch={handleSearch}
+              onReset={handleReset}
+            />
+          ),
+          content: loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
+              <CircularProgress color="primary" size={36} thickness={2.5} />
+            </Box>
+          ) : (
+            content
+          ),
+        }}
+      />
+      <Menu
+        anchorEl={listPickerAnchorEl}
+        open={Boolean(listPickerAnchorEl)}
+        onClose={handleCloseAddMenu}
+      >
+        {listPickerLoading ? (
+          <MenuItem disabled>Loading your lists...</MenuItem>
+        ) : myLists.length === 0 ? (
+          <MenuItem disabled>No lists yet</MenuItem>
         ) : (
-          content
-        ),
-      }}
-    />
+          myLists.map((list) => (
+            <MenuItem
+              key={list.list_id}
+              onClick={() => handleAddMovieToList(list.list_id)}
+              disabled={addingToListId === list.list_id}
+            >
+              {addingToListId === list.list_id ? "Adding..." : list.list_name}
+            </MenuItem>
+          ))
+        )}
+      </Menu>
+    </>
   );
 };
 

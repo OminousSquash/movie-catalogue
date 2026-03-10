@@ -3,6 +3,7 @@ import Dashboard from "./pages/Dashboard";
 import UserLists from "./pages/UserLists";
 import ViewLists from "./pages/ViewLists";
 import ListDetails from "./pages/ListDetails";
+import MovieDetails from "./pages/MovieDetails";
 
 function ProtectedRoute({ isAuthenticated, children }) {
   if (!isAuthenticated) {
@@ -25,6 +26,7 @@ function AppRoutes({ isAuthenticated }) {
       />
       <Route path="/view-lists" element={<ViewLists />} />
       <Route path="/lists/:listId" element={<ListDetails />} />
+      <Route path="/movies/:tconst" element={<MovieDetails />} />
     </Routes>
   );
 }
