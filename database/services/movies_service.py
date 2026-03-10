@@ -263,3 +263,45 @@ def get_movie_oscars_service(
         "count": len(rows),
         "data": rows,
     }
+
+def get_predicted_ratings_service(
+        db: MySQLConnection
+    ):
+    try:
+        cursor = db.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT
+                pr.tconst,
+                m.primary_title,
+                m.start_year,
+                pr.predicted_rating,
+                pr.prediction_uncertainty
+            FROM predicted_ratings pr
+            JOIN movies m ON pr.tconst = m.tconst
+        """)
+        return cursor.fetchall()
+    except Error:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve recent movies")
+
+
+def get_predicted_rating_by_tconst_service( # Currently not in use, just here in case its needed
+        db: MySQLConnection,
+        tconst: str
+    ):
+    try:
+        cursor = db.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT * FROM predicted_ratings WHERE tconst = %s",
+            (tconst,)
+        )
+        result = cursor.fetchone()
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No predicted rating found for tconst: {tconst}"
+            )
+        return result
+    except HTTPException:
+        raise
+    except Error:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve recent movies")
