@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   TextField,
@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { getGenres } from "../../services/movieService";
 
 const SectionLabel = ({ children }) => (
   <Typography
@@ -32,30 +31,31 @@ const SectionLabel = ({ children }) => (
   </Typography>
 );
 
-const FilterPanel = ({ onSearch }) => {
-  const [title, setTitle] = useState("");
-  const [startYear, setStartYear] = useState("");
-  const [endYear, setEndYear] = useState("");
-  const [minRating, setMinRating] = useState("");
-  const [maxRating, setMaxRating] = useState("");
-  const [minRuntime, setMinRuntime] = useState("");
-  const [maxRuntime, setMaxRuntime] = useState("");
-  const [director, setDirector] = useState("");
-  const [actors, setActors] = useState("");
-  const [writers, setWriters] = useState("");
-  const [availableGenres, setAvailableGenres] = useState([]);
-  const [selectedGenres, setSelectedGenres] = useState(new Set());
-  const [genresOpen, setGenresOpen] = useState(true);
+const FilterPanel = ({
+  filterState,
+  setFilterState,
+  availableGenres,
+  genresOpen,
+  setGenresOpen,
+  onSearch,
+  onReset,
+}) => {
+  const {
+    title, startYear, endYear,
+    minRating, maxRating,
+    minRuntime, maxRuntime,
+    director, actors, writers,
+    selectedGenres,
+  } = filterState;
 
-  useEffect(() => {
-    getGenres().then(setAvailableGenres).catch(console.error);
-  }, []);
+  const set = (field) => (e) =>
+    setFilterState((prev) => ({ ...prev, [field]: e.target.value }));
 
   const toggleGenre = (genre) => {
-    setSelectedGenres((prev) => {
-      const next = new Set(prev);
+    setFilterState((prev) => {
+      const next = new Set(prev.selectedGenres);
       next.has(genre) ? next.delete(genre) : next.add(genre);
-      return next;
+      return { ...prev, selectedGenres: next };
     });
   };
 
@@ -76,13 +76,6 @@ const FilterPanel = ({ onSearch }) => {
     });
   };
 
-  const handleReset = () => {
-    setTitle(""); setStartYear(""); setEndYear("");
-    setMinRating(""); setMaxRating(""); setMinRuntime(""); setMaxRuntime("");
-    setDirector(""); setActors(""); setWriters("");
-    setSelectedGenres(new Set());
-  };
-
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <Typography
@@ -96,7 +89,7 @@ const FilterPanel = ({ onSearch }) => {
         <TextField
           label="Title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={set("title")}
           fullWidth
           inputProps={{ style: { fontSize: "0.85rem" } }}
         />
@@ -104,66 +97,30 @@ const FilterPanel = ({ onSearch }) => {
         <Box>
           <SectionLabel>Year</SectionLabel>
           <Stack direction="row" spacing={1}>
-            <TextField
-              label="From"
-              type="number"
-              value={startYear}
-              onChange={(e) => setStartYear(e.target.value)}
-              inputProps={{ min: 1878, max: 2050 }}
-              sx={{ flex: 1 }}
-            />
-            <TextField
-              label="To"
-              type="number"
-              value={endYear}
-              onChange={(e) => setEndYear(e.target.value)}
-              inputProps={{ min: 1878, max: 2050 }}
-              sx={{ flex: 1 }}
-            />
+            <TextField label="From" type="number" value={startYear}
+              onChange={set("startYear")} inputProps={{ min: 1878, max: 2025 }} sx={{ flex: 1 }} />
+            <TextField label="To" type="number" value={endYear}
+              onChange={set("endYear")} inputProps={{ min: 1878, max: 2025 }} sx={{ flex: 1 }} />
           </Stack>
         </Box>
 
         <Box>
           <SectionLabel>Rating</SectionLabel>
           <Stack direction="row" spacing={1}>
-            <TextField
-              label="Min"
-              type="number"
-              value={minRating}
-              onChange={(e) => setMinRating(e.target.value)}
-              inputProps={{ min: 0, max: 10, step: 0.1 }}
-              sx={{ flex: 1 }}
-            />
-            <TextField
-              label="Max"
-              type="number"
-              value={maxRating}
-              onChange={(e) => setMaxRating(e.target.value)}
-              inputProps={{ min: 0, max: 10, step: 0.1 }}
-              sx={{ flex: 1 }}
-            />
+            <TextField label="Min" type="number" value={minRating}
+              onChange={set("minRating")} inputProps={{ min: 0, max: 10, step: 0.1 }} sx={{ flex: 1 }} />
+            <TextField label="Max" type="number" value={maxRating}
+              onChange={set("maxRating")} inputProps={{ min: 0, max: 10, step: 0.1 }} sx={{ flex: 1 }} />
           </Stack>
         </Box>
 
         <Box>
           <SectionLabel>Runtime (mins)</SectionLabel>
           <Stack direction="row" spacing={1}>
-            <TextField
-              label="Min"
-              type="number"
-              value={minRuntime}
-              onChange={(e) => setMinRuntime(e.target.value)}
-              inputProps={{ min: 1, max: 600 }}
-              sx={{ flex: 1 }}
-            />
-            <TextField
-              label="Max"
-              type="number"
-              value={maxRuntime}
-              onChange={(e) => setMaxRuntime(e.target.value)}
-              inputProps={{ min: 1, max: 600 }}
-              sx={{ flex: 1 }}
-            />
+            <TextField label="Min" type="number" value={minRuntime}
+              onChange={set("minRuntime")} inputProps={{ min: 1, max: 600 }} sx={{ flex: 1 }} />
+            <TextField label="Max" type="number" value={maxRuntime}
+              onChange={set("maxRuntime")} inputProps={{ min: 1, max: 600 }} sx={{ flex: 1 }} />
           </Stack>
         </Box>
 
@@ -172,24 +129,9 @@ const FilterPanel = ({ onSearch }) => {
         <Box>
           <SectionLabel>People</SectionLabel>
           <Stack spacing={1}>
-            <TextField
-              label="Director"
-              value={director}
-              onChange={(e) => setDirector(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Actor"
-              value={actors}
-              onChange={(e) => setActors(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Writer"
-              value={writers}
-              onChange={(e) => setWriters(e.target.value)}
-              fullWidth
-            />
+            <TextField label="Director" value={director} onChange={set("director")} fullWidth />
+            <TextField label="Actor" value={actors} onChange={set("actors")} fullWidth />
+            <TextField label="Writer" value={writers} onChange={set("writers")} fullWidth />
           </Stack>
         </Box>
 
@@ -207,15 +149,12 @@ const FilterPanel = ({ onSearch }) => {
           </Box>
           <Collapse in={genresOpen}>
             {availableGenres.length === 0 ? (
-              <Typography variant="caption" color="text.secondary">
-                Loading genres…
-              </Typography>
+              <Typography variant="caption" color="text.secondary">Loading genres…</Typography>
             ) : (
               <Box
                 sx={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
-                  gap: 0,
                   maxHeight: 260,
                   overflowY: "auto",
                   "&::-webkit-scrollbar": { width: 3 },
@@ -250,7 +189,7 @@ const FilterPanel = ({ onSearch }) => {
         <Button type="submit" variant="contained" color="primary" fullWidth>
           Search
         </Button>
-        <Button type="button" variant="outlined" color="primary" onClick={handleReset} sx={{ flexShrink: 0 }}>
+        <Button type="button" variant="outlined" color="primary" onClick={onReset} sx={{ flexShrink: 0 }}>
           Reset
         </Button>
       </Stack>

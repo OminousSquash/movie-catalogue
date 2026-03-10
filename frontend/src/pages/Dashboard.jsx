@@ -12,15 +12,37 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import FilterPanel from "../components/dashboard/FilterPanel";
 import MovieCard from "../components/dashboard/MovieCard";
-import { searchMovies, getRecentMovies } from "../services/movieService";
+import { searchMovies, getRecentMovies, getGenres } from "../services/movieService";
+
+const INITIAL_FILTERS = {
+  title: "",
+  startYear: "",
+  endYear: "",
+  minRating: "",
+  maxRating: "",
+  minRuntime: "",
+  maxRuntime: "",
+  director: "",
+  actors: "",
+  writers: "",
+  selectedGenres: new Set(),
+};
 
 const Dashboard = () => {
+  const [filterState, setFilterState] = useState(INITIAL_FILTERS);
+  const [availableGenres, setAvailableGenres] = useState([]);
+  const [genresOpen, setGenresOpen] = useState(true);
+
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(null);
   const lastFilters = useRef({});
+  
+  useEffect(() => {
+    getGenres().then(setAvailableGenres).catch(console.error);
+  }, []);
 
   useEffect(() => {
     fetchRecent();
@@ -54,6 +76,10 @@ const Dashboard = () => {
       setTotalResults(null);
     }
     setLoading(false);
+  };
+
+  const handleReset = () => {
+    setFilterState(INITIAL_FILTERS);
   };
 
   const handlePrev = () => {
@@ -116,11 +142,9 @@ const Dashboard = () => {
             >
               Prev
             </Button>
-
             <Typography variant="body2" color="text.secondary" sx={{ minWidth: 80, textAlign: "center" }}>
               {currentPage} / {totalPages}
             </Typography>
-
             <Button
               variant="outlined"
               color="primary"
@@ -140,7 +164,17 @@ const Dashboard = () => {
   return (
     <DashboardLayout
       children={{
-        filters: <FilterPanel onSearch={handleSearch} />,
+        filters: (
+          <FilterPanel
+            filterState={filterState}
+            setFilterState={setFilterState}
+            availableGenres={availableGenres}
+            genresOpen={genresOpen}
+            setGenresOpen={setGenresOpen}
+            onSearch={handleSearch}
+            onReset={handleReset}
+          />
+        ),
         content: loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
             <CircularProgress color="primary" size={36} thickness={2.5} />
