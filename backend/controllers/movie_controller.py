@@ -5,6 +5,8 @@ from database.services.movies_service import (
     get_genres_service,
     get_oscar_movies_service,
     get_movie_oscars_service,
+    get_predicted_ratings_service,
+    get_predicted_rating_by_tconst_service
 )
 from database.database import get_db
 
@@ -28,8 +30,10 @@ def get_genres(db=Depends(get_db)):
     return get_genres_service(db=db)
 
 @router.get('/recent')
-def get_recent_movies():
-    return []
+def get_recent_movies(
+    db = Depends(get_db)
+):
+    return get_predicted_ratings_service(db=db)
 
 @router.get("/oscar_movies")
 def get_oscar_movies(

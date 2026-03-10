@@ -154,6 +154,16 @@ CREATE TABLE IF NOT EXISTS movie_tags (
         ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS predicted_ratings (
+    tconst VARCHAR(10) NOT NULL,
+    predicted_rating DECIMAL(3, 1),
+    prediction_uncertainty DECIMAL(4, 2),
+    PRIMARY KEY (tconst),
+    FOREIGN KEY (tconst)
+        REFERENCES movies(tconst)
+        ON DELETE CASCADE
+);
+
 LOAD DATA INFILE '/datasets/IMDb/filtered/movies.tsv'
 INTO TABLE movies
 FIELDS TERMINATED BY '\t'
@@ -270,5 +280,13 @@ SET recipient_nconst = CASE
     WHEN TRIM(REPLACE(@raw_recipient_nconst, '\r', '')) IN ('\\N', '') THEN NULL
     ELSE TRIM(REPLACE(@raw_recipient_nconst, '\r', ''))
 END;
+
+LOAD DATA INFILE '/datasets/IMDb/filtered/recent_predicted_movies.tsv'
+IGNORE
+INTO TABLE predicted_ratings
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(tconst, predicted_rating, prediction_uncertainty);
 
 SHOW WARNINGS;
