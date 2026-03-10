@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import UserLists from "./pages/UserLists";
 import ViewLists from "./pages/ViewLists";
+import ViewerRatingAnalysis from "./pages/ViewerRatingAnalysisPage";
 
 function ProtectedRoute({ isAuthenticated, children }) {
   if (!isAuthenticated) {
@@ -23,6 +24,7 @@ function AppRoutes({ isAuthenticated }) {
         }
       />
       <Route path="/view-lists" element={<ViewLists />} />
+      <Route path="/viewer-rating-analysis" element={<ViewerRatingAnalysis />} />
     </Routes>
   );
 }
