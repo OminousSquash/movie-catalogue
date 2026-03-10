@@ -48,47 +48,36 @@ export default function PredictedRatings() {
                 p: 2,
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
+                gap: 3,
                 border: "1px solid rgba(232,201,126,0.15)"
               }}
             >
 
-              {/* Movie Info */}
-              <Box>
-                <Typography variant="h6">
-                  {movie.primary_title}
-                </Typography>
+              <Typography variant="h6" sx={{ minWidth: 250 }}>
+                {movie.primary_title} ({movie.start_year})
+              </Typography>
 
-                <Typography variant="body2" color="text.secondary">
-                  Year: {movie.start_year}
-                </Typography>
-              </Box>
 
-              {/* Prediction Display */}
-              <Box sx={{ minWidth: 200 }}>
-                {prediction ? (
-                  <>
-                    <Typography>
-                      ⭐ Predicted Rating: {prediction.rating}
-                    </Typography>
-
-                    <Typography variant="body2">
-                      Uncertainty: ±{prediction.uncertainty}
-                    </Typography>
-                  </>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    No prediction yet
-                  </Typography>
-                )}
-              </Box>
               <Button
                 variant="contained"
+                color="primary"
                 disabled={prediction}
                 onClick={() => handlePredict(movie)}
               >
                 {prediction ? "Predicted" : "Predict"}
               </Button>
+
+              {prediction && (
+                <>
+                  <Typography>
+                    ⭐ {prediction.rating}
+                  </Typography>
+
+                  <Typography color="text.secondary">
+                    ±{prediction.uncertainty}
+                  </Typography>
+                </>
+              )}
 
             </Paper>
           );
