@@ -3,7 +3,7 @@ import { Tabs, Tab, Box, Typography, Grid, Paper, CircularProgress, MenuItem, Fo
 import { ResponsivePie } from "@nivo/pie";
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveHeatMap } from "@nivo/heatmap";
-import axios from "axios";
+import api from "../../services/api";
 
 const tabLabels = [
   "Viewer Rating Patterns",
@@ -27,9 +27,9 @@ const ViewerRatingAnalysis = () => {
       try {
         setLoading(true);
         const [harshRes, lowRes, matrixRes] = await Promise.all([
-          axios.get("/rating_analysis/viewer_harshness"),
-          axios.get("/rating_analysis/low_rating_genres"),
-          axios.get("/rating_analysis/genre_correlation_matrix"),
+          api.get("/rating_analysis/viewer_harshness"),
+          api.get("/rating_analysis/low_rating_genres"),
+          api.get("/rating_analysis/genre_correlation_matrix"),
         ]);
 
         setViewerHarshness(harshRes.data);
@@ -58,7 +58,7 @@ const ViewerRatingAnalysis = () => {
     if (!conditional.genreA || !conditional.genreB) return;
     try {
       setConditionalLoading(true);
-      const res = await axios.get("/rating_analysis/conditional_low_rating", {
+      const res = await api.get("/rating_analysis/conditional_low_rating", {
         params: { genre_a: conditional.genreA, genre_b: conditional.genreB }
       });
       setConditional({ ...conditional, data: res.data });
@@ -112,7 +112,7 @@ const ViewerRatingAnalysis = () => {
         {tabIndex === 1 && (
           <Paper sx={{ height: 500, p: 2 }}>
             <ResponsiveBar
-              data={lowRatingGenres}
+              data={Array.isArray(lowRatingGenres) ? lowRatingGenres : []}
               keys={["num_users_with_low_preference"]}
               indexBy="genre"
               margin={{ top: 50, right: 50, bottom: 150, left: 60 }}
@@ -129,8 +129,8 @@ const ViewerRatingAnalysis = () => {
         {tabIndex === 2 && (
           <Paper sx={{ height: 600, p: 2 }}>
             <ResponsiveHeatMap
-              data={genreMatrix}
-              keys={genres}
+              data={Array.isArray(genreMatrix) ? genreMatrix : []}
+              keys={Array.isArray(genres) ? genres : []}
               indexBy="genre"
               margin={{ top: 100, right: 60, bottom: 100, left: 100 }}
               forceSquare={true}
