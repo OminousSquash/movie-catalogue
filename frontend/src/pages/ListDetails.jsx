@@ -3,17 +3,14 @@ import {
   Alert,
   CircularProgress,
   Container,
+  Divider,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { formatApiErrorDetail, getUserListById } from "../services/userListService";
+import MovieCard from "../components/dashboard/MovieCard";
+import "./ListDetails.css";
 
 export default function ListDetails() {
   const { listId } = useParams();
@@ -38,16 +35,16 @@ export default function ListDetails() {
     loadList();
   }, [listId]);
 
-  const movieRows = useMemo(() => {
+  const groupedMovies = useMemo(() => {
     if (!listData?.movies || typeof listData.movies !== "object") {
       return [];
     }
-    return Object.entries(listData.movies).flatMap(([genre, titles]) =>
-      (titles || []).map((movieTitle) => ({
+    return Object.entries(listData.movies)
+      .map(([genre, titles]) => ({
         genre,
-        movie_title: movieTitle,
+        titles: Array.isArray(titles) ? titles : [],
       }))
-    );
+      .filter((group) => group.titles.length > 0);
   }, [listData]);
 
   return (
@@ -67,30 +64,34 @@ export default function ListDetails() {
             </Typography>
           ) : null}
 
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Genre</TableCell>
-                  <TableCell>Movie Title</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {movieRows.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={2}>No movies in this list.</TableCell>
-                  </TableRow>
-                ) : (
-                  movieRows.map((row, index) => (
-                    <TableRow key={`${row.genre}-${row.movie_title}-${index}`}>
-                      <TableCell>{row.genre}</TableCell>
-                      <TableCell>{row.movie_title}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          {groupedMovies.length === 0 ? (
+            <Paper sx={{ p: 2 }}>
+              <Typography>No movies in this list.</Typography>
+            </Paper>
+          ) : (
+            groupedMovies.map((group) => (
+              <section key={group.genre} className="list-details-genre-section">
+                <Typography variant="h5" className="list-details-genre-title">
+                  {group.genre}
+                </Typography>
+                <Divider sx={{ mb: 1.5 }} />
+                <div className="list-details-genre-row">
+                  {group.titles.map((movie, index) => (
+                    <div key={`${group.genre}-${movie.tconst ?? movie.primary_title ?? index}`} className="list-details-movie-card">
+                      <MovieCard
+                        movie={
+                          typeof movie === "string"
+                            ? { primary_title: movie }
+                            : movie
+                        }
+                        compact
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))
+          )}
         </>
       )}
     </Container>

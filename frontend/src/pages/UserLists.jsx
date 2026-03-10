@@ -122,7 +122,7 @@ export default function UserLists() {
       {loading ? (
         <CircularProgress />
       ) : (
-        <Grid container spacing={2}>
+        <Grid container spacing={2} alignItems={"stretch"}>
           {lists.map((list) => (
             <Grid item xs={12} sm={6} md={3} key={list.list_id}>
               <MovieListCard
