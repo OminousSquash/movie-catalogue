@@ -123,7 +123,7 @@ def get_movies_service(
     role_conditions = []
     if contributor_filters.actors:
         actors_placeholder = " OR ".join(["c.primary_name LIKE %s"] * len(contributor_filters.actors))
-        role_conditions.append(f"(mc.role LIKE '%actor%' AND ({actors_placeholder}))")
+        role_conditions.append(f"((mc.role LIKE '%actor%' OR mc.role LIKE '%actress%') AND ({actors_placeholder}))")
         params.extend(f"%{a}%" for a in contributor_filters.actors)
 
     if contributor_filters.directors:

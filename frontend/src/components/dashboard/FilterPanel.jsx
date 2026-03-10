@@ -31,6 +31,12 @@ const SectionLabel = ({ children }) => (
   </Typography>
 );
 
+const parseCommaSeparated = (value) =>
+  String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
 const FilterPanel = ({
   filterState,
   setFilterState,
@@ -61,6 +67,10 @@ const FilterPanel = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const directors = parseCommaSeparated(director);
+    const actorNames = parseCommaSeparated(actors);
+    const writerNames = parseCommaSeparated(writers);
+
     onSearch({
       title,
       start_year: startYear || undefined,
@@ -69,10 +79,10 @@ const FilterPanel = ({
       max_rating: maxRating || undefined,
       min_runtime: minRuntime || undefined,
       max_runtime: maxRuntime || undefined,
-      directors: director ? [director] : [],
-      actors: actors ? [actors] : [],
+      directors,
+      actors: actorNames,
       genres: [...selectedGenres],
-      writers: writers ? [writers] : [],
+      writers: writerNames,
     });
   };
 

@@ -11,9 +11,37 @@ import {
   Container,
   Divider,
   Stack,
-  Typography,
+  Typography
 } from "@mui/material";
 import { getMovieDetails } from "../services/movieService";
+import { Link } from "react-router-dom";
+
+function ContributorLinks({ people = [] }) {
+  if (!people.length) {
+    return <Box component="span" sx={{ color: "text.secondary" }}>N/A</Box>;
+  }
+
+  return (
+    <>
+      {people.map((person, index) => (
+        <Box component="span" key={`${person.nconst}-${index}`}>
+          <Box
+            component={Link}
+            to={`/contributors/${person.nconst}`}
+            sx={{
+              color: "primary.main",
+              textDecoration: "none",
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            {person.primary_name}
+          </Box>
+          {index < people.length - 1 ? ", " : ""}
+        </Box>
+      ))}
+    </>
+  );
+}
 
 export default function MovieDetails() {
   const { tconst } = useParams();
@@ -106,13 +134,16 @@ export default function MovieDetails() {
           <Typography variant="h6" gutterBottom>Contributors</Typography>
           <Divider sx={{ mb: 1.5 }} />
           <Typography sx={{ mb: 1 }}>
-            Directors: {(contributors.directors || []).map((c) => c.primary_name).join(", ") || "N/A"}
+            Directors:{" "}
+            <ContributorLinks people={contributors.directors || []} />
           </Typography>
           <Typography sx={{ mb: 1 }}>
-            Writers: {(contributors.writers || []).map((c) => c.primary_name).join(", ") || "N/A"}
+            Actors:{" "}
+            <ContributorLinks people={contributors.actors || []} />
           </Typography>
-          <Typography>
-            Actors: {(contributors.actors || []).map((c) => c.primary_name).join(", ") || "N/A"}
+          <Typography sx={{ mb: 1 }}>
+            Writers:{" "}
+            <ContributorLinks people={contributors.writers || []} />
           </Typography>
         </CardContent>
       </Card>

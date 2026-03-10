@@ -3,18 +3,19 @@ from fastapi import HTTPException, status
 
 def get_contributor_info_service(
     db: MySQLConnection,
-    contributor: str
+    nconst: str
 ):
     cursor = db.cursor(dictionary=True)
 
     contributor_count_query = """
     SELECT COUNT(DISTINCT nconst) AS contributor_count
     FROM contributors
-    WHERE primary_name = %s
+    WHERE nconst = %s
     """
 
     stats_query = """
     SELECT
+        c.nconst as nconst,
         c.primary_name as name,
         c.birth_year as birth_year,
         c.death_year as death_year,
@@ -26,7 +27,7 @@ def get_contributor_info_service(
     FROM movies m
     JOIN movie_contributors mc ON mc.tconst = m.tconst
     JOIN contributors c ON c.nconst = mc.nconst
-    WHERE c.primary_name = %s
+    WHERE c.nconst = %s
     GROUP BY c.nconst
     """
 
@@ -35,11 +36,11 @@ def get_contributor_info_service(
     FROM movies m
     JOIN popular_works pw ON pw.tconst = m.tconst
     JOIN contributors c ON c.nconst = pw.nconst
-    WHERE c.primary_name = %s
+    WHERE c.nconst= %s
     """
 
     try:
-        cursor.execute(contributor_count_query, (contributor,))
+        cursor.execute(contributor_count_query, (nconst,))
         contributor_count = cursor.fetchone()["contributor_count"]
 
         if contributor_count == 0:
@@ -51,10 +52,10 @@ def get_contributor_info_service(
         if contributor_count > 1:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Multiple contributors found for the provided name"
+                detail="Multiple contributors found for the provided id"
             )
 
-        cursor.execute(stats_query, (contributor,))
+        cursor.execute(stats_query, (nconst,))
         contributor_info = cursor.fetchone()
 
         if not contributor_info:
@@ -63,8 +64,10 @@ def get_contributor_info_service(
                 detail="Contributor not found"
             )
 
-        cursor.execute(popular_movies_query, (contributor,))
+        cursor.execute(popular_movies_query, (nconst,))
         popular_movies = cursor.fetchall()
+        contributor_info["popular_works"] = [movie["primary_title"] for movie in popular_movies]
+        return contributor_info 
     except HTTPException:
         raise
     except Error:
@@ -72,7 +75,3 @@ def get_contributor_info_service(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve contributor information"
         )
-
-    actor_info["popular_works"] = [movie["primary_title"] for movie in popular_movies]
-
-    return actor_info
