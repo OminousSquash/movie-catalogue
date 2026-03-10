@@ -36,6 +36,11 @@ export const getMyLists = async () => {
   return response.data;
 };
 
+export const getUserListById = async (listId) => {
+  const response = await api.get(`/user_list/${listId}`);
+  return response.data;
+};
+
 export const createList = async ({ list_name, list_note }) => {
   const response = await api.post(
     "/user_list/",
@@ -67,5 +72,14 @@ export const deleteList = async (listId) => {
   const response = await api.delete(`/user_list/${listId}`, {
     headers: getAuthHeaders(),
   });
+  return response.data;
+};
+
+export const addMovieToList = async (listId, movieId) => {
+  const response = await api.post(
+    `/user_list/add_movie/${listId}`,
+    { movie_id: movieId },
+    { headers: getAuthHeaders() }
+  );
   return response.data;
 };

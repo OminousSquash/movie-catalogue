@@ -36,3 +36,8 @@ export const getGenres = async () => {
   const response = await api.get("/movies/genres");
   return Array.isArray(response.data) ? response.data : [];
 };
+
+export const getMovieDetails = async (tconst) => {
+  const response = await api.get(`/movies/${tconst}`);
+  return response.data;
+};

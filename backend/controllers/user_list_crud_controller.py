@@ -6,7 +6,7 @@ from backend.DTOs.update_list_note_dto import UpdateListNoteDTO
 from backend.DTOs.add_movie_to_list_dto import AddMovieToListDTO
 from database.services.user_list_service import create_user_list_service
 from database.services.user_list_service import delete_user_list_service
-from database.services.user_list_service import get_user_list_service
+from database.services.user_list_service import get_user_list_movies_service
 from database.services.user_list_service import update_list_note_service
 from database.services.user_list_service import update_list_name_service
 from database.services.user_list_service import add_movie_to_list_service
@@ -36,7 +36,7 @@ def get_user_list(
     list_id: int,
     db = Depends(get_db)
 ):
-    return get_user_list_service(user_list_id=list_id, db=db)
+    return get_user_list_movies_service(user_list_id=list_id, db=db)
 
 @router.post("/")
 def create_user_list(

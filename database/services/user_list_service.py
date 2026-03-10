@@ -4,6 +4,23 @@ from backend.DTOs.create_user_list_dto import CreateUserListDTO
 from backend.DTOs.add_movie_to_list_dto import AddMovieToListDTO
 from backend.DTOs.update_list_name_dto import UpdateListNameDTO
 from backend.DTOs.update_list_note_dto import UpdateListNoteDTO
+from functools import lru_cache
+from pathlib import Path
+import os
+
+POSTER_BASE_URL = os.getenv("POSTER_BASE_URL", "http://localhost:8000/posters")
+POSTERS_DIR = Path(__file__).resolve().parents[2] / "datasets" / "movie-posters"
+
+
+@lru_cache(maxsize=1)
+def _get_poster_index():
+    poster_index = {}
+    if not POSTERS_DIR.exists():
+        return poster_index
+    for poster_file in POSTERS_DIR.iterdir():
+        if poster_file.is_file() and poster_file.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}:
+            poster_index[poster_file.stem] = poster_file.name
+    return poster_index
 
 def get_public_user_lists_service(db: MySQLConnection):
     try:
@@ -273,7 +290,7 @@ def delete_user_list_service(
             detail="Failed to delete list"
         )
 
-def get_user_list_service(
+def get_user_list_movies_service(
     user_list_id: int,
     db: MySQLConnection
 ):
@@ -293,7 +310,11 @@ def get_user_list_service(
         get_list_movies_query = """
             SELECT
                 g.genre,
-                m.primary_title
+                m.tconst,
+                m.primary_title,
+                m.start_year,
+                m.average_rating,
+                m.runtime_minutes
             FROM app_user_lists ul
             JOIN app_user_list_movies ulm ON ul.list_id = ulm.list_id
             JOIN movies m ON ulm.tconst = m.tconst
@@ -304,13 +325,24 @@ def get_user_list_service(
         """
         cursor.execute(get_list_movies_query, (user_list_id,))
         list_movies = cursor.fetchall()
+        poster_index = _get_poster_index()
         grouped_result = {}
         for movie in list_movies:
             genre = movie["genre"]
-            movie_name = movie["primary_title"]
             if genre not in grouped_result:
                 grouped_result[genre] = []
-            grouped_result[genre].append(movie_name)
+            poster_name = poster_index.get(movie.get("tconst", ""))
+            movie["poster"] = f"{POSTER_BASE_URL}/{poster_name}" if poster_name else None
+            grouped_result[genre].append(
+                {
+                    "tconst": movie["tconst"],
+                    "primary_title": movie["primary_title"],
+                    "start_year": movie["start_year"],
+                    "average_rating": movie["average_rating"],
+                    "runtime_minutes": movie["runtime_minutes"],
+                    "poster": movie["poster"],
+                }
+            )
         
         result["movies"] = grouped_result
         return result

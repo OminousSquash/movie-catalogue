@@ -123,7 +123,7 @@ def get_movies_service(
     role_conditions = []
     if contributor_filters.actors:
         actors_placeholder = " OR ".join(["c.primary_name LIKE %s"] * len(contributor_filters.actors))
-        role_conditions.append(f"(mc.role LIKE '%actor%' AND ({actors_placeholder}))")
+        role_conditions.append(f"((mc.role LIKE '%actor%' OR mc.role LIKE '%actress%') AND ({actors_placeholder}))")
         params.extend(f"%{a}%" for a in contributor_filters.actors)
 
     if contributor_filters.directors:
@@ -262,6 +262,151 @@ def get_movie_oscars_service(
         "tconst": tconst,
         "count": len(rows),
         "data": rows,
+    }
+
+
+def get_movie_details_service(
+    db: MySQLConnection,
+    tconst: str,
+):
+    cursor = db.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            """
+            SELECT
+                m.tconst,
+                m.primary_title,
+                m.is_adult,
+                m.average_rating,
+                m.num_votes,
+                m.start_year,
+                m.runtime_minutes
+            FROM movies m
+            WHERE m.tconst = %s
+            """,
+            (tconst,),
+        )
+        movie = cursor.fetchone()
+        if not movie:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Movie not found",
+            )
+
+        cursor.execute(
+            """
+            SELECT g.genre
+            FROM movie_genres mg
+            JOIN genres g ON g.genre_id = mg.genre_id
+            WHERE mg.tconst = %s
+            ORDER BY g.genre ASC
+            """,
+            (tconst,),
+        )
+        genres = [row["genre"] for row in cursor.fetchall()]
+
+        cursor.execute(
+            """
+            SELECT
+                t.tag_id,
+                t.tag_name
+            FROM movie_tags mt
+            JOIN tags t ON t.tag_id = mt.tag_id
+            WHERE mt.tconst = %s
+            ORDER BY t.tag_name ASC
+            """,
+            (tconst,),
+        )
+        tags = cursor.fetchall()
+
+        cursor.execute(
+            """
+            SELECT
+                c.nconst,
+                c.primary_name,
+                mc.role
+            FROM movie_contributors mc
+            JOIN contributors c ON c.nconst = mc.nconst
+            WHERE mc.tconst = %s
+            ORDER BY c.primary_name ASC
+            """,
+            (tconst,),
+        )
+        raw_contributors = cursor.fetchall()
+
+        contributors = {
+            "actors": [],
+            "directors": [],
+            "writers": [],
+            "other": [],
+        }
+        for contributor in raw_contributors:
+            role_lower = (contributor.get("role") or "").lower()
+            if "actor" in role_lower or "actress" in role_lower:
+                contributors["actors"].append(contributor)
+            elif "director" in role_lower:
+                contributors["directors"].append(contributor)
+            elif "writer" in role_lower:
+                contributors["writers"].append(contributor)
+            else:
+                contributors["other"].append(contributor)
+
+        cursor.execute(
+            """
+            SELECT
+                id,
+                award_year,
+                award_name,
+                award_status,
+                recipient_name,
+                recipient_nconst
+            FROM oscar_movies
+            WHERE tconst = %s
+            ORDER BY award_year DESC, award_status DESC, award_name ASC, recipient_name ASC
+            """,
+            (tconst,),
+        )
+        oscars = cursor.fetchall()
+        oscar_summary = {
+            "wins": sum(1 for row in oscars if row.get("award_status") == "Winner"),
+            "nominations": sum(1 for row in oscars if row.get("award_status") == "Nominee"),
+            "total": len(oscars),
+        }
+
+        cursor.execute(
+            """
+            SELECT
+                predicted_rating,
+                prediction_uncertainty
+            FROM predicted_ratings
+            WHERE tconst = %s
+            """,
+            (tconst,),
+        )
+        predicted_rating = cursor.fetchone()
+
+    except HTTPException:
+        raise
+    except Error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve movie details",
+        )
+
+    poster_index = _get_poster_index()
+    poster_name = poster_index.get(movie.get("tconst", ""))
+    movie["poster"] = f"{POSTER_BASE_URL}/{poster_name}" if poster_name else None
+
+    return {
+        "movie": movie,
+        "genres": genres,
+        "tags": tags,
+        "contributors": contributors,
+        "oscars": {
+            "summary": oscar_summary,
+            "data": oscars,
+        },
+        "predicted_rating": predicted_rating,
     }
 
 def get_predicted_ratings_service(
