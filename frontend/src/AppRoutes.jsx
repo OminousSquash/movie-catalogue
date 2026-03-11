@@ -4,6 +4,9 @@ import UserLists from "./pages/UserLists";
 import ViewLists from "./pages/ViewLists";
 import ViewerRatingAnalysis from "./pages/ViewerRatingAnalysisPage";
 import PredictedRatings from "./pages/PredictedRatings";
+import ListDetails from "./pages/ListDetails";
+import MovieDetails from "./pages/MovieDetails";
+import ContributorDetails from "./pages/ContributorDetails";
 
 function ProtectedRoute({ isAuthenticated, children }) {
   if (!isAuthenticated) {
@@ -15,7 +18,7 @@ function ProtectedRoute({ isAuthenticated, children }) {
 function AppRoutes({ isAuthenticated }) {
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/" element={<Dashboard isAuthenticated={isAuthenticated} />} />
       <Route
         path="/user-lists"
         element={
@@ -27,6 +30,9 @@ function AppRoutes({ isAuthenticated }) {
       <Route path="/view-lists" element={<ViewLists />} />
       <Route path="/viewer-rating-analysis" element={<ViewerRatingAnalysis />} />
       <Route path="/predicted-ratings" element={<PredictedRatings />} />
+      <Route path="/lists/:listId" element={<ListDetails />} />
+      <Route path="/movies/:tconst" element={<MovieDetails />} />
+      <Route path="/contributors/:nconst" element={<ContributorDetails />} />
     </Routes>
   );
 }

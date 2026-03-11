@@ -13,10 +13,6 @@ export const searchMovies = async (filters, page = 1) => {
   if (filters.min_votes !== undefined) body.min_votes = Number(filters.min_votes);
   if (filters.max_votes !== undefined) body.max_votes = Number(filters.max_votes);
   if (filters.tags?.length) body.tags = filters.tags;
-  if (filters.has_oscar !== undefined) body.has_oscar = filters.has_oscar;
-  if (filters.oscar_year !== undefined) body.oscar_year = Number(filters.oscar_year);
-  if (filters.oscar_status) body.oscar_status = filters.oscar_status;
-  if (filters.oscar_awards?.length) body.oscar_awards = filters.oscar_awards;
 
   if (filters.actors?.length) body.actors = filters.actors;
   if (filters.directors?.length) body.directors = filters.directors;
@@ -35,4 +31,9 @@ export const getRecentMovies = async () => {
 export const getGenres = async () => {
   const response = await api.get("/movies/genres");
   return Array.isArray(response.data) ? response.data : [];
+};
+
+export const getMovieDetails = async (tconst) => {
+  const response = await api.get(`/movies/${tconst}`);
+  return response.data;
 };

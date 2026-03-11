@@ -91,7 +91,7 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
               <MenuIcon />
             </IconButton>
             <Menu
-              id="menu-appbar"
+              id="menu-appbar-nav"
               anchorEl={anchorElNav}
               anchorOrigin={{
                 vertical: 'bottom',

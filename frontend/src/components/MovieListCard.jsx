@@ -21,6 +21,7 @@ export default function MovieListCard({
   list,
   onEdit,
   onDelete,
+  onOpenList,
   editable = false,
 }) {
   const candidates = useMemo(() => resolvePosterCandidates(list.cover_tconst), [list.cover_tconst]);
@@ -28,11 +29,11 @@ export default function MovieListCard({
   const noteText = list.list_note || "No note provided";
 
   return (
-      <Card className="movie-list-card">
+      <Card className="movie-list-card" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
         <div className="movie-list-card-media-wrap">
         <CardMedia
           component="img"
-          height="170"
+          sx={{ width: "100%", height: 170, objectFit: "cover" }}
           image={candidates[imageIndex]}
           alt={list.list_name}
           onError={() => {
@@ -45,10 +46,20 @@ export default function MovieListCard({
           </Typography>
         </div>
         </div>
-        <CardContent>
-          <Typography variant="h6" className="movie-list-card-title">
-            {list.list_name}
-          </Typography>
+        <CardContent sx = {{ flexGrow: 1}}>
+          {onOpenList ? (
+            <Button
+              variant="text"
+              className="movie-list-card-name-button"
+              onClick={() => onOpenList(list.list_id)}
+            >
+              {list.list_name}
+            </Button>
+          ) : (
+            <Typography variant="h6" className="movie-list-card-title">
+              {list.list_name}
+            </Typography>
+          )}
           <Typography variant="body2" color="text.secondary">
             Creator: {list.creator_username}
           </Typography>

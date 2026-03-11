@@ -68,47 +68,6 @@ class ImdbScraper:
             print(f"Failed to parse rating: {e}")
             return None
         
-    def get_awards(self, imdb_id):
-        url = f"https://www.imdb.com/title/{imdb_id}/awards/"
-        
-        try:
-            response = self.session.get(url)
-            if response.status_code != 200:
-                return None
-
-            pattern = r'"categories":\s*(\[.*?\])\s*\}\s*,\s*"requestContext"'
-            match = re.search(pattern, response.text, re.DOTALL)
-
-            if match:
-                awards_data = json.loads(match.group(1))
-                parsed_awards = []
-
-                for category in awards_data:
-                    event_name = category.get('name')
-                    if event_name != 'Academy Awards, USA':
-                        continue
-                    items = category.get('section', {}).get('items', [])
-                    for item in items:
-                        award_list = item.get('listContent', [])
-                        award_name = award_list[0].get('text') if award_list else "Unknown Award"
-                        sub_list = item.get('subListContent', [])
-                        recipients = [r.get('text') for r in sub_list if r.get('text')] # Currently, the recipient will be empty if the movie itself receives an award and not a person
-
-                        parsed_awards.append({
-                            "event": event_name,
-                            "type": f"{item.get('rowTitle', '')} {item.get('rowSubTitle', '')}".strip(),
-                            "award": award_name,
-                            "all_recipients": recipients
-                        })
-                return parsed_awards
-            else:
-                print("Could not find awards data in page source.")
-                return None
-
-        except Exception as e:
-            print(f"Failed to parse awards: {e}")
-            return None
-
     def download_filtered_movie_posters(
         self,
         movies_tsv_path: str = "datasets/IMDb/filtered/movies.tsv",
@@ -205,12 +164,6 @@ class ImdbScraper:
 
         return nconst_to_name, name_to_nconsts
 
-    def _extract_oscar_year_status(self, type_text: str) -> Tuple[Optional[int], Optional[str]]:
-        match = re.match(r"^\s*(\d{4})\s+(Winner|Nominee)\b", type_text or "")
-        if not match:
-            return None, None
-        return int(match.group(1)), match.group(2)
-
     def _resolve_recipient_nconst(
         self,
         recipient_name: str,
@@ -221,93 +174,6 @@ class ImdbScraper:
             return None
 
         return sorted(candidates)[0]
-
-    def export_oscar_movies_csv(
-        self,
-        movies_tsv_path: str = "../../datasets/IMDb/filtered/movies.tsv",
-        contributors_tsv_path: str = "../../datasets/IMDb/filtered/contributors.tsv",
-        output_csv_path: str = "../../datasets/IMDb/filtered/oscar_movies.csv",
-        test_tconst: Optional[str] = None,
-    ):
-        output_dir = os.path.dirname(output_csv_path)
-        if output_dir:
-            os.makedirs(output_dir, exist_ok=True)
-
-        nconst_to_name, name_to_nconsts = self._load_contributor_maps(contributors_tsv_path)
-
-        with open(movies_tsv_path, "r", encoding="utf-8", newline="") as f:
-            reader = csv.DictReader(f, delimiter="\t")
-            imdb_ids = [row["tconst"] for row in reader if row.get("tconst")]
-        if test_tconst:
-            imdb_ids = [test_tconst]
-
-        output_rows: List[Dict[str, str]] = []
-
-        for imdb_id in imdb_ids:
-            awards = self.get_awards(imdb_id)
-            if not awards:
-                continue
-
-            for award in awards:
-                year, status = self._extract_oscar_year_status(award.get("type", ""))
-                if year is None or status is None:
-                    continue
-
-                award_name = (award.get("award") or "").strip()
-                recipients = award.get("all_recipients") or []
-
-                # If no people are listed, still write one row for the movie-level nomination/win.
-                if not recipients:
-                    output_rows.append({
-                        "tconst": imdb_id,
-                        "year": str(year),
-                        "award_name": award_name,
-                        "status": status,
-                        "recipient_name": "\\N",
-                        "recipient_nconst": "\\N",
-                    })
-                    continue
-
-                for recipient in recipients:
-                    recipient_name = (recipient or "").strip()
-                    if not recipient_name:
-                        continue
-
-                    recipient_nconst = self._resolve_recipient_nconst(
-                        recipient_name=recipient_name,
-                        name_to_nconsts=name_to_nconsts,
-                    )
-
-                    if recipient_nconst and recipient_nconst not in nconst_to_name:
-                        recipient_nconst = None
-
-                    output_rows.append({
-                        "tconst": imdb_id,
-                        "year": str(year),
-                        "award_name": award_name,
-                        "status": status,
-                        "recipient_name": recipient_name,
-                        "recipient_nconst": recipient_nconst or "\\N",
-                    })
-
-        with open(output_csv_path, "w", encoding="utf-8", newline="") as f:
-            fieldnames = [
-                "tconst",
-                "year",
-                "award_name",
-                "status",
-                "recipient_name",
-                "recipient_nconst",
-            ]
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(output_rows)
-
-        return {
-            "output_path": output_csv_path,
-            "rows": len(output_rows),
-            "movies_scanned": len(imdb_ids),
-        }
 
     def export_movie_tags(
         self,

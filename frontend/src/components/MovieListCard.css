@@ -37,3 +37,12 @@
 .movie-list-card-note-text {
   word-break: break-word;
 }
+
+.movie-list-card-name-button {
+  text-transform: none !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  justify-content: flex-start !important;
+  padding: 0 !important;
+  min-width: 0 !important;
+}
