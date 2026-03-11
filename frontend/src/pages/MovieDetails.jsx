@@ -86,8 +86,6 @@ export default function MovieDetails() {
   const genres = details?.genres || [];
   const tags = details?.tags || [];
   const contributors = details?.contributors || {};
-  const oscars = details?.oscars?.data || [];
-  const oscarSummary = details?.oscars?.summary || {};
   const prediction = details?.predicted_rating;
 
   return (
@@ -157,22 +155,6 @@ export default function MovieDetails() {
               <Chip key={tag.tag_id} label={tag.tag_name} variant="outlined" />
             )) : <Typography color="text.secondary">No tags available.</Typography>}
           </Stack>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>Oscar History</Typography>
-          <Divider sx={{ mb: 1.5 }} />
-          <Typography sx={{ mb: 1 }}>
-            Wins: {oscarSummary.wins ?? 0} • Nominations: {oscarSummary.nominations ?? 0}
-          </Typography>
-          {oscars.length ? oscars.map((award) => (
-            <Typography key={award.id} color="text.secondary">
-              {award.award_year} - {award.award_status} - {award.award_name}
-              {award.recipient_name ? ` (${award.recipient_name})` : ""}
-            </Typography>
-          )) : <Typography color="text.secondary">No Oscar records.</Typography>}
         </CardContent>
       </Card>
     </Container>
