@@ -292,11 +292,11 @@ def get_predicted_ratings_service(
         cursor = db.cursor(dictionary=True)
         cursor.execute("""
             SELECT
-                pr.tconst,
-                m.primary_title,
-                m.start_year,
-                pr.predicted_rating,
-                pr.prediction_uncertainty
+                pr.tconst as tconst,
+                m.primary_title as primary_title,
+                m.start_year as start_year,
+                pr.predicted_rating as predicated_rating,
+                pr.prediction_uncertainty as prediction_uncertainity
             FROM predicted_ratings pr
             JOIN movies m ON pr.tconst = m.tconst
         """)

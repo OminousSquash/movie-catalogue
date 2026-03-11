@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS movies (
 
 CREATE TABLE IF NOT EXISTS genres (
     genre_id INT PRIMARY KEY,
-    genre VARCHAR(255) NOT NULL UNIQUE
+    genre VARCHAR(255) NOT NULL UNIQUE,
+    INDEX idx_genres_name (genre)
 );
 
 CREATE TABLE IF NOT EXISTS movie_genres(
@@ -78,7 +79,8 @@ CREATE TABLE IF NOT EXISTS dataset_user_ratings (
         ON DELETE CASCADE,
 
     INDEX idx_dataset_user_ratings_user (dataset_user_id),
-    INDEX idx_dataset_user_ratings_movie (tconst)
+    INDEX idx_dataset_user_ratings_movie (tconst),
+    INDEX idx_dataset_user_ratings_movie_user_rating (tconst, dataset_user_id, rating)
 );
 
 
