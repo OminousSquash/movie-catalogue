@@ -6,6 +6,8 @@ import ListDetails from "./pages/ListDetails";
 import MovieDetails from "./pages/MovieDetails";
 import ContributorDetails from "./pages/ContributorDetails";
 import PersonalityTraits from "./pages/PersonalityTraits";
+import RecentMovies from "./pages/RecentMovies";
+
 
 function ProtectedRoute({ isAuthenticated, children }) {
   if (!isAuthenticated) {
@@ -31,6 +33,7 @@ function AppRoutes({ isAuthenticated }) {
       <Route path="/lists/:listId" element={<ListDetails />} />
       <Route path="/movies/:tconst" element={<MovieDetails />} />
       <Route path="/contributors/:nconst" element={<ContributorDetails />} />
+      <Route path="/recent_movies" element={<RecentMovies isAuthenticated={isAuthenticated} />} />
     </Routes>
   );
 }
