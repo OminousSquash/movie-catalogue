@@ -56,7 +56,7 @@ const Dashboard = ({ isAuthenticated = false }) => {
   }, []);
 
   useEffect(() => {
-    fetchRecent();
+    handleSearch({});
   }, []);
 
   const fetchRecent = async () => {
