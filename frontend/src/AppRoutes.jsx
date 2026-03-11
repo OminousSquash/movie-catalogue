@@ -7,7 +7,7 @@ import MovieDetails from "./pages/MovieDetails";
 import ContributorDetails from "./pages/ContributorDetails";
 import PersonalityTraits from "./pages/PersonalityTraits";
 import RecentMovies from "./pages/RecentMovies";
-import Account from "./pages/UserDetail";
+import GenreReports from "./pages/GenreReports";import Account from "./pages/UserDetail";
 import ViewerRatingStatistics from "./pages/ViewerRatingStatistics";
 
 
@@ -23,6 +23,7 @@ function AppRoutes({ isAuthenticated }) {
     <Routes>
       <Route path="/" element={<Dashboard isAuthenticated={isAuthenticated} />} />
       <Route path="/personality" element={<PersonalityTraits />} />
+      <Route path="/genre-reports" element={<GenreReports />} />
       <Route path="/viewer-ratings" element={<ViewerRatingStatistics />} />
       <Route
         path="/user-lists"
