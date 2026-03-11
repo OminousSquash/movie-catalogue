@@ -21,10 +21,10 @@ def get_correlation_statistics(
 
 @router.post("/genre_profiles")
 def get_genre_personality_profiles(
-    genre_profiles_dto: GenreProfilesDTO,
+    genre_profile_dto: GenreProfilesDTO,
     db = Depends(get_db)
 ):
     return get_genre_personality_profiles_service(
-        genre_profiles_dto=genre_profiles_dto,
+        genre_profile_dto=genre_profile_dto,
         db=db
     )
