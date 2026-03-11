@@ -13,6 +13,21 @@ def get_personality_genre_correlations_service(
     personality_corr_dto: PersonalityCorrelationDTO,
     db:MySQLConnection
 ):
+    a = personality_corr_dto.personality_or_genre_a
+    b = personality_corr_dto.personality_or_genre_b
+
+    if a and a not in traits:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid trait '{a}'. Valid traits: {traits}"
+        )
+
+    genre_filter_clause = ""
+    params = []
+    if b:
+        genre_filter_clause = " AND g.genre = %s"
+        params.append(b)
+
     query = """
         WITH user_mean AS (
             SELECT dataset_user_id, AVG(rating) AS mean_rating
@@ -35,6 +50,7 @@ def get_personality_genre_correlations_service(
             JOIN user_mean um ON um.dataset_user_id = ur.dataset_user_id
             JOIN dataset_user_personalities p ON p.dataset_user_id = ur.dataset_user_id
             WHERE LENGTH(TRIM(g.genre)) > 1
+    """ + genre_filter_clause + """
             GROUP BY ur.dataset_user_id, g.genre, p.openness, p.agreeableness, p.emotional_stability, p.conscientiousness, p.extraversion
         ),
         components AS (
@@ -90,13 +106,6 @@ def get_personality_genre_correlations_service(
 
             FROM components ORDER BY genre ASC
     """
-    
-    params = []
-    
-    b = personality_corr_dto.personality_or_genre_b
-    if b:
-        query = f"SELECT * FROM ({query}) AS corr WHERE genre = %s"
-        params.append(b)
 
     try:
         cursor = db.cursor(dictionary = True)
@@ -112,14 +121,6 @@ def get_personality_genre_correlations_service(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No data found"
-        )
-    
-    a = personality_corr_dto.personality_or_genre_a
-
-    if a and a not in traits:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid trait '{a}'. Valid traits: {traits}"
         )
 
     results = []
@@ -146,6 +147,12 @@ def get_genre_personality_profiles_service(
     genre_profile_dto: GenreProfilesDTO,
     db:MySQLConnection
 ):
+    genre_filter_clause = ""
+    params = []
+    if genre_profile_dto.genre:
+        genre_filter_clause = " AND g.genre = %s"
+        params.append(genre_profile_dto.genre)
+
     query = """
         SELECT
             g.genre,
@@ -160,16 +167,13 @@ def get_genre_personality_profiles_service(
         JOIN genres g ON g.genre_id = mg.genre_id
         JOIN dataset_user_personalities p ON p.dataset_user_id = ur.dataset_user_id
         WHERE LENGTH(TRIM(g.genre)) > 1
+    """ + genre_filter_clause + """
         GROUP BY g.genre_id, g.genre
         HAVING user_count >= %s
         ORDER BY g.genre ASC
     """
 
-    params = [genre_profile_dto.minimum_no_users]
-
-    if genre_profile_dto.genre:
-        query = f"SELECT * FROM ({query}) AS profiles WHERE genre = %s"
-        params.append(genre_profile_dto.genre)
+    params.append(genre_profile_dto.minimum_no_users)
 
     try:
         cursor = db.cursor(dictionary = True)
