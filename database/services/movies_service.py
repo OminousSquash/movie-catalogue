@@ -74,37 +74,6 @@ def get_movies_service(
         conditions.append("m.num_votes <= %s")
         params.append(movie_filters.max_votes)
 
-    oscar_filters_present = any([
-        movie_filters.oscar_year is not None,
-        movie_filters.oscar_status is not None,
-        bool(movie_filters.oscar_awards),
-    ])
-    if movie_filters.has_oscar is not None or oscar_filters_present:
-        oscar_conditions = ["om.tconst = m.tconst"]
-        oscar_params = []
-
-        if movie_filters.oscar_year is not None:
-            oscar_conditions.append("om.award_year = %s")
-            oscar_params.append(movie_filters.oscar_year)
-
-        if movie_filters.oscar_status is not None:
-            oscar_conditions.append("om.award_status = %s")
-            oscar_params.append(movie_filters.oscar_status)
-
-        if movie_filters.oscar_awards:
-            oscar_award_placeholder = ",".join(["%s"] * len(movie_filters.oscar_awards))
-            oscar_conditions.append(f"om.award_name IN ({oscar_award_placeholder})")
-            oscar_params.extend(movie_filters.oscar_awards)
-
-        oscar_subquery = "SELECT 1 FROM oscar_movies om WHERE " + " AND ".join(oscar_conditions)
-
-        if movie_filters.has_oscar is False:
-            conditions.append(f"NOT EXISTS ({oscar_subquery})")
-        else:
-            conditions.append(f"EXISTS ({oscar_subquery})")
-
-        params.extend(oscar_params)
-
     if movie_filters.genres:
         joins.append("JOIN movie_genres mg on mg.tconst = m.tconst") 
         joins.append("JOIN genres g on mg.genre_id = g.genre_id")
@@ -198,73 +167,6 @@ def get_genres_service(
             detail="Failed to retrieve genres"
         )
 
-def get_oscar_movies_service(
-    db: MySQLConnection
-):
-    cursor = db.cursor(dictionary=True)
-    query = """
-    SELECT
-        m.*,
-        SUM(CASE WHEN om.award_status = 'Winner' THEN 1 ELSE 0 END) AS oscar_wins,
-        SUM(CASE WHEN om.award_status = 'Nominee' THEN 1 ELSE 0 END) AS oscar_nominations
-    FROM movies m
-    JOIN oscar_movies om ON om.tconst = m.tconst
-    GROUP BY m.tconst
-    ORDER BY oscar_wins DESC, oscar_nominations DESC, m.average_rating DESC
-    """
-
-    try:
-        cursor.execute(query)
-        rows = cursor.fetchall()
-    except Error:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve Oscar movies"
-        )
-
-    poster_index = _get_poster_index()
-    for row in rows:
-        poster_name = poster_index.get(row.get("tconst", ""))
-        row["poster"] = f"{POSTER_BASE_URL}/{poster_name}" if poster_name else None
-
-    return rows
-
-
-def get_movie_oscars_service(
-    db: MySQLConnection,
-    tconst: str,
-):
-    cursor = db.cursor(dictionary=True)
-    query = """
-    SELECT
-        id,
-        tconst,
-        award_year,
-        award_name,
-        award_status,
-        recipient_name,
-        recipient_nconst
-    FROM oscar_movies
-    WHERE tconst = %s
-    ORDER BY award_year DESC, award_status DESC, award_name ASC, recipient_name ASC
-    """
-
-    try:
-        cursor.execute(query, (tconst,))
-        rows = cursor.fetchall()
-    except Error:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve Oscar details"
-        )
-
-    return {
-        "tconst": tconst,
-        "count": len(rows),
-        "data": rows,
-    }
-
-
 def get_movie_details_service(
     db: MySQLConnection,
     tconst: str,
@@ -354,28 +256,6 @@ def get_movie_details_service(
         cursor.execute(
             """
             SELECT
-                id,
-                award_year,
-                award_name,
-                award_status,
-                recipient_name,
-                recipient_nconst
-            FROM oscar_movies
-            WHERE tconst = %s
-            ORDER BY award_year DESC, award_status DESC, award_name ASC, recipient_name ASC
-            """,
-            (tconst,),
-        )
-        oscars = cursor.fetchall()
-        oscar_summary = {
-            "wins": sum(1 for row in oscars if row.get("award_status") == "Winner"),
-            "nominations": sum(1 for row in oscars if row.get("award_status") == "Nominee"),
-            "total": len(oscars),
-        }
-
-        cursor.execute(
-            """
-            SELECT
                 predicted_rating,
                 prediction_uncertainty
             FROM predicted_ratings
@@ -402,10 +282,6 @@ def get_movie_details_service(
         "genres": genres,
         "tags": tags,
         "contributors": contributors,
-        "oscars": {
-            "summary": oscar_summary,
-            "data": oscars,
-        },
         "predicted_rating": predicted_rating,
     }
 
