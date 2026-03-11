@@ -137,17 +137,41 @@ const ViewerRatingAnalysis = () => {
                 data={genreMatrix}
                 margin={{ top: 100, right: 60, bottom: 100, left: 100 }}
                 valueFormat=".2f"
+
                 colors={{ type: "diverging", scheme: "red_yellow_blue", minValue: 0, maxValue: 1 }}
+                emptyColor="#eeeeee"
+
+                cellBorderWidth={1}
+                cellBorderColor="#ffffff"
 
                 axisTop={{
                   tickRotation: -45,
                   legend: "Genre",
-                  legendOffset: -70
+                  legendOffset: -70,
+                  tickTextColor: "#ffffff",
+                  legendTextColor: "#ffffff"
                 }}
 
                 axisLeft={{
                   legend: "Genre",
-                  legendOffset: -80
+                  legendOffset: -80,
+                  tickTextColor: "#ffffff",
+                  legendTextColor: "#ffffff"
+                }}
+
+                theme={{
+                  axis: {
+                    ticks: {
+                      text: {
+                        fill: "#ffffff"
+                      }
+                    },
+                    legend: {
+                      text: {
+                        fill: "#ffffff"
+                      }
+                    }
+                  }
                 }}
 
                 tooltip={({ cell }) =>
