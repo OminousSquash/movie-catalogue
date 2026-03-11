@@ -25,6 +25,6 @@ def get_genre_personality_profiles(
     db = Depends(get_db)
 ):
     return get_genre_personality_profiles_service(
-        genre_profile_dto=genre_profile_dto,
+        genre_profiles_dto=genre_profiles_dto,
         db=db
     )
