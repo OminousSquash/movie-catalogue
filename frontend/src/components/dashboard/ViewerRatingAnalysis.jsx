@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Tabs, Tab, Box, Typography, Grid, Paper, CircularProgress, MenuItem, FormControl, Select } from "@mui/material";
 import { ResponsivePie } from "@nivo/pie";
 import { ResponsiveBar } from "@nivo/bar";
-import { ResponsiveHeatMap } from "@nivo/heatmap";
+import { ResponsiveHeatMapCanvas } from "@nivo/heatmap";
 import api from "../../services/api";
 
 const tabLabels = [
@@ -32,18 +32,23 @@ const ViewerRatingAnalysis = () => {
           api.get("/rating_analysis/genre_correlation_matrix"),
         ]);
 
+        console.log("Matrix response:", matrixRes.data);
+
         setViewerHarshness(harshRes.data);
-        console.log("Viewer Harshness fetched:", harshRes.data);
         setLowRatingGenres(lowRes.data);
 
-        const keys = Object.keys(matrixRes.data);
-        const matrixData = keys.map((genre) => ({
-          genre,
-          ...matrixRes.data[genre],
-        }));
-        setGenreMatrix(matrixData);
-        setGenres(keys);
+        const genres = Object.keys(matrixRes.data).filter(Boolean);
 
+        const matrixData = genres.map((genre) => ({
+          id: genre,
+          data: genres.map((g) => ({
+            x: g,
+            y: matrixRes.data[genre]?.[g] ?? 0
+          }))
+        }));
+
+        setGenreMatrix(matrixData);
+        setGenres(genres);
       } catch (err) {
         console.error("Error fetching viewer analysis data:", err);
       } finally {
@@ -78,7 +83,6 @@ const ViewerRatingAnalysis = () => {
       </Tabs>
 
       <Box sx={{ mt: 3 }}>
-        {/* TAB 0: Viewer Rating Patterns */}
         {tabIndex === 0 && (
           <Paper sx={{ height: 400, p: 2 }}>
             <ResponsivePie
@@ -108,7 +112,7 @@ const ViewerRatingAnalysis = () => {
           </Paper>
         )}
 
-        {/* TAB 1: Low Rating Genres */}
+
         {tabIndex === 1 && (
           <Paper sx={{ height: 500, p: 2 }}>
             <ResponsiveBar
@@ -125,26 +129,40 @@ const ViewerRatingAnalysis = () => {
           </Paper>
         )}
 
-        {/* TAB 2: Genre Correlation */}
+
         {tabIndex === 2 && (
           <Paper sx={{ height: 600, p: 2 }}>
-            <ResponsiveHeatMap
-              data={Array.isArray(genreMatrix) ? genreMatrix : []}
-              keys={Array.isArray(genres) ? genres : []}
-              indexBy="genre"
-              margin={{ top: 100, right: 60, bottom: 100, left: 100 }}
-              forceSquare={true}
-              colors={{ type: "diverging", scheme: "red_yellow_blue", minValue: 0, maxValue: 1 }}
-              cellOpacity={1}
-              cellBorderColor={{ from: "color", modifiers: [["darker", 0.4]] }}
-              axisTop={{ orient: "top" }}
-              axisLeft={{ orient: "left" }}
-              tooltip={({ xKey, yKey, value }) => `${yKey} & ${xKey}: ${value.toFixed(2)}`}
-            />
+            {genreMatrix.length > 0 && genres.length > 0 ? (
+              <ResponsiveHeatMapCanvas
+                data={genreMatrix}
+                margin={{ top: 100, right: 60, bottom: 100, left: 100 }}
+                valueFormat=".2f"
+                colors={{ type: "diverging", scheme: "red_yellow_blue", minValue: 0, maxValue: 1 }}
+
+                axisTop={{
+                  tickRotation: -45,
+                  legend: "Genre",
+                  legendOffset: -70
+                }}
+
+                axisLeft={{
+                  legend: "Genre",
+                  legendOffset: -80
+                }}
+
+                tooltip={({ cell }) =>
+                  `${cell.serieId} & ${cell.data.x}: ${Number(cell.value).toFixed(2)}`
+                }
+              />
+            ) : (
+              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+                <CircularProgress />
+              </Box>
+            )}
           </Paper>
         )}
 
-        {/* TAB 3: Conditional Ratings */}
+
         {tabIndex === 3 && (
           <Paper sx={{ p: 3 }}>
             <Grid container spacing={3}>
