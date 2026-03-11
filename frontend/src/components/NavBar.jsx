@@ -14,7 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import MovieIcon from '@mui/icons-material/Movie';
 import { useNavigate } from "react-router-dom";
 
-const common_pages = [{label: "Dashboard", path: "/"}, {label: "View Lists", path: "/view-lists"}];
+const common_pages = [{label: "Dashboard", path: "/"}, {label: "View Lists", path: "/view-lists"}, {label: "Personality", path: "/personality"}];
 const auth_settings = [{label: "Your Lists", path: "/user-lists"}, {label: "Logout", path: null}];
 
 function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
