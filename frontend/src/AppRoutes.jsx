@@ -5,6 +5,7 @@ import ViewLists from "./pages/ViewLists";
 import ListDetails from "./pages/ListDetails";
 import MovieDetails from "./pages/MovieDetails";
 import ContributorDetails from "./pages/ContributorDetails";
+import PersonalityTraits from "./pages/PersonalityTraits";
 
 function ProtectedRoute({ isAuthenticated, children }) {
   if (!isAuthenticated) {
@@ -17,6 +18,7 @@ function AppRoutes({ isAuthenticated }) {
   return (
     <Routes>
       <Route path="/" element={<Dashboard isAuthenticated={isAuthenticated} />} />
+      <Route path="/personality" element={<PersonalityTraits />} />
       <Route
         path="/user-lists"
         element={
