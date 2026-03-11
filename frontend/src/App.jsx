@@ -12,6 +12,7 @@ function App() {
 
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
+    // MAKE POSSIBLE CHANGES HERE, CREATE A POP UP WHICH PROMPTS USERS TO SELECT FROM 0 to 10 ON EACH FIELD.
   };
 
   const handleLogout = () => {
