@@ -171,6 +171,13 @@ const ViewerRatingAnalysis = () => {
                         fill: "#ffffff"
                       }
                     }
+                  },
+                  tooltip: {
+                    container: {
+                      background: "#222222",
+                      color: "#ffffff",
+                      fontSize: 12
+                    }
                   }
                 }}
 
