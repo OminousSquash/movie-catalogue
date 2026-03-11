@@ -292,15 +292,20 @@ def get_predicted_ratings_service(
         cursor = db.cursor(dictionary=True)
         cursor.execute("""
             SELECT
-                pr.tconst,
-                m.primary_title,
-                m.start_year,
-                pr.predicted_rating,
-                pr.prediction_uncertainty
+                pr.tconst as tconst,
+                m.primary_title as primary_title,
+                m.start_year as start_year,
+                pr.predicted_rating as predicated_rating,
+                pr.prediction_uncertainty as prediction_uncertainity
             FROM predicted_ratings pr
             JOIN movies m ON pr.tconst = m.tconst
         """)
-        return cursor.fetchall()
+        rows= cursor.fetchall()
+        poster_index = _get_poster_index()
+        for row in rows:
+            poster_name = poster_index.get(row.get("tconst", ""))
+            row["poster"] = f"{POSTER_BASE_URL}/{poster_name}" if poster_name else None
+        return rows
     except Error:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve recent movies")
 
