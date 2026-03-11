@@ -51,7 +51,6 @@ export default function PredictedRatings() {
                 border: "1px solid rgba(232,201,126,0.15)",
               }}
             >
-              {/* Poster */}
               {movie.poster ? (
                 <CardMedia
                   component="img"
@@ -75,7 +74,6 @@ export default function PredictedRatings() {
                 </Box>
               )}
 
-              {/* Movie Info + Predict */}
               <Stack direction="row" spacing={2} alignItems="center" flex={1}>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="h6">
@@ -83,7 +81,6 @@ export default function PredictedRatings() {
                   </Typography>
                 </Box>
 
-                {/* Predict Button + Rating */}
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Button
                     variant="contained"
