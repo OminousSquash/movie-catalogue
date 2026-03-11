@@ -1,4 +1,4 @@
-import PersonalityTraits from "../pages/PersonalityTraits";
+import PersonalityTraits from "../pages/personalityTraits";
 import api from "./api";
 
 export const getTraitGenreCorrelations = async (trait=null, genre=null) => {

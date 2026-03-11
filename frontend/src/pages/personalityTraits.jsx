@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
     Box, 
     Typography, 
@@ -56,26 +56,8 @@ function SectionHeader({icon, title, subtitle }) {
     );
 }
 
-function CorrelationHeatmap() {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+function CorrelationHeatmap({ data, loading, error }) {
     const [activeTrait, setActiveTrait] = useState(null);
-
-    const load = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const result = await getTraitGenreCorrelations(activeTrait);
-            setData(result);
-        } catch {
-            setError("Failed to load correlation data.");
-        } finally {
-            setLoading(false);
-        }
-    }, [activeTrait]);
-
-    useEffect(() => {load();}, [load]);
 
     const {genres, lookup} = (() => {
         if (!data || !Array.isArray(data)) return {genres: [], lookup: {}};
@@ -292,26 +274,8 @@ function GenreProfileCard({profile }) {
     );
 }
 
-function GenreProfiles() {
-    const [data, setData]       = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError]     = useState(null);
+function GenreProfiles({ data, loading, error }) {
     const [genreFilter, setGenreFilter] = useState("");
-
-    useEffect(() => {
-        (async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const result = await getGenreProfiles(null, 100);
-                setData(result);
-            } catch {
-                setError("Failed to load genre profiles.");
-            } finally {
-                setLoading(false);
-            }
-        })();
-    }, []);
 
     const allGenres = data.map(d => d.genre);
     const visible   = genreFilter ? data.filter(d => d.genre === genreFilter) : data;
@@ -360,6 +324,48 @@ function GenreProfiles() {
 
 export default function PersonalityTraits() {
     const [tab, setTab] = useState("correlation");
+    const [correlationData, setCorrelationData] = useState([]);
+    const [correlationLoading, setCorrelationLoading] = useState(true);
+    const [correlationError, setCorrelationError] = useState(null);
+    const [profilesData, setProfilesData] = useState([]);
+    const [profilesLoading, setProfilesLoading] = useState(false);
+    const [profilesError, setProfilesError] = useState(null);
+    const [profilesRequested, setProfilesRequested] = useState(false);
+
+    useEffect(() => {
+        (async () => {
+            setCorrelationLoading(true);
+            setCorrelationError(null);
+            try {
+                const result = await getTraitGenreCorrelations();
+                setCorrelationData(result);
+            } catch {
+                setCorrelationError("Failed to load correlation data.");
+            } finally {
+                setCorrelationLoading(false);
+            }
+        })();
+    }, []);
+
+    useEffect(() => {
+        if (tab !== "profiles" || profilesRequested || profilesLoading) {
+            return;
+        }
+
+        (async () => {
+            setProfilesRequested(true);
+            setProfilesLoading(true);
+            setProfilesError(null);
+            try {
+                const result = await getGenreProfiles(null, 100);
+                setProfilesData(result);
+            } catch {
+                setProfilesError("Failed to load genre profiles.");
+            } finally {
+                setProfilesLoading(false);
+            }
+        })();
+    }, [tab, profilesRequested, profilesLoading]);
 
     return (
         <Box sx={{p: {xs: 2, md: 4}, maxWidth: 1400, mx: "auto"}}>
@@ -398,8 +404,20 @@ export default function PersonalityTraits() {
 
             <Divider sx={{ mb: 4 }} />
 
-            {tab === "correlation" && <CorrelationHeatmap />}
-            {tab === "profiles"    && <GenreProfiles />}
+            {tab === "correlation" && (
+                <CorrelationHeatmap
+                    data={correlationData}
+                    loading={correlationLoading}
+                    error={correlationError}
+                />
+            )}
+            {tab === "profiles" && (
+                <GenreProfiles
+                    data={profilesData}
+                    loading={profilesLoading}
+                    error={profilesError}
+                />
+            )}
         </Box>
     );
 }
