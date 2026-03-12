@@ -5,7 +5,7 @@ import ViewLists from "./pages/ViewLists";
 import ListDetails from "./pages/ListDetails";
 import MovieDetails from "./pages/MovieDetails";
 import ContributorDetails from "./pages/ContributorDetails";
-import PersonalityTraits from "./pages/personalityTraits";
+import PersonalityTraits from "./pages/PersonalityTraits";
 import RecentMovies from "./pages/RecentMovies";
 import Account from "./pages/UserDetail";
 import ViewerRatingStatistics from "./pages/ViewerRatingStatistics";
