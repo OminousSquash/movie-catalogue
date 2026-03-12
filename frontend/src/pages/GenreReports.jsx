@@ -3,10 +3,15 @@ import {
     Box, 
     Typography, 
     ToggleButton, 
-    ToggleButtonGroup,
-    CircularProgress, 
-    Alert, 
-    Divider
+    ToggleButtonGroup, 
+    CircularProgress,
+    Alert,
+    Divider,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Menu
 } from "@mui/material";
 import {
     BarChart, 
@@ -48,6 +53,17 @@ function CustomTooltip({ active, payload, label }) {
     );
 }
 
+function GenreJumper({genres, selected, onChange}){
+    return (
+        <FormControl size="small" sx="{{ minwidth: 200 }}">
+            <InputLabel>Jump To Genre</InputLabel>
+            <Select value={selected} label="Jump To Genre" onChange={e => onChange(e.target.value)}>
+                <MenuItem value=""><em>All Genres</em></MenuItem>
+                {genres.map(g => <MenuItem key={g} value={g}>{g}</MenuItem>)}
+            </Select>
+        </FormControl>
+    );
+}
 function PopularityChart() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
