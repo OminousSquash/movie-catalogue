@@ -6,7 +6,7 @@ from backend.security.dependencies import get_current_user
 
 router = APIRouter(prefix="/account", tags=["account handling"])
 
-@router.post("/personality")
+@router.post("/store_personality")
 def save_personality(
     personality_dto: StorePersonalityDTO,
     db = Depends(get_db),

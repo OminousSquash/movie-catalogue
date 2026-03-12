@@ -8,7 +8,7 @@ const getAuthHeaders = () => {
 
 export const savePersonality = async (ratings) => {
   const response = await api.post(
-    "/account/personality",
+    "/account/store_personality",
     {
       openness: parseInt(ratings["Openness"]),
       agreeableness: parseInt(ratings["Agreeableness"]),

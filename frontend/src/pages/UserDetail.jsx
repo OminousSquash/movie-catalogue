@@ -48,7 +48,7 @@ export default function Account({ isAuthenticated }) {
           headers: getAuthHeaders(),
         });
         const data = response.data;
-        setUsername(data.username);
+        setUsername(data.app_username);
         setRatings({
           Openness: data.openness ?? 5,
           Agreeableness: data.agreeableness ?? 5,
