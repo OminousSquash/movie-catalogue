@@ -5,8 +5,10 @@ import ViewLists from "./pages/ViewLists";
 import ListDetails from "./pages/ListDetails";
 import MovieDetails from "./pages/MovieDetails";
 import ContributorDetails from "./pages/ContributorDetails";
-import PersonalityTraits from "./pages/PersonalityTraits";
+import PersonalityTraits from "./pages/personalityTraits";
 import RecentMovies from "./pages/RecentMovies";
+import ViewerRatingDashboard from "./pages/ViewerRatingDashboad";
+import ViewerRatingStatistics from "./pages/ViewerRatingStatistics";
 
 
 function ProtectedRoute({ isAuthenticated, children }) {
@@ -21,6 +23,7 @@ function AppRoutes({ isAuthenticated }) {
     <Routes>
       <Route path="/" element={<Dashboard isAuthenticated={isAuthenticated} />} />
       <Route path="/personality" element={<PersonalityTraits />} />
+      <Route path="/viewer-ratings" element={<ViewerRatingStatistics />} />
       <Route
         path="/user-lists"
         element={
