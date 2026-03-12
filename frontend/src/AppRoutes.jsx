@@ -7,7 +7,6 @@ import MovieDetails from "./pages/MovieDetails";
 import ContributorDetails from "./pages/ContributorDetails";
 import PersonalityTraits from "./pages/personalityTraits";
 import RecentMovies from "./pages/RecentMovies";
-import ViewerRatingDashboard from "./pages/ViewerRatingDashboad";
 import ViewerRatingStatistics from "./pages/ViewerRatingStatistics";
 
 

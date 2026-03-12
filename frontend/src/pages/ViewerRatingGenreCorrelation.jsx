@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import ViewerRatingCorrelationHeatmap from "../components/ViewerRatingCorrelationHeatmap.jsx";
+import ViewerRatingCorrelationHeatmap from "../components/ViewerRatingCorrelationHeatmap";
 import { getGenreCorrelationMatrix } from "../services/viewerRatingService";
 
 export default function ViewerRatingGenreCorrelation() {
