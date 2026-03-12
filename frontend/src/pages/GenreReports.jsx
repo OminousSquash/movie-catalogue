@@ -57,7 +57,7 @@ function PopularityChart() {
         (async () => {
             try {
                 const raw = await getGenrePopularity();
-                const sorted = [...raw].sort((a, b) => b.avg_rating - a.avg_rating);
+                const sorted = [...raw].filter(d => d.genre && d.genre.trim() !== "N").sort((a, b) => b.avg_rating - a.avg_rating);
                 setData(sorted);
             } catch {
                 setError("Failed to load popularity daat");
@@ -155,7 +155,7 @@ function PolarisationChart() {
         (async () => {
             try {
                 const raw = await getGenrePolarisation();
-                const sorted = [...raw].sort((a, b) => b.polarisation_score - a.polarisation_score);
+                const sorted = [...raw].filter(d => d.genre && d.genre.trim() !== "N").sort((a, b) => b.polarisation_score - a.polarisation_score);
                 setData(sorted);
             } catch {
                 setError("Failed to load polarisation data");
