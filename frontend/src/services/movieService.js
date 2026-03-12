@@ -27,10 +27,6 @@ export const getRecentMovies = async () => {
   return Array.isArray(response.data) ? response.data : (response.data?.data ?? []);
 };
 
-export const getTopRatedMovies = async () => {
-  const response = await api.get("/movies/top-rated");
-  return response.data;
-};
 
 export const getGenres = async () => {
   const response = await api.get("/movies/genres");

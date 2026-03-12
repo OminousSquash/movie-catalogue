@@ -4,7 +4,6 @@ from database.services.movies_service import (
     get_movies_service,
     get_genres_service,
     get_predicted_ratings_service,
-    get_top_rated_movies_service,
     get_predicted_rating_by_tconst_service,
     get_movie_details_service,
 )
@@ -35,9 +34,6 @@ def get_recent_movies(
 ):
     return get_predicted_ratings_service(db=db)
 
-@router.get("/top-rated")
-def get_top_rated_movies(db=Depends(get_db)):
-    return get_top_rated_movies_service(db)
 
 @router.get("/{tconst}")
 def get_movie_details(
