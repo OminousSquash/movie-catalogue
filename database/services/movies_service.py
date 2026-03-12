@@ -300,12 +300,8 @@ def get_predicted_ratings_service(
             FROM predicted_ratings pr
             JOIN movies m ON pr.tconst = m.tconst
         """)
-        rows= cursor.fetchall()
-        poster_index = _get_poster_index()
-        for row in rows:
-            poster_name = poster_index.get(row.get("tconst", ""))
-            row["poster"] = f"{POSTER_BASE_URL}/{poster_name}" if poster_name else None
-        return rows
+        rows = cursor.fetchall()
+
     except Error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
