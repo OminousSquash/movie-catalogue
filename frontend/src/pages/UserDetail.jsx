@@ -74,7 +74,7 @@ export default function Account({ isAuthenticated }) {
       await api.put(
         "/account/update",
         {
-          username: username.trim(),
+          app_username: username.trim(),
           openness: parseInt(ratings["Openness"]),
           agreeableness: parseInt(ratings["Agreeableness"]),
           emotional_stability: parseInt(ratings["Emotional Stability"]),
