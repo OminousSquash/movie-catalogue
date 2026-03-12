@@ -10,8 +10,10 @@ import {
   Tabs,
   TextField,
   Typography,
+  Slider,
 } from "@mui/material";
 import { login, signup } from "../services/authService";
+import { savePersonality } from "../services/storePersonalityService";
 import "./LoginSignup.css";
 
 export default function LoginSignup({ onAuthSuccess, embedded = false, onCancel }) {
@@ -20,6 +22,14 @@ export default function LoginSignup({ onAuthSuccess, embedded = false, onCancel 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ratings, setRatings] = useState({
+    "Openness": 5,
+    "Agreeableness": 5,
+    "Emotional Stability": 5,
+    "Conscientiousness": 5,
+    "Extraversion": 5,
+  });
+  const [showPersonality, setShowPersonality] = useState(false);
 
   const handleModeChange = (_, newMode) => {
     if (!newMode) {
@@ -40,7 +50,12 @@ export default function LoginSignup({ onAuthSuccess, embedded = false, onCancel 
         throw new Error("No access token returned.");
       }
       localStorage.setItem("access_token", response.access_token);
-      onAuthSuccess?.();
+      if (mode === "signup"){
+        setShowPersonality(true);
+      } else {
+        onAuthSuccess?.();
+      }
+
     } catch (err) {
       const detail = err?.response?.data?.detail;
       setError(detail || "Request failed. Please try again.");
@@ -48,6 +63,19 @@ export default function LoginSignup({ onAuthSuccess, embedded = false, onCancel 
       setLoading(false);
     }
   };
+
+const handlePersonalitySubmit = async (event) => {
+  event.preventDefault();
+  setLoading(true);
+  try {
+    await savePersonality(ratings);
+    onAuthSuccess?.();
+  } catch (err) {
+    setError("Failed to submit. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const authForm = (
     <>
@@ -114,14 +142,52 @@ export default function LoginSignup({ onAuthSuccess, embedded = false, onCancel 
     </>
   );
 
+  const personalityForm = (
+    <>
+      <Typography variant="h5" className="login-signup-title" gutterBottom>
+        Welcome!
+      </Typography>
+      <Typography variant="body2" color="text.secondary" className="login-signup-subtitle">
+        Please rate yourself from 1–10 in each of the following traits.
+      </Typography>
+
+      {error ? (
+        <Alert severity="error" className="login-signup-alert">
+          {error}
+        </Alert>
+      ) : null}
+
+      <Box component="form" onSubmit={handlePersonalitySubmit}>
+        {["Openness", "Agreeableness", "Emotional Stability", "Conscientiousness", "Extraversion"].map((trait) => (
+          <Box key={trait} sx={{ mb: 2 }}>
+            <Typography variant="body1">{trait}</Typography>
+            <Slider
+              value={ratings[trait] ?? 5}
+              onChange={(_, newValue) => setRatings((prev) => ({ ...prev, [trait]: newValue }))}
+              min={1}
+              max={10}
+              step={1}
+              marks
+              valueLabelDisplay="auto"
+            />
+          </Box>
+        ))}
+
+        <Button type="submit" variant="contained" fullWidth disabled={loading} className="login-signup-submit">
+          {loading ? <CircularProgress size={20} color="inherit" /> : "Submit"}
+        </Button>
+      </Box>
+    </>
+  );
+
   if (embedded) {
-    return <Box>{authForm}</Box>;
+    return <Box>{showPersonality ? personalityForm : authForm}</Box>;
   }
 
   return (
     <Container maxWidth="sm" className="login-signup-container">
       <Paper elevation={6} className="login-signup-paper">
-        {authForm}
+        {showPersonality ? personalityForm : authForm}
       </Paper>
     </Container>
   );

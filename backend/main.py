@@ -11,6 +11,8 @@ from backend.controllers.viewer_rating_controller import router as viewer_rating
 from backend.controllers.personality_traits_controller import router as personality_traits_router
 from backend.controllers.login_signup_controller import router as auth_router
 from backend.controllers.user_list_crud_controller import router as user_list_crud_router
+from backend.controllers.store_personality_controller import router as store_personality_router
+from backend.controllers.app_user_details_controller import router as app_user_details_router
 
 app = FastAPI(title="Movie Catalogue API")
 posters_dir = Path(__file__).resolve().parents[1] / "datasets" / "movie-posters"
@@ -40,3 +42,5 @@ app.include_router(viewer_ratings_router)
 app.include_router(personality_traits_router)
 app.include_router(auth_router)
 app.include_router(user_list_crud_router)
+app.include_router(store_personality_router)
+app.include_router(app_user_details_router)

@@ -99,6 +99,14 @@ CREATE TABLE IF NOT EXISTS app_users (
     app_username VARCHAR(255) NOT NULL UNIQUE,
     app_user_password_hash VARCHAR(255) NOT NULL,
 
+    openness INT,
+    agreeableness INT,
+    emotional_stability INT,
+    conscientiousness INT,
+    extraversion INT,
+
+    
+
     INDEX idx_app_users_username (app_username)
 );
 
