@@ -13,6 +13,7 @@ import {
   Slider,
 } from "@mui/material";
 import { login, signup } from "../services/authService";
+import { savePersonality } from "../services/storePersonalityService";
 import "./LoginSignup.css";
 
 export default function LoginSignup({ onAuthSuccess, embedded = false, onCancel }) {
@@ -21,7 +22,13 @@ export default function LoginSignup({ onAuthSuccess, embedded = false, onCancel 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [ratings, setRatings] = useState({});
+  const [ratings, setRatings] = useState({
+    "Openness": 5,
+    "Agreeableness": 5,
+    "Emotional Stability": 5,
+    "Conscientiousness": 5,
+    "Extraversion": 5,
+  });
   const [showPersonality, setShowPersonality] = useState(false);
 
   const handleModeChange = (_, newMode) => {
@@ -48,7 +55,6 @@ export default function LoginSignup({ onAuthSuccess, embedded = false, onCancel 
       } else {
         onAuthSuccess?.();
       }
-      // onAuthSuccess?.();
 
     } catch (err) {
       const detail = err?.response?.data?.detail;
@@ -62,7 +68,7 @@ const handlePersonalitySubmit = async (event) => {
   event.preventDefault();
   setLoading(true);
   try {
-    // send `ratings` to your API here
+    await savePersonality(ratings);
     onAuthSuccess?.();
   } catch (err) {
     setError("Failed to submit. Please try again.");
