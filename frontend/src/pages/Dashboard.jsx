@@ -56,7 +56,7 @@ const Dashboard = ({ isAuthenticated = false }) => {
   }, []);
 
   useEffect(() => {
-    fetchTopRated();
+    handleSearch({});
   }, []);
 
   const handleSearch = async (filters, page = 1) => {
