@@ -15,7 +15,7 @@ import MovieIcon from '@mui/icons-material/Movie';
 import { useNavigate } from "react-router-dom";
 
 const common_pages = [{label: "Dashboard", path: "/"}, {label: "View Lists", path: "/view-lists"}, {label: "Personality", path: "/personality"}, {label: "Viewer Ratings", path: "/viewer-ratings"}, {label:"Recent Movies", path:"/recent_movies"}];
-const auth_settings = [{label: "Your Lists", path: "/user-lists"}, {label: "Logout", path: null}];
+const auth_settings = [{label: "Your Lists", path: "/user-lists"}, {label: "User Details", path: "/account"}, {label: "Logout", path: null}];
 
 function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
     const [anchorElNav, setAnchorElNav] = React.useState(null);

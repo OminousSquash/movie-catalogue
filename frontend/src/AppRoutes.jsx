@@ -7,6 +7,7 @@ import MovieDetails from "./pages/MovieDetails";
 import ContributorDetails from "./pages/ContributorDetails";
 import PersonalityTraits from "./pages/personalityTraits";
 import RecentMovies from "./pages/RecentMovies";
+import Account from "./pages/UserDetail";
 import ViewerRatingStatistics from "./pages/ViewerRatingStatistics";
 
 
@@ -28,6 +29,14 @@ function AppRoutes({ isAuthenticated }) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <UserLists />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/account"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <Account isAuthenticated={isAuthenticated} />
           </ProtectedRoute>
         }
       />
