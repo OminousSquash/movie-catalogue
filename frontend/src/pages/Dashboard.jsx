@@ -15,7 +15,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import FilterPanel from "../components/dashboard/FilterPanel";
 import MovieCard from "../components/dashboard/MovieCard";
-import { searchMovies, getRecentMovies, getGenres } from "../services/movieService";
+import { searchMovies, getGenres, getTopRatedMovies } from "../services/movieService";
 import { addMovieToList, formatApiErrorDetail, getMyLists } from "../services/userListService";
 
 const INITIAL_FILTERS = {
@@ -56,16 +56,19 @@ const Dashboard = ({ isAuthenticated = false }) => {
   }, []);
 
   useEffect(() => {
-    handleSearch({});
+    fetchTopRated();
   }, []);
 
-  const fetchRecent = async () => {
+  const fetchTopRated = async () => {
     setLoading(true);
     try {
-      const data = await getRecentMovies();
+      const data = await getTopRatedMovies();
       setMovies(data);
+      setCurrentPage(1);
+      setTotalPages(1);
+      setTotalResults(data.length);
     } catch (err) {
-      console.error("Failed to fetch recent movies", err);
+      console.error("Failed to fetch top rated movies", err);
     }
     setLoading(false);
   };

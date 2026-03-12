@@ -25,7 +25,7 @@ const DashboardLayout = ({ children }) => {
         PaperProps={{
           sx: {
             width: SIDEBAR_WIDTH,
-            position: "relative", // permanent variant needs this to sit inside the flex row
+            position: "relative",
             height: "100%",
             background: "background.paper",
             borderRight: "1px solid",
@@ -33,7 +33,6 @@ const DashboardLayout = ({ children }) => {
             overflowY: "auto",
             "&::-webkit-scrollbar": { width: 4 },
             "&::-webkit-scrollbar-thumb": { background: "#3a3530", borderRadius: 2 },
-            // temporary variant overrides position back to fixed automatically
             ...(isMobile && {
               position: "fixed",
               background: "#16161a",

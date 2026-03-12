@@ -90,3 +90,4 @@ def get_contributor_trends_service(
         raise
     except Error:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+
