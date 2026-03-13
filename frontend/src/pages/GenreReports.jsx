@@ -197,6 +197,7 @@ function PolarisationChart() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [highlighted, setHighlighted] = useState("");
+    const rowRefs = useRef({});
 
     useEffect(() => {
         (async () => {
@@ -263,7 +264,12 @@ function PolarisationChart() {
                         </Box>
                     </Box>
                 )}
-                <GenreJumper genres={genres} selected={highlighted} onChange={setHighlighted} />
+                <GenreJumper genres={genres} selected={highlighted} onChange={(genre) => {
+                    setHighlighted(genre);
+                    if (genre && rowRefs.current[genre]) {
+                        rowRefs.current[genre].scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }} />
             </Box>
 
             <ResponsiveContainer width="100%" height={data.length * 36 + 40}>
@@ -287,9 +293,11 @@ function PolarisationChart() {
                             const {x,y,payload} = props;
                             const isHighlighted = payload.value === highlighted;
                             return (
-                                <text x={x} y={y} dy={4} textAnchor="end" fill={isHighlighted ? "#e8c97e" : "#f0ece3"} fontWeight={isHighlighted ? 700 : 400} fontSize={12}>
-                                    {payload.value}
-                                </text>
+                                <g ref={el => { if (el) rowRefs.current[payload.value] = el; }}>
+                                    <text x={x} y={y} dy={4} textAnchor="end" fill={isHighlighted ? "#e8c97e" : "#f0ece3"} fontWeight={isHighlighted ? 700 : 400} fontSize={12}>
+                                        {payload.value}
+                                    </text>
+                                </g>
                             );
                         }}
                     
