@@ -32,6 +32,15 @@ services:
       DB_PASSWORD: apppass
       DB_NAME: moviedb 
 
+  frontend:
+    build: ./frontend
+    container_name: react-frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
   phpmyadmin:
     image: phpmyadmin
     restart: always

@@ -105,18 +105,22 @@ export default function MovieDetails() {
             <Typography color="text.secondary" sx={{ mt: 1 }}>
               {movie.tconst} • {movie.start_year ?? "Unknown year"} • {movie.runtime_minutes ?? "?"} mins
             </Typography>
-            <Typography sx={{ mt: 1 }}>
-              Rating: {movie.average_rating ?? "N/A"} ({movie.num_votes ?? 0} votes)
-            </Typography>
-            <Typography sx={{ mt: 1 }}>
-              Adult: {movie.is_adult ? "Yes" : "No"}
-            </Typography>
+            {!prediction && (
+              <Typography sx={{ mt: 1 }}>
+                Rating: {movie.average_rating ?? "N/A"} ({movie.num_votes ?? 0} votes)
+              </Typography>
+            )}
 
             {prediction ? (
               <Typography sx={{ mt: 1 }}>
                 Predicted rating: {prediction.predicted_rating} (uncertainty {prediction.prediction_uncertainty})
               </Typography>
             ) : null}
+
+            <Typography sx={{ mt: 1 }}>
+              Adult: {movie.is_adult ? "Yes" : "No"}
+            </Typography>
+
 
             <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: "wrap", gap: 1 }}>
               {genres.map((genre) => (

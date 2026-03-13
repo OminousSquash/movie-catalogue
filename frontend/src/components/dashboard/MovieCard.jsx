@@ -46,6 +46,7 @@ const MovieCard = ({
   const title = movie.primary_title ?? movie.primaryTitle ?? "";
   const year = movie.start_year ?? movie.startYear ?? "";
   const rating = movie.average_rating ?? movie.averageRating ?? null;
+  const predicted_rating = movie.predicted_rating ?? null;
   const runtime = movie.runtime_minutes ?? movie.runtimeMinutes ?? null;
   const actors = movie.actors ?? [];
   const cardWidth = compact ? "220px" : "100%";
@@ -137,7 +138,21 @@ const MovieCard = ({
               <Typography variant="caption" color="text.secondary">{runtime} min</Typography>
             </Stack>
           )}
-          {rating != null && (
+          {predicted_rating != null ? (
+            <Chip
+              icon={<StarIcon sx={{ fontSize: "0.7rem !important", color: "#e8c97e !important" }} />}
+              label={`Predicted ${Number(predicted_rating).toFixed(1)}`}
+              size="small"
+              sx={{
+                background: "rgba(232, 201, 126, 0.1)",
+                color: "#e8c97e",
+                border: "1px solid rgba(232, 201, 126, 0.25)",
+                fontWeight: 700,
+                fontSize: "0.72rem",
+                height: 20,
+              }}
+            />
+          ) : (
             <Chip
               icon={<StarIcon sx={{ fontSize: "0.7rem !important", color: "#e8c97e !important" }} />}
               label={Number(rating).toFixed(1)}
