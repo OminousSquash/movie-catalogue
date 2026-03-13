@@ -68,6 +68,8 @@ function PopularityChart() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError]= useState(null);
+    const [highlighted, setHighlighted] = useState("");
+    const rowRefs = useRef({});
 
     useEffect(() => {
         (async () => {
@@ -84,6 +86,14 @@ function PopularityChart() {
     }, []);
 
     const maxVotes = Math.max(...data.map(d => d.avg_num_votes || 0), 1);
+    const genres = data.map(d => d.genre);
+
+    const handleJump = (genre) => {
+        setHighlighted(genre);
+        if (genre && rowRefs.current[genre]){
+            rowRefs.current[genre].scrollIntoView({behavior: "smooth", block: "center"});
+        }
+    };
 
     if (loading) return <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}><CircularProgress color="primary" size={32} thickness={2.5} /></Box>;
     if (error)   return <Alert severity="error">{error}</Alert>;
@@ -99,25 +109,30 @@ function PopularityChart() {
                 </Typography>
             </Box>
 
-            <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
-                {data.slice(0, 3).map((d, i) => (
-                    <Box key={d.genre} sx={{
-                        border: "1px solid rgba(232,201,126,0.2)",
-                        borderRadius: 1.5, px: 2, py: 1,
-                        background: "rgba(232,201,126,0.05)",
-                        minWidth: 120,
-                    }}>
-                        <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                            #{i + 1} by rating
-                        </Typography>
-                        <Typography variant="subtitle2" sx={{ color: "primary.main", fontFamily: "Playfair Display, serif" }}>
-                            {d.genre}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 700 }}>
-                            {Number(d.avg_rating).toFixed(2)}
-                        </Typography>
-                    </Box>
-                ))}
+            <Box sx={{display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2, mb: 3 }}>
+
+                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                    {data.slice(0, 3).map((d, i) => (
+                        <Box key={d.genre} sx={{
+                            border: "1px solid rgba(232,201,126,0.2)",
+                            borderRadius: 1.5, px: 2, py: 1,
+                            background: "rgba(232,201,126,0.05)",
+                            minWidth: 120,
+                        }}>
+                            <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                                #{i + 1} by rating
+                            </Typography>
+                            <Typography variant="subtitle2" sx={{ color: "primary.main", fontFamily: "Playfair Display, serif" }}>
+                                {d.genre}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 700 }}>
+                                {Number(d.avg_rating).toFixed(2)}
+                            </Typography>
+                        </Box>
+                    ))}
+                </Box>
+                <GenreJumper genres={genres} selected={highlighted} onChange={handleJump} />
+            
             </Box>
 
             <ResponsiveContainer width="100%" height={data.length * 32 + 40}>
@@ -138,15 +153,30 @@ function PopularityChart() {
                         type="category"
                         dataKey="genre"
                         width={75}
-                        tick={{ fill: "#f0ece3", fontSize: 12 }}
+                        tick={(props) => {
+                            const {x, y, payload} = props;
+                            const isHighlighted = payload.value === highlighted;
+                            return (
+                                <g ref={e => {if (e) rowRefs.current[payload.value] = e;}}>
+                                    <text x={x} y={y} dy={4} textAnchor="end" fill={isHighlighted ? "#e8c97e" : "#f0ece3"} fontWeight={isHighlighted ? 700 : 400} fontSize={12}>
+                                        {payload.value}
+                                    </text>
+                                </g>
+                            );
+                        }}
                         axisLine={false}
                         tickLine={false}
                     />
                     <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(232,201,126,0.04)" }} />
                     <Bar dataKey="avg_rating" name="Avg Rating" radius={[0, 3, 3, 0]} maxBarSize={20}>
                         {data.map((entry) => {
+                            const isHighlighted = entry.genre === highlighted;
                             const opacity = 0.35 + 0.75 * (entry.avg_num_votes / maxVotes);
-                            return <Cell key={entry.genre} fill={`rgba(232,201,126,${opacity.toFixed(2)})`} />;
+                            const fill = isHighlighted 
+                                ? "#f5e199" 
+                                : highlighted 
+                                    ? `rgba(232,201,126,${(opacity * 0.35).toFixed(2)})` : `rgba(232,201,126),${opacity.toFixed(2)})`;
+                            return <Cell key={entry.genre} fill={fill} />;
                         })}
                     </Bar>
                 </BarChart>
