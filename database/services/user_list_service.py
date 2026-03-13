@@ -314,12 +314,14 @@ def get_user_list_movies_service(
                 m.primary_title,
                 m.start_year,
                 m.average_rating,
-                m.runtime_minutes
+                m.runtime_minutes,
+                pr.predicted_rating
             FROM app_user_lists ul
             JOIN app_user_list_movies ulm ON ul.list_id = ulm.list_id
             JOIN movies m ON ulm.tconst = m.tconst
             JOIN movie_genres mg ON mg.tconst = m.tconst
             JOIN genres g ON g.genre_id = mg.genre_id
+            LEFT JOIN predicted_ratings pr ON pr.tconst = m.tconst
             WHERE ul.list_id = %s
             ORDER BY g.genre, m.primary_title;
         """
@@ -339,6 +341,7 @@ def get_user_list_movies_service(
                     "primary_title": movie["primary_title"],
                     "start_year": movie["start_year"],
                     "average_rating": movie["average_rating"],
+                    "predicted_rating": movie["predicted_rating"],
                     "runtime_minutes": movie["runtime_minutes"],
                     "poster": movie["poster"],
                 }

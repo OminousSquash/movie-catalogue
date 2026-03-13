@@ -141,10 +141,10 @@ const MovieCard = ({
               <Typography variant="caption" color="text.secondary">{runtime} min</Typography>
             </Stack>
           )}
-          {rating != null && (
+          {predicted_rating != null ? (
             <Chip
               icon={<StarIcon sx={{ fontSize: "0.7rem !important", color: "#e8c97e !important" }} />}
-              label={Number(rating).toFixed(1)}
+              label={`Predicted ${Number(predicted_rating).toFixed(1)}`}
               size="small"
               sx={{
                 background: "rgba(232, 201, 126, 0.1)",
@@ -155,11 +155,10 @@ const MovieCard = ({
                 height: 20,
               }}
             />
-          )}
-          {predicted_rating != null && (
+          ) : (
             <Chip
               icon={<StarIcon sx={{ fontSize: "0.7rem !important", color: "#e8c97e !important" }} />}
-              label={`Predicted ${Number(predicted_rating).toFixed(1)}`}
+              label={Number(rating).toFixed(1)}
               size="small"
               sx={{
                 background: "rgba(232, 201, 126, 0.1)",
