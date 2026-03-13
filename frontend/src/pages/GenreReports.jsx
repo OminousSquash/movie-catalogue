@@ -196,6 +196,7 @@ function PolarisationChart() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [highlighted, setHighlighted] = useState("");
 
     useEffect(() => {
         (async () => {
@@ -211,6 +212,8 @@ function PolarisationChart() {
         })();
     }, []);
 
+    const genres = data.map(d => d.genre);
+
     if (loading) return <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}><CircularProgress color="primary" size={32} thickness={2.5} /></Box>;
     if (error)   return <Alert severity="error">{error}</Alert>;
 
@@ -221,51 +224,47 @@ function PolarisationChart() {
                     Genre Polarisation
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Genres sorted by polarisation score (composite of STD DEV and % extreme ratings). IQR shows the spread between the 25th and 75th percentile, so a wider means more diverse middle grounds
+                    Genres are ranked by how much they divide audiences. The <strong style={{ color: "#e8c97e" }}>Polarisation Score</strong> combines how wildly ratings vary with how many people gave extreme scores (very high or very low) — a higher score means more love-it-or-hate-it reactions. 
+                    The <strong style={{ color: "#7e9ee8" }}>Rating Spread (IQR)</strong> shows the gap between the middle 50% of ratings: a wide spread means even typical viewers disagree significantly on quality.
                 </Typography>
             </Box>
+            <Box sx={{display: "flex", alignItems: "center", justifyContent:"space-between", flexWrap: "wrap", gap: 2, mb: 3}}>
 
-            {data[0] && (
-                <Box sx={{
-                    border: "1px solid rgba(232,201,126,0.2)",
-                    borderRadius: 1.5, px: 2, py: 1,
-                    background: "rgba(232,201,126,0.05)",
-                    display: "inline-flex", gap: 3, mb: 3, flexWrap: "wrap",
-                }}>
-                    <Box>
-                        <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                            Most polarising genre
-                        </Typography>
-                        <Typography variant="subtitle2" sx={{ color: "primary.main", fontFamily: "Playfair Display, serif" }}>
-                            {data[0].genre}
-                        </Typography>
+                {data[0] && (
+                    <Box sx={{
+                        border: "1px solid rgba(232,201,126,0.2)",
+                        borderRadius: 1.5, px: 2, py: 1,
+                        background: "rgba(232,201,126,0.05)",
+                        display: "inline-flex", gap: 3, mb: 3, flexWrap: "wrap",
+                    }}>
+                        <Box>
+                            <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                                Most polarising genre
+                            </Typography>
+                            <Typography variant="subtitle2" sx={{ color: "primary.main", fontFamily: "Playfair Display, serif" }}>
+                                {data[0].genre}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                                Loved It (Rating of: 8+)
+                            </Typography>
+                            <Typography variant="subtitle2" sx={{ color: "text.primary", fontWeight: 700 }}>
+                                {Number(data[0].high_percent).toFixed(1)}% of viewers
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                                Disliked it (Rating of: 5 or below)
+                            </Typography>
+                            <Typography variant="subtitle2" sx={{ color: "text.primary", fontWeight: 700 }}>
+                                {Number(data[0].low_percent).toFixed(1)}% of viewers
+                            </Typography>
+                        </Box>
                     </Box>
-                    <Box>
-                        <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                            Score
-                        </Typography>
-                        <Typography variant="subtitle2" sx={{ color: "text.primary", fontWeight: 700 }}>
-                            {Number(data[0].polarisation_score).toFixed(3)}
-                        </Typography>
-                    </Box>
-                    <Box>
-                        <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                            High ratings %
-                        </Typography>
-                        <Typography variant="subtitle2" sx={{ color: "text.primary", fontWeight: 700 }}>
-                            {Number(data[0].high_percent).toFixed(1)}%
-                        </Typography>
-                    </Box>
-                    <Box>
-                        <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                            Low ratings %
-                        </Typography>
-                        <Typography variant="subtitle2" sx={{ color: "text.primary", fontWeight: 700 }}>
-                            {Number(data[0].low_percent).toFixed(1)}%
-                        </Typography>
-                    </Box>
-                </Box>
-            )}
+                )}
+                <GenreJumper genres={genres} selected={highlighted} onChange={setHighlighted} />
+            </Box>
 
             <ResponsiveContainer width="100%" height={data.length * 36 + 40}>
                 <BarChart
