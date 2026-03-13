@@ -1,6 +1,5 @@
 from mysql.connector import Error, MySQLConnection
 from fastapi import HTTPException, status
-from database.services.personality_traits_service import get_genre_personality_profiles_service, traits
 
 def get_recommended_genres_service(
     user_traits: dict,
@@ -9,7 +8,7 @@ def get_recommended_genres_service(
     try:
         query = """
             SELECT
-                g.genre,
+                g.genre_id,
                 SQRT(
                     POW(AVG(p.openness) - %s, 2) +
                     POW(AVG(p.agreeableness) - %s, 2) +
@@ -22,7 +21,7 @@ def get_recommended_genres_service(
             JOIN genres g ON g.genre_id = mg.genre_id
             JOIN dataset_user_personalities p ON p.dataset_user_id = ur.dataset_user_id
             WHERE LENGTH(TRIM(g.genre)) > 1
-            GROUP BY g.genre_id, g.genre
+            GROUP BY g.genre_id
             HAVING COUNT(DISTINCT p.dataset_user_id) >= 50
             ORDER BY distance ASC
             LIMIT 3
@@ -46,7 +45,7 @@ def get_recommended_genres_service(
                 detail="No genre recommendations found"
             )
 
-        return [row["genre"] for row in rows]
+        return [row["genre_id"] for row in rows]
 
     except HTTPException:
         raise

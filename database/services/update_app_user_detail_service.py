@@ -17,7 +17,8 @@ def update_app_user_detail_service(
             "conscientiousness": update_dto.conscientiousness,
             "extraversion": update_dto.extraversion,
         }
-        recommended_genres = get_recommended_genres_service(user_traits=user_traits, db=db)
+        recommended_genre_ids = get_recommended_genres_service(user_traits=user_traits, db=db)
+
         cursor.execute(
             """
             UPDATE app_users
@@ -27,8 +28,7 @@ def update_app_user_detail_service(
                 agreeableness = %s,
                 emotional_stability = %s,
                 conscientiousness = %s,
-                extraversion = %s,
-                recommended_genres = %s
+                extraversion = %s
             WHERE app_user_id = %s
             """,
             (
@@ -38,10 +38,21 @@ def update_app_user_detail_service(
                 update_dto.emotional_stability,
                 update_dto.conscientiousness,
                 update_dto.extraversion,
-                ",".join(recommended_genres),
                 current_user,
             )
         )
+
+        cursor.execute(
+            "DELETE FROM app_user_recommended_genres WHERE app_user_id = %s",
+            (current_user,)
+        )
+
+        for genre_id in recommended_genre_ids:
+            cursor.execute(
+                "INSERT INTO app_user_recommended_genres (app_user_id, genre_id) VALUES (%s, %s)",
+                (current_user, genre_id)
+            )
+
         db.commit()
 
         return {
@@ -50,8 +61,8 @@ def update_app_user_detail_service(
 
     except HTTPException:
         raise
-    except Error:
+    except Error as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update user details"
+            detail=f"Failed to update user details: {str(e)}"
         )

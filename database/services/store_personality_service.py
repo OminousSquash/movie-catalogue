@@ -17,7 +17,8 @@ def store_personality_service(
             "conscientiousness": store_personality_dto.conscientiousness,
             "extraversion": store_personality_dto.extraversion,
         }
-        recommended_genres = get_recommended_genres_service(user_traits=user_traits, db=db)
+        recommended_genre_ids = get_recommended_genres_service(user_traits=user_traits, db=db)
+
         cursor.execute(
             """
             UPDATE app_users 
@@ -26,8 +27,7 @@ def store_personality_service(
                 agreeableness = %s,
                 emotional_stability = %s,
                 conscientiousness = %s,
-                extraversion = %s,
-                recommended_genres = %s
+                extraversion = %s
             WHERE app_user_id = %s
             """,
             (
@@ -36,16 +36,28 @@ def store_personality_service(
                 store_personality_dto.emotional_stability,
                 store_personality_dto.conscientiousness,
                 store_personality_dto.extraversion,
-                ",".join(recommended_genres),
                 current_user,
             )
         )
+
+        cursor.execute(
+            "DELETE FROM app_user_recommended_genres WHERE app_user_id = %s",
+            (current_user,)
+        )
+
+        for genre_id in recommended_genre_ids:
+            cursor.execute(
+                "INSERT INTO app_user_recommended_genres (app_user_id, genre_id) VALUES (%s, %s)",
+                (current_user, genre_id)
+            )
+
         db.commit()
         return {"message": "Personality saved successfully"}
+
     except HTTPException:
         raise
-    except Error:
+    except Error as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to save personality"
+            detail=f"Failed to save personality: {str(e)}"
         )
