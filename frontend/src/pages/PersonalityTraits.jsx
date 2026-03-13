@@ -190,7 +190,7 @@ function GenreModal({ profile, open, onClose }) {
             </DialogTitle>
 
             <DialogContent>
-                <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+                <Box sx={{ display: "flex", justifyContent: "center", mb: 3, pt: 3 }}>
                     <RadarChart profile={profile} size={280} expanded />
                 </Box>
 
