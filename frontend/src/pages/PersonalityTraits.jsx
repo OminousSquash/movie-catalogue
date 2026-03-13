@@ -261,7 +261,7 @@ function GenreProfiles() {
     const sorted = [...data].sort((a, b) => {
         if (sortBy === "genre") return a.genre.localeCompare(b.genre);
         if (sortBy === "users") return b.user_count - a.user_count;
-        return Math.abs(b.traits[sortBy]?.deviation || 0) - Math.abs(a.traits[sortBy]?.deviation || 0);
+        return Math.abs(b.traits[sortBy]?.deviation || 0) - (a.traits[sortBy]?.deviation || 0);
     });
 
     return (
