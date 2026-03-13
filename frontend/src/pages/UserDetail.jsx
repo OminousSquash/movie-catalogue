@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { updateAppUserDetailsService } from "../services/updateAppUserDetailsService";
 import api from "../services/api";
 
 const getAuthHeaders = () => {
@@ -71,18 +72,7 @@ export default function Account({ isAuthenticated }) {
     setSuccess("");
     setLoading(true);
     try {
-      await api.put(
-        "/account/update",
-        {
-          app_username: username.trim(),
-          openness: parseInt(ratings["Openness"]),
-          agreeableness: parseInt(ratings["Agreeableness"]),
-          emotional_stability: parseInt(ratings["Emotional Stability"]),
-          conscientiousness: parseInt(ratings["Conscientiousness"]),
-          extraversion: parseInt(ratings["Extraversion"]),
-        },
-        { headers: getAuthHeaders() }
-      );
+      await updateAppUserDetailsService(username, ratings);
       setSuccess("Changes saved successfully!");
     } catch (err) {
       const detail = err?.response?.data?.detail;
