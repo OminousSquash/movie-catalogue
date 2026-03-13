@@ -7,7 +7,6 @@ import MovieCard from "../components/dashboard/MovieCard";
 import { fetchRecommendedMoviesService } from "../services/fetchRecommendedMoviesService";
 import { useAddToList } from "../hooks/useAddToList";
 import ListPickerMenu from "../components/ListPickerMenu";
-import "./ListDetails.css";
 
 export default function RecommendedMovies({ isAuthenticated }) {
   const navigate = useNavigate();
@@ -72,19 +71,15 @@ export default function RecommendedMovies({ isAuthenticated }) {
             <section key={group.genre} className="list-details-genre-section">
               <Typography variant="h5" className="list-details-genre-title">{group.genre}</Typography>
               <Divider sx={{ mb: 1.5 }} />
-              <div className="list-details-genre-row">
-                {group.titles.map((movie, index) => (
-                  <div key={`${group.genre}-${movie.tconst ?? movie.primary_title ?? index}`} className="list-details-movie-card">
-                    <MovieCard
-                      movie={typeof movie === "string" ? { primary_title: movie } : movie}
-                      compact
-                      isAuthenticated={isAuthenticated}
-                      onAddClick={handleOpenAddMenu}
-                      isAddBusy={Boolean(addingToListId)}
-                    />
-                  </div>
-                ))}
-              </div>
+              {group.titles.map((movie, index) => (
+                <MovieCard
+                  key={`${group.genre}-${movie.tconst ?? movie.primary_title ?? index}`}
+                  movie={typeof movie === "string" ? { primary_title: movie } : movie}
+                  isAuthenticated={isAuthenticated}
+                  onAddClick={handleOpenAddMenu}
+                  isAddBusy={Boolean(addingToListId)}
+                />
+              ))}
             </section>
           ))
         )}
