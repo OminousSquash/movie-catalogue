@@ -295,7 +295,7 @@ def get_predicted_ratings_service(
                 pr.tconst as tconst,
                 m.primary_title as primary_title,
                 m.start_year as start_year,
-                pr.predicted_rating as predicated_rating,
+                pr.predicted_rating as predicted_rating,
                 pr.prediction_uncertainty as prediction_uncertainity
             FROM predicted_ratings pr
             JOIN movies m ON pr.tconst = m.tconst
