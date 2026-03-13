@@ -105,8 +105,6 @@ CREATE TABLE IF NOT EXISTS app_users (
     conscientiousness INT,
     extraversion INT,
 
-    
-
     INDEX idx_app_users_username (app_username)
 );
 
@@ -131,6 +129,14 @@ CREATE TABLE IF NOT EXISTS app_user_list_movies (
     FOREIGN KEY (tconst)
         REFERENCES movies(tconst)
         ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS app_user_recommended_genres (
+    app_user_id INT NOT NULL,
+    genre_id INT NOT NULL,
+    PRIMARY KEY (app_user_id, genre_id),
+    FOREIGN KEY (app_user_id) REFERENCES app_users(app_user_id) ON DELETE CASCADE,
+    FOREIGN KEY (genre_id) REFERENCES genres(genre_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tags (

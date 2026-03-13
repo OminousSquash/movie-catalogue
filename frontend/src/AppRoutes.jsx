@@ -9,6 +9,7 @@ import PersonalityTraits from "./pages/PersonalityTraits";
 import RecentMovies from "./pages/RecentMovies";
 import GenreReports from "./pages/GenreReports";import Account from "./pages/UserDetail";
 import ViewerRatingStatistics from "./pages/ViewerRatingStatistics";
+import RecommendedMovies from "./pages/RecommendedMovies";
 import TrendAnalysis from "./pages/TrendAnalysis";
 
 
@@ -39,6 +40,14 @@ function AppRoutes({ isAuthenticated }) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <Account isAuthenticated={isAuthenticated} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/recommended_movies"
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <RecommendedMovies isAuthenticated={isAuthenticated} />
           </ProtectedRoute>
         }
       />

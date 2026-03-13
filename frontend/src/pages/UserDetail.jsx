@@ -11,13 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("access_token");
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
-};
+import { updateAppUserDetailsService, fetchUserDetailsService } from "../services/appUserDetailsService";
 
 export default function Account({ isAuthenticated }) {
   const navigate = useNavigate();
@@ -42,12 +36,9 @@ export default function Account({ isAuthenticated }) {
 
   // fetch current user details on load
   useEffect(() => {
-    const fetchUserDetails = async () => {
+    const loadUserDetails = async () => {
       try {
-        const response = await api.get("/account/details", {
-          headers: getAuthHeaders(),
-        });
-        const data = response.data;
+        const data = await fetchUserDetailsService();
         setUsername(data.app_username);
         setRatings({
           Openness: data.openness ?? 5,
@@ -61,7 +52,7 @@ export default function Account({ isAuthenticated }) {
       }
     };
     if (isAuthenticated) {
-      fetchUserDetails();
+      loadUserDetails();
     }
   }, [isAuthenticated]);
 
@@ -71,18 +62,7 @@ export default function Account({ isAuthenticated }) {
     setSuccess("");
     setLoading(true);
     try {
-      await api.put(
-        "/account/update",
-        {
-          app_username: username.trim(),
-          openness: parseInt(ratings["Openness"]),
-          agreeableness: parseInt(ratings["Agreeableness"]),
-          emotional_stability: parseInt(ratings["Emotional Stability"]),
-          conscientiousness: parseInt(ratings["Conscientiousness"]),
-          extraversion: parseInt(ratings["Extraversion"]),
-        },
-        { headers: getAuthHeaders() }
-      );
+      await updateAppUserDetailsService(username, ratings);
       setSuccess("Changes saved successfully!");
     } catch (err) {
       const detail = err?.response?.data?.detail;

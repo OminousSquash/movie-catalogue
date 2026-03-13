@@ -23,7 +23,8 @@ const common_pages = [
   {label: "Recent Movies", path:"/recent_movies"},
   {label: "Trend Analysis", path: "/trend-analysis"}
 ];
-const auth_settings = [{label: "Your Lists", path: "/user-lists"}, {label: "User Details", path: "/account"}, {label: "Logout", path: null}];
+const auth_settings = [{label: "Your Lists", path: "/user-lists"}, {label: "User Details", path: "/account"}, {label: "Recommended Movies", path: "/recommended_movies"}, {label: "Logout", path: null}];
+
 
 function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
