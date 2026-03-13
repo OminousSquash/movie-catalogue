@@ -105,7 +105,7 @@ function PopularityChart() {
                     Genre Popularity
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Average rating per genre from our dataset which is sorted from highest to lowest. Bar brightness reflects average vote count = brighter means more votes backing the score.
+                    Average rating per genre from our dataset which is sorted from highest to lowest ratings. The bar's brightness tells you the average vote count, so a brighter bar means more votes.
                 </Typography>
             </Box>
 
@@ -224,7 +224,7 @@ function PolarisationChart() {
                     Genre Polarisation
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Genres are ranked by how much they divide audiences. The <strong style={{ color: "#e8c97e" }}>Polarisation Score</strong> combines how wildly ratings vary with how many people gave extreme scores (very high or very low) — a higher score means more love-it-or-hate-it reactions. 
+                    Genres are ranked by how much they divide audiences. The <strong style={{ color: "#e8c97e" }}>Polarisation Score</strong> combines how widely ratings vary with how many people gave extreme scores (very high (8+) or very low (5 or lower)) — a higher score means more love it or hate it reactions.
                     The <strong style={{ color: "#7e9ee8" }}>Rating Spread (IQR)</strong> shows the gap between the middle 50% of ratings: a wide spread means even typical viewers disagree significantly on quality.
                 </Typography>
             </Box>
@@ -330,7 +330,7 @@ export default function GenreReports() {
                     Genre Popularity & Polarisation
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Shows which genres are consistently doing well
+                    Helps understanding which genres constantly perform well and which divide the viewers - support acquisition, promotions and in general for decision making.
                 </Typography>
             </Box>
 
