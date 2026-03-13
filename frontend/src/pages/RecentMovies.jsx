@@ -29,7 +29,6 @@ export default function RecentMovies({ isAuthenticated = false }) {
         try {
             const data = await getRecentMovies();
             setRecentMovies(Array.isArray(data) ? data : []);
-            console.log(data)
         } catch (err) {
             console.error("Failed to fetch recent movies", err);
             setError("Failed to fetch recent movies.");
