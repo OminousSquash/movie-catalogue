@@ -23,7 +23,7 @@ const TRAITS = ["openness", "agreeableness", "emotional_stability", "conscientio
 const TRAIT_LABELS = {openness: "Openness", agreeableness: "Agreeableness", emotional_stability: "Emotional Stability", conscientiousness: "Conscientiousness", extraversion: "Extraversion",
 };
 
-const TRAIT_SHORT = {openness: "Open.", agreeableness: "Agree.", emotional_stability: "E. Stability", extraversion: "Extra."};
+const TRAIT_SHORT = {openness: "Open.", agreeableness: "Agree.", emotional_stability: "E. Stability",conscientiousness: "Consc.", extraversion: "Extra."};
 
 function RadarChart({profile, size = 160, expanded = false}) {
     const cx = size / 2;
