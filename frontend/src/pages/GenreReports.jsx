@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     Box, 
     Typography, 
@@ -55,7 +55,7 @@ function CustomTooltip({ active, payload, label }) {
 
 function GenreJumper({genres, selected, onChange}){
     return (
-        <FormControl size="small" sx="{{ minwidth: 200 }}">
+        <FormControl size="small" sx={{ minWidth: 200 }}>
             <InputLabel>Jump To Genre</InputLabel>
             <Select value={selected} label="Jump To Genre" onChange={e => onChange(e.target.value)}>
                 <MenuItem value=""><em>All Genres</em></MenuItem>
@@ -175,7 +175,7 @@ function PopularityChart() {
                             const fill = isHighlighted 
                                 ? "#f5e199" 
                                 : highlighted 
-                                    ? `rgba(232,201,126,${(opacity * 0.35).toFixed(2)})` : `rgba(232,201,126),${opacity.toFixed(2)})`;
+                                    ? `rgba(232,201,126,${(opacity * 0.35).toFixed(2)})` : `rgba(232,201,126,${opacity.toFixed(2)})`;
                             return <Cell key={entry.genre} fill={fill} />;
                         })}
                     </Bar>
@@ -283,7 +283,7 @@ function PolarisationChart() {
                         type="category"
                         dataKey="genre"
                         width={75}
-                        ticks={(props) => {
+                        tick={(props) => {
                             const {x,y,payload} = props;
                             const isHighlighted = payload.value === highlighted;
                             return (
