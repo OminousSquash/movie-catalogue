@@ -12,13 +12,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { updateAppUserDetailsService } from "../services/updateAppUserDetailsService";
-import api from "../services/api";
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("access_token");
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
-};
+import { fetchUserDetails } from "../services/fetchUserDetails";
 
 export default function Account({ isAuthenticated }) {
   const navigate = useNavigate();
@@ -43,12 +37,9 @@ export default function Account({ isAuthenticated }) {
 
   // fetch current user details on load
   useEffect(() => {
-    const fetchUserDetails = async () => {
+    const loadUserDetails = async () => {
       try {
-        const response = await api.get("/account/details", {
-          headers: getAuthHeaders(),
-        });
-        const data = response.data;
+        const data = await fetchUserDetails();
         setUsername(data.app_username);
         setRatings({
           Openness: data.openness ?? 5,
@@ -62,7 +53,7 @@ export default function Account({ isAuthenticated }) {
       }
     };
     if (isAuthenticated) {
-      fetchUserDetails();
+      loadUserDetails();
     }
   }, [isAuthenticated]);
 
