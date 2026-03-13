@@ -8,8 +8,8 @@ router = APIRouter(prefix="/account", tags=["account handling"])
 
 @router.post("/store_personality")
 def save_personality(
-    personality_dto: StorePersonalityDTO,
+    store_personality_dto: StorePersonalityDTO,
     db = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    return store_personality_service(personality_dto=personality_dto, db=db, current_user=current_user)
+    return store_personality_service(store_personality_dto=store_personality_dto, db=db, current_user=current_user)

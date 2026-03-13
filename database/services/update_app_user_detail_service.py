@@ -10,7 +10,14 @@ def update_app_user_detail_service(
 ):
     try:
         cursor = db.cursor(dictionary=True)
-        recommended_genres = get_recommended_genres_service(update_dto=update_dto, db=db)
+        user_traits = {
+            "openness": update_dto.openness,
+            "agreeableness": update_dto.agreeableness,
+            "emotional_stability": update_dto.emotional_stability,
+            "conscientiousness": update_dto.conscientiousness,
+            "extraversion": update_dto.extraversion,
+        }
+        recommended_genres = get_recommended_genres_service(user_traits=user_traits, db=db)
         cursor.execute(
             """
             UPDATE app_users
