@@ -1,6 +1,7 @@
 from mysql.connector import Error, MySQLConnection
 from fastapi import HTTPException, status
 from backend.DTOs.update_app_user_dto import UpdateAppUserDTO
+from database.services.genre_recommend_service import get_recommended_genres_service
 
 def update_app_user_detail_service(
     update_dto: UpdateAppUserDTO,
@@ -9,7 +10,7 @@ def update_app_user_detail_service(
 ):
     try:
         cursor = db.cursor(dictionary=True)
-
+        recommended_genres = get_recommended_genres_service(update_dto=update_dto, db=db)
         cursor.execute(
             """
             UPDATE app_users
@@ -19,7 +20,8 @@ def update_app_user_detail_service(
                 agreeableness = %s,
                 emotional_stability = %s,
                 conscientiousness = %s,
-                extraversion = %s
+                extraversion = %s,
+                recommended_genres = %s
             WHERE app_user_id = %s
             """,
             (
@@ -29,12 +31,15 @@ def update_app_user_detail_service(
                 update_dto.emotional_stability,
                 update_dto.conscientiousness,
                 update_dto.extraversion,
+                ",".join(recommended_genres),
                 current_user,
             )
         )
         db.commit()
 
-        return {"message": "User details updated successfully"}
+        return {
+            "message": "User details updated successfully",
+        }
 
     except HTTPException:
         raise

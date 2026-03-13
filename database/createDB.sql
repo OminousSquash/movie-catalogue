@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS app_users (
     conscientiousness INT,
     extraversion INT,
 
-    
+    recommended_genres VARCHAR(255),
 
     INDEX idx_app_users_username (app_username)
 );
