@@ -1,5 +1,6 @@
 from mysql.connector import Error, MySQLConnection
 from fastapi import HTTPException, status
+from database.services.movies_service import _get_poster_index, POSTER_BASE_URL
 
 def fetch_recommended_movies_service(
     current_user: int,
@@ -43,6 +44,10 @@ def fetch_recommended_movies_service(
                 (genre_id,)
             )
             movies = cursor.fetchall()
+            poster_index = _get_poster_index()
+            for row in movies:
+                poster_name = poster_index.get(row.get("tconst", ""))
+                row["poster"] = f"{POSTER_BASE_URL}/{poster_name}" if poster_name else None
             if movies:
                 genre_name = movies[0]["genre"]
                 results[genre_name] = movies
