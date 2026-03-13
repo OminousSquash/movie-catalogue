@@ -7,7 +7,7 @@ const getAuthHeaders = () => {
 };
 
 
-export const fetchUserDetails = async () => {
+export const fetchUserDetailsService = async () => {
   const response = await api.get("/account/details", {
     headers: getAuthHeaders(),
   });

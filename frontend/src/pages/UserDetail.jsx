@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { updateAppUserDetailsService } from "../services/updateAppUserDetailsService";
-import { fetchUserDetails } from "../services/fetchUserDetails";
+import { fetchUserDetailsService } from "../services/fetchUserDetailsService";
 
 export default function Account({ isAuthenticated }) {
   const navigate = useNavigate();
@@ -39,7 +39,7 @@ export default function Account({ isAuthenticated }) {
   useEffect(() => {
     const loadUserDetails = async () => {
       try {
-        const data = await fetchUserDetails();
+        const data = await fetchUserDetailsService();
         setUsername(data.app_username);
         setRatings({
           Openness: data.openness ?? 5,
