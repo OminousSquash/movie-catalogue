@@ -14,8 +14,17 @@ import MenuItem from '@mui/material/MenuItem';
 import MovieIcon from '@mui/icons-material/Movie';
 import { useNavigate } from "react-router-dom";
 
-const common_pages = [{label: "Dashboard", path: "/"}, {label: "View Lists", path: "/view-lists"}, {label: "Genre Reports", path: "/genre-reports"}, {label: "Personality", path: "/personality"}, {label: "Viewer Ratings", path: "/viewer-ratings"}, {label:"Recent Movies", path:"/recent_movies"}];
+const common_pages = [
+  {label: "Dashboard", path: "/"}, 
+  {label: "View Lists", path: "/view-lists"}, 
+  {label: "Genre Reports", path: "/genre-reports"}, 
+  {label: "Personality", path: "/personality"}, 
+  {label: "Viewer Ratings", path: "/viewer-ratings"}, 
+  {label: "Recent Movies", path:"/recent_movies"},
+  {label: "Trend Analysis", path: "/trend-analysis"}
+];
 const auth_settings = [{label: "Your Lists", path: "/user-lists"}, {label: "User Details", path: "/account"}, {label: "Recommended Movies", path: "/recommended_movies"}, {label: "Logout", path: null}];
+
 
 function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -116,7 +125,7 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
             >
               {common_pages.map((page) => (
                 <MenuItem key={page.label} onClick={() => handleNavClick(page.path)}
-                sx={{ '&:hover': { background: 'rgba(232,201,126,0.08' } }}>
+                sx={{ '&:hover': { background: 'rgba(232,201,126,0.08)' } }}>
                   <Typography sx={{ color: 'text.primary', fontSize: '0.9 rem' }}>{page.label}</Typography>
                 </MenuItem>
               ))}

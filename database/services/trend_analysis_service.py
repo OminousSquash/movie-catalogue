@@ -2,7 +2,7 @@ from mysql.connector import MySQLConnection, Error
 from backend.DTOs.genre_contributor_trend_analysis_dto import GenreContributorTrendAnalysisDTO
 from fastapi import HTTPException, status
 
-def get_trend_analytics_service(
+def get_genre_trend_service(
     db: MySQLConnection
 ):
     try:

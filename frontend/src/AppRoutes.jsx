@@ -10,6 +10,7 @@ import RecentMovies from "./pages/RecentMovies";
 import GenreReports from "./pages/GenreReports";import Account from "./pages/UserDetail";
 import ViewerRatingStatistics from "./pages/ViewerRatingStatistics";
 import RecommendedMovies from "./pages/RecommendedMovies";
+import TrendAnalysis from "./pages/TrendAnalysis";
 
 
 function ProtectedRoute({ isAuthenticated, children }) {
@@ -55,6 +56,7 @@ function AppRoutes({ isAuthenticated }) {
       <Route path="/movies/:tconst" element={<MovieDetails />} />
       <Route path="/contributors/:nconst" element={<ContributorDetails />} />
       <Route path="/recent_movies" element={<RecentMovies isAuthenticated={isAuthenticated} />} />
+      <Route path="/trend-analysis" element={<TrendAnalysis />} />
     </Routes>
   );
 }
