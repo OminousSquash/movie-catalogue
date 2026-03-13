@@ -16,7 +16,8 @@ import DashboardLayout from "../components/dashboard/DashboardLayout";
 import FilterPanel from "../components/dashboard/FilterPanel";
 import MovieCard from "../components/dashboard/MovieCard";
 import { searchMovies, getGenres } from "../services/movieService";
-import { addMovieToList, formatApiErrorDetail, getMyLists } from "../services/userListService";
+import { useAddToList } from "../hooks/useAddToList";
+import ListPickerMenu from "../components/ListPickerMenu"
 
 const INITIAL_FILTERS = {
   title: "",
@@ -33,6 +34,10 @@ const INITIAL_FILTERS = {
 };
 
 const Dashboard = ({ isAuthenticated = false }) => {
+  const {
+    message, addingToListId, listPickerAnchorEl, listPickerLoading,
+    myLists, handleOpenAddMenu, handleCloseAddMenu, handleAddMovieToList,
+  } = useAddToList();
   const [filterState, setFilterState] = useState(INITIAL_FILTERS);
   const [availableGenres, setAvailableGenres] = useState([]);
   const [genresOpen, setGenresOpen] = useState(true);
@@ -42,13 +47,6 @@ const Dashboard = ({ isAuthenticated = false }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(null);
-  const [myLists, setMyLists] = useState([]);
-  const [listsLoaded, setListsLoaded] = useState(false);
-  const [listPickerAnchorEl, setListPickerAnchorEl] = useState(null);
-  const [activeMovieTconst, setActiveMovieTconst] = useState(null);
-  const [listPickerLoading, setListPickerLoading] = useState(false);
-  const [addingToListId, setAddingToListId] = useState(null);
-  const [message, setMessage] = useState({ type: "", text: "" });
   const lastFilters = useRef({});
   
   useEffect(() => {
@@ -88,54 +86,6 @@ const Dashboard = ({ isAuthenticated = false }) => {
 
   const handleNext = () => {
     if (currentPage < totalPages) handleSearch(lastFilters.current, currentPage + 1);
-  };
-
-  const handleOpenAddMenu = async (event, movie) => {
-    if (!isAuthenticated) {
-      return;
-    }
-    setMessage({ type: "", text: "" });
-    setActiveMovieTconst(movie.tconst);
-    setListPickerAnchorEl(event.currentTarget);
-    if (!listsLoaded) {
-      setListPickerLoading(true);
-      try {
-        const lists = await getMyLists();
-        setMyLists(lists || []);
-        setListsLoaded(true);
-      } catch (err) {
-        setMessage({
-          type: "error",
-          text: formatApiErrorDetail(err, "Failed to load your lists."),
-        });
-      } finally {
-        setListPickerLoading(false);
-      }
-    }
-  };
-
-  const handleCloseAddMenu = () => {
-    setListPickerAnchorEl(null);
-    setActiveMovieTconst(null);
-    setAddingToListId(null);
-  };
-
-  const handleAddMovieToList = async (listId) => {
-    if (!activeMovieTconst) {
-      return;
-    }
-    setAddingToListId(listId);
-    try {
-      const result = await addMovieToList(listId, activeMovieTconst);
-      setMessage({ type: "success", text: result?.message || "Movie added successfully." });
-      handleCloseAddMenu();
-    } catch (err) {
-      setMessage({
-        type: "error",
-        text: formatApiErrorDetail(err, "Failed to add movie to list."),
-      });
-      setAddingToListId(null);
-    }
   };
 
   const content = (
@@ -246,27 +196,15 @@ const Dashboard = ({ isAuthenticated = false }) => {
           ),
         }}
       />
-      <Menu
+
+      <ListPickerMenu
         anchorEl={listPickerAnchorEl}
-        open={Boolean(listPickerAnchorEl)}
         onClose={handleCloseAddMenu}
-      >
-        {listPickerLoading ? (
-          <MenuItem disabled>Loading your lists...</MenuItem>
-        ) : myLists.length === 0 ? (
-          <MenuItem disabled>No lists yet</MenuItem>
-        ) : (
-          myLists.map((list) => (
-            <MenuItem
-              key={list.list_id}
-              onClick={() => handleAddMovieToList(list.list_id)}
-              disabled={addingToListId === list.list_id}
-            >
-              {addingToListId === list.list_id ? "Adding..." : list.list_name}
-            </MenuItem>
-          ))
-        )}
-      </Menu>
+        lists={myLists}
+        loading={listPickerLoading}
+        addingToListId={addingToListId}
+        onSelect={handleAddMovieToList}
+      />
     </>
   );
 };

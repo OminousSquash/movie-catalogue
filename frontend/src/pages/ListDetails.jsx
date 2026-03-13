@@ -12,7 +12,7 @@ import { formatApiErrorDetail, getUserListById } from "../services/userListServi
 import MovieCard from "../components/dashboard/MovieCard";
 import "./ListDetails.css";
 
-export default function ListDetails() {
+export default function ListDetails({isAuthenticated}) {
   const { listId } = useParams();
   const [listData, setListData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -85,6 +85,7 @@ export default function ListDetails() {
                             : movie
                         }
                         compact
+                        isAuthenticated={isAuthenticated}
                       />
                     </div>
                   ))}

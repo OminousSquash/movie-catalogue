@@ -1,15 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
-  CircularProgress,
-  Container,
-  Divider,
-  Paper,
-  Typography,
+  Alert, CircularProgress, Container, Divider, Paper, Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import MovieCard from "../components/dashboard/MovieCard";
 import { fetchRecommendedMoviesService } from "../services/fetchRecommendedMoviesService";
+import { useAddToList } from "../hooks/useAddToList";
+import ListPickerMenu from "../components/ListPickerMenu";
 import "./ListDetails.css";
 
 export default function RecommendedMovies({ isAuthenticated }) {
@@ -17,6 +14,11 @@ export default function RecommendedMovies({ isAuthenticated }) {
   const [moviesData, setMoviesData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const {
+    message, addingToListId, listPickerAnchorEl, listPickerLoading,
+    myLists, handleOpenAddMenu, handleCloseAddMenu, handleAddMovieToList,
+  } = useAddToList();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -41,50 +43,61 @@ export default function RecommendedMovies({ isAuthenticated }) {
   const groupedMovies = useMemo(() => {
     if (!moviesData || typeof moviesData !== "object") return [];
     return Object.entries(moviesData)
-      .map(([genre, movies]) => ({
-        genre,
-        titles: Array.isArray(movies) ? movies : [],
-      }))
+      .map(([genre, movies]) => ({ genre, titles: Array.isArray(movies) ? movies : [] }))
       .filter((group) => group.titles.length > 0);
   }, [moviesData]);
 
   return (
-    <Container sx={{ py: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Recommended For You
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Top movies based on your personality traits.
-      </Typography>
+    <>
+      <Container sx={{ py: 3 }}>
+        <Typography variant="h4" gutterBottom>Recommended For You</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Top movies based on your personality traits.
+        </Typography>
 
-      {loading ? (
-        <CircularProgress />
-      ) : error ? (
-        <Alert severity="error">{error}</Alert>
-      ) : groupedMovies.length === 0 ? (
-        <Paper sx={{ p: 2 }}>
-          <Typography>No recommendations found. Try updating your personality traits.</Typography>
-        </Paper>
-      ) : (
-        groupedMovies.map((group) => (
-          <section key={group.genre} className="list-details-genre-section">
-            <Typography variant="h5" className="list-details-genre-title">
-              {group.genre}
-            </Typography>
-            <Divider sx={{ mb: 1.5 }} />
-            <div className="list-details-genre-row">
-              {group.titles.map((movie, index) => (
-                <div key={`${group.genre}-${movie.tconst ?? movie.primary_title ?? index}`} className="list-details-movie-card">
-                  <MovieCard
-                    movie={typeof movie === "string" ? { primary_title: movie } : movie}
-                    compact
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        ))
-      )}
-    </Container>
+        {message.text && (
+          <Alert severity={message.type || "info"} sx={{ mb: 1.5 }}>{message.text}</Alert>
+        )}
+
+        {loading ? (
+          <CircularProgress />
+        ) : error ? (
+          <Alert severity="error">{error}</Alert>
+        ) : groupedMovies.length === 0 ? (
+          <Paper sx={{ p: 2 }}>
+            <Typography>No recommendations found. Try updating your personality traits.</Typography>
+          </Paper>
+        ) : (
+          groupedMovies.map((group) => (
+            <section key={group.genre} className="list-details-genre-section">
+              <Typography variant="h5" className="list-details-genre-title">{group.genre}</Typography>
+              <Divider sx={{ mb: 1.5 }} />
+              <div className="list-details-genre-row">
+                {group.titles.map((movie, index) => (
+                  <div key={`${group.genre}-${movie.tconst ?? movie.primary_title ?? index}`} className="list-details-movie-card">
+                    <MovieCard
+                      movie={typeof movie === "string" ? { primary_title: movie } : movie}
+                      compact
+                      isAuthenticated={isAuthenticated}
+                      onAddClick={handleOpenAddMenu}
+                      isAddBusy={Boolean(addingToListId)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))
+        )}
+      </Container>
+
+      <ListPickerMenu
+        anchorEl={listPickerAnchorEl}
+        onClose={handleCloseAddMenu}
+        lists={myLists}
+        loading={listPickerLoading}
+        addingToListId={addingToListId}
+        onSelect={handleAddMovieToList}
+      />
+    </>
   );
 }

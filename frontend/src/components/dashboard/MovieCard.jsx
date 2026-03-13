@@ -9,6 +9,7 @@ import {
   Box,
   Chip,
   Stack,
+  IconButton
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -93,18 +94,32 @@ const MovieCard = ({
       )}
 
       <CardContent sx={{ flex: 1, py: 1.5, px: 2, "&:last-child": { pb: 1.5 } }}>
-        {isAuthenticated && !compact ? (
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddCircleOutlineIcon />}
-            onClick={(event) => onAddClick?.(event, movie)}
-            disabled={isAddBusy}
-            sx={{ mb: 1, fontWeight: 700 }}
-          >
-            Add to List
-          </Button>
-        ) : null}
+        {isAuthenticated 
+        ? 
+          (compact 
+            ? (
+              <IconButton
+                size="small"
+                onClick={(event) => onAddClick?.(event, movie)}
+                disabled={isAddBusy}
+                sx={{ color: "#e8c97e", p: 0.5 }}
+              >
+                <AddCircleOutlineIcon />
+              </IconButton>
+            ) 
+            : (
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<AddCircleOutlineIcon />}
+                onClick={(event) => onAddClick?.(event, movie)}
+                disabled={isAddBusy}
+                sx={{ mb: 1, fontWeight: 700 }}
+              >
+                Add to List
+              </Button>
+            )) 
+        : (null)}
 
         <Typography
           variant="h6"
