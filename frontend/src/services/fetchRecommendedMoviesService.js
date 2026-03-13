@@ -6,9 +6,8 @@ const getAuthHeaders = () => {
   return { Authorization: `Bearer ${token}` };
 };
 
-
-export const fetchUserDetailsService = async () => {
-  const response = await api.get("/account/details", {
+export const fetchRecommendedMoviesService = async () => {
+  const response = await api.get("/recommended_movies/", {
     headers: getAuthHeaders(),
   });
   return response.data;

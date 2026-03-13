@@ -20,7 +20,7 @@ def fetch_recommended_movies_service(
             )
 
         genre_ids = [row["genre_id"] for row in genre_rows]
-        
+
         results = {}
         for genre_id in genre_ids:
             cursor.execute(
@@ -31,7 +31,6 @@ def fetch_recommended_movies_service(
                     m.start_year,
                     m.average_rating,
                     m.num_votes,
-                    m.poster_url,
                     g.genre
                 FROM movies m
                 JOIN movie_genres mg ON mg.tconst = m.tconst

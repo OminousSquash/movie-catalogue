@@ -13,7 +13,7 @@ import {
   Slider,
 } from "@mui/material";
 import { login, signup } from "../services/authService";
-import { savePersonality } from "../services/storePersonalityService";
+import { savePersonality } from "../services/appUserDetailsService";
 import "./LoginSignup.css";
 
 export default function LoginSignup({ onAuthSuccess, embedded = false, onCancel }) {

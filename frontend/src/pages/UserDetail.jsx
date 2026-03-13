@@ -11,8 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { updateAppUserDetailsService } from "../services/updateAppUserDetailsService";
-import { fetchUserDetailsService } from "../services/fetchUserDetailsService";
+import { updateAppUserDetailsService, fetchUserDetailsService } from "../services/appUserDetailsService";
 
 export default function Account({ isAuthenticated }) {
   const navigate = useNavigate();

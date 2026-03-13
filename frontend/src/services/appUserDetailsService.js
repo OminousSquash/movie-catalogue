@@ -6,6 +6,28 @@ const getAuthHeaders = () => {
   return { Authorization: `Bearer ${token}` };
 };
 
+export const fetchUserDetailsService = async () => {
+  const response = await api.get("/account/details", {
+    headers: getAuthHeaders(),
+  });
+  return response.data;
+};
+
+export const savePersonality = async (ratings) => {
+  const response = await api.post(
+    "/account/store_personality",
+    {
+      openness: parseInt(ratings["Openness"]),
+      agreeableness: parseInt(ratings["Agreeableness"]),
+      emotional_stability: parseInt(ratings["Emotional Stability"]),
+      conscientiousness: parseInt(ratings["Conscientiousness"]),
+      extraversion: parseInt(ratings["Extraversion"]),
+    },
+    { headers: getAuthHeaders() }
+  );
+  return response.data;
+};
+
 export const updateAppUserDetailsService = async (username, ratings) => {
   const response = await api.put(
       "/account/update",
