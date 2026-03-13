@@ -283,7 +283,16 @@ function PolarisationChart() {
                         type="category"
                         dataKey="genre"
                         width={75}
-                        tick={{ fill: "#f0ece3", fontSize: 12 }}
+                        ticks={(props) => {
+                            const {x,y,payload} = props;
+                            const isHighlighted = payload.value === highlighted;
+                            return (
+                                <text x={x} y={y} dy={4} textAnchor="end" fill={isHighlighted ? "#e8c97e" : "#f0ece3"} fontWeight={isHighlighted ? 700 : 400} fontSize={12}>
+                                    {payload.value}
+                                </text>
+                            );
+                        }}
+                    
                         axisLine={false}
                         tickLine={false}
                     />
@@ -291,8 +300,20 @@ function PolarisationChart() {
                     <Legend
                         wrapperStyle={{ fontSize: "0.75rem", color: "#9a9082", paddingTop: 8 }}
                     />
-                    <Bar dataKey="polarisation_score" name="Polarisation Score" fill="rgba(232,201,126,0.75)" radius={[0, 3, 3, 0]} maxBarSize={14} />
-                    <Bar dataKey="iqr" name="IQR (rating spread)" fill="rgba(126,158,232,0.6)" radius={[0, 3, 3, 0]} maxBarSize={14} />
+                    <Bar dataKey="polarisation_score" name="Polarisation Score" radius={[0, 3, 3, 0]} maxBarSize={14}>
+                        {data.map((entry) => {
+                            const isHighlighted = entry.genre === highlighted;
+                            const fill = isHighlighted ? "#f5e199" : highlighted ? "rgba(232,201,126,0.2)" : "rgba(232,201,126,0.75)";
+                            return <Cell key={`pol-${entry.genre}`} fill={fill} />;
+                        })}
+                    </Bar>
+                    <Bar dataKey="iqr" name="Rating Spread (IQR)" radius={[0, 3, 3, 0]} maxBarSize={14}>
+                        {data.map((entry) => {
+                            const isHighlighted = entry.genre === highlighted;
+                            const fill = isHighlighted ? "#aac4f3" : highlighted ? "rgba(126,159,213,0.2)" : "rgba(126,159,213,0.6)";
+                            return <Cell key={`iqr-${entry.genre}`} fill={fill} />;
+                        })}
+                    </Bar>
                 </BarChart>
             </ResponsiveContainer>
         </Box>
