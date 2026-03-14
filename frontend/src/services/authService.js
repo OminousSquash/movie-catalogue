@@ -5,6 +5,13 @@ const normalizeAuthResponse = (data) => ({
   token_type: data?.token_type ?? "bearer",
 });
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("access_token");
+  if (!token) return {};
+  return { Authorization: `Bearer ${token}` };
+};
+
+
 export const login = async ({ username, password }) => {
   const response = await api.post("/account/login", { username, password });
   return normalizeAuthResponse(response.data);
@@ -15,7 +22,9 @@ export const signup = async ({ username, password }) => {
   return normalizeAuthResponse(response.data);
 };
 
-export const logout = async() => {
-  const response = await api.post("/account/logout");
+export const logout = async () => {
+  const response = await api.post("/account/logout", {}, {
+    headers: getAuthHeaders()
+  });
   return response.data;
-}
+};

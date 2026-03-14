@@ -4,12 +4,14 @@ import AppRoutes from "./AppRoutes";
 import NavBar from "./components/NavBar";
 import LoginSignup from "./pages/LoginSignup";
 import { logout } from "./services/authService";
+import { useNavigate } from "react-router-dom";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(localStorage.getItem("access_token"))
   );
   const [authOpen, setAuthOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
@@ -23,6 +25,7 @@ function App() {
     } finally {
       localStorage.removeItem("access_token");
       setIsAuthenticated(false);
+      navigate("/");
     }
   };
 
