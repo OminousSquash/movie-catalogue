@@ -85,7 +85,7 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
               textDecoration: 'none',
             }}
           >
-            LOGO
+            MOVIEBOX
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -146,7 +146,7 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
               textDecoration: 'none',
             }}
           >
-            LOGO
+            MOVIEBOX 
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, gap: 0.5 }}>
             {common_pages.map((page) => (
