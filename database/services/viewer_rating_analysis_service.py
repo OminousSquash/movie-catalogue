@@ -1,7 +1,8 @@
 from mysql.connector import MySQLConnection, Error
-from sklearn.cluster import KMeans
 from fastapi import HTTPException, status
 import pandas as pd
+from backend.utils.redis_client import redis_client
+import json
 
 
 def _validate_genres_exist(cursor, genres: list[str]):
@@ -75,6 +76,14 @@ def get_low_rating_genres_service(db:MySQLConnection):
 
 def get_correlation_matrix_service(db: MySQLConnection):
     try:
+
+        cache_key = "genre_correlation_matrix"
+
+        cached_result = redis_client.get(cache_key)
+
+        if cached_result:
+            return json.loads(cached_result)
+
         cursor = db.cursor(dictionary=True)
 
         query = """
@@ -107,11 +116,19 @@ def get_correlation_matrix_service(db: MySQLConnection):
 
         correlation_matrix = user_genre_matrix.corr(method="pearson")
 
-        return correlation_matrix.to_dict()
+        result = correlation_matrix.to_dict()
+
+        redis_client.setex(cache_key, 3600, json.dumps(result))
+
+        return result
+
     except HTTPException:
         raise
     except Error:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error"
+        )
 
 
 def get_conditional_low_rating_service(db: MySQLConnection, genre_a: str, genre_b: str):
