@@ -300,7 +300,7 @@ const sorted = [...data]
                     Genre Audience Profiles.
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Each radar shows the Big Five personality profile of that genre's audience. Gold = above population average, dashed = population mean. Click any card to expand.
+                    Each radar shows the personality profile of that genre's audience against the population average. The trait below each chart shows the trait that stands out the most, so up arrow means above average, down arrow means below. Sorts by a trait to rank genres by how strongly that trait's audience prefers them. Click any card to expand.
                 </Typography>
             </Box>
             <Box sx={{mb: 3, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2}}>
