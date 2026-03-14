@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     Box, 
     Typography, 
@@ -9,19 +9,360 @@ import {
     Chip, 
     Tooltip, 
     Divider,
-    Select, 
-    MenuItem, 
-    FormControl, 
-    InputLabel, 
-    Grid
+    Grid,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from "@mui/material";
-import PsychologyIcon from "@mui/icons-material/Psychology";
+import CloseIcon from "@mui/icons-material/Close";
 import { getTraitGenreCorrelations, getGenreProfiles } from "../services/personalityService";
 
 const TRAITS = ["openness", "agreeableness", "emotional_stability", "conscientiousness", "extraversion"];
 
 const TRAIT_LABELS = {openness: "Openness", agreeableness: "Agreeableness", emotional_stability: "Emotional Stability", conscientiousness: "Conscientiousness", extraversion: "Extraversion",
 };
+
+const TRAIT_SHORT = {openness: "Open.", agreeableness: "Agree.", emotional_stability: "E. Stability",conscientiousness: "Consc.", extraversion: "Extra."};
+
+function RadarChart({profile, size = 160, expanded = false}) {
+    const cx = size / 2;
+    const cy = size / 2;
+    const r = size * 0.36;
+    const labelR = size * 0.48;
+    const n = TRAITS.length;
+
+    const angle = (i) => (Math.PI * 2 * i) / n - Math.PI / 2;
+
+    const toXY = (i, value, maxVal = 10) => {
+        const a = angle(i);
+        const len = (value / maxVal) * r;
+        return {x: cx + len * Math.cos(a), y: cy + len * Math.sin(a)};
+    };
+
+    const labelXY = (i) => {
+        const a = angle(i);
+        return {x: cx + labelR * Math.cos(a), y: cy + labelR * Math.sin(a)};
+    };
+
+    const POPULATION_MEANS = {
+        openness: 5.37, agreeableness: 4.22,
+        emotional_stability: 4.56, conscientiousness: 4.66, extraversion: 3.48,
+    };
+
+    const dataPoints = TRAITS.map((t, i) => toXY(i, profile.traits[t].avg));
+    const meanPoints = TRAITS.map((t, i) => toXY(i, POPULATION_MEANS[t]));
+    const gridLevels = [2, 4, 6, 8, 10];
+
+    const pointsStr = (pts) => pts.map(p => `${p.x},${p.y}`).join(" ");
+
+    const fontSize = expanded ? 11 : 8;
+    const valueSize = expanded ? 10 : 7;
+    const strokeWidth = expanded ? 1.5 : 1;
+
+    return (
+        <svg width={size} height={size} style={{ overflow: "visible" }}>
+            {/* Grid circles */}
+            {gridLevels.map(lvl => {
+                const pts = TRAITS.map((_, i) => toXY(i, lvl));
+                return (
+                    <polygon key={lvl} points={pointsStr(pts)} fill="none" stroke="rgba(232,201,126,0.08)" strokeWidth={0.5}/>
+                );
+            })}
+
+            {TRAITS.map((_, i) => {
+                const end = toXY(i, 10);
+                return <line key={i} x1={cx} y1={cy} x2={end.x} y2={end.y}
+                    stroke="rgba(232,201,126,0.1)" strokeWidth={0.5} />;
+            })}
+
+            <polygon points={pointsStr(meanPoints)} fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.15)" strokeWidth={strokeWidth} strokeDasharray="3,3"/>
+
+            <polygon points={pointsStr(dataPoints)} fill="rgba(232,201,126,0.18)" stroke="#e8c97e" strokeWidth={strokeWidth + 0.5}/>
+
+            {dataPoints.map((p, i) => (
+                <circle key={i} cx={p.x} cy={p.y} r={expanded ? 3 : 2}
+                    fill="#e8c97e" />
+            ))}
+
+            {TRAITS.map((t, i) => {
+                const { x, y } = labelXY(i);
+                const label = expanded ? TRAIT_LABELS[t] : TRAIT_SHORT[t];
+                const avg = profile.traits[t].avg;
+                const dev = profile.traits[t].deviation;
+                const devColor = dev > 0.05 ? "#e8c97e" : dev < -0.05 ? "#7e9ee8" : "#9a9082";
+                return (
+                    <g key={t}>
+                        <text x={x} y={y - (expanded ? 5 : 3)}
+                            textAnchor="middle"
+                            fill="#9a9082"
+                            fontSize={fontSize}
+                            fontFamily="DM Sans, sans-serif"
+                        >
+                            {label}
+                        </text>
+                        {expanded && (
+                            <text x={x} y={y + 9}
+                                textAnchor="middle"
+                                fill={devColor}
+                                fontSize={valueSize}
+                                fontFamily="DM Sans, sans-serif"
+                                fontWeight="700"
+                            >
+                                {avg.toFixed(2)} ({dev >= 0 ? "+" : ""}{dev.toFixed(2)})
+                            </text>
+                        )}
+                    </g>
+                );
+            })}
+        </svg>
+    );
+}
+
+function GenreCard({ profile, onClick }) {
+    const topTrait = TRAITS.reduce((best, t) =>
+        Math.abs(profile.traits[t].deviation) > Math.abs(profile.traits[best].deviation) ? t : best
+    , TRAITS[0]);
+    const topDev = profile.traits[topTrait].deviation;
+
+    return (
+        <Box onClick={onClick} sx={{
+            border: "1px solid rgba(232,201,126,0.1)",
+            borderRadius: 2,
+            p: 2,
+            background: "#16161a",
+            cursor: "pointer",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1,
+            "&:hover": {
+                borderColor: "rgba(232,201,126,0.4)",
+                background: "rgba(232,201,126,0.03)",
+                transform: "translateY(-2px)",
+            },
+            transition: "all 0.2s",
+        }}>
+            <Typography variant="subtitle2" sx={{
+                fontFamily: "Playfair Display, serif",
+                color: "text.primary",
+                fontSize: "0.85rem",
+                textAlign: "center",
+            }}>
+                {profile.genre}
+            </Typography>
+
+            <RadarChart profile={profile} size={130} />
+
+            <Tooltip title={`Most distinctive trait: ${TRAIT_LABELS[topTrait]} (${topDev >= 0 ? "+" : ""}${topDev.toFixed(3)} vs population)`}>
+                <Chip
+                    label={`${TRAIT_SHORT[topTrait]} ${topDev >= 0 ? "▲" : "▼"}`}
+                    size="small"
+                    sx={{ fontSize: "0.65rem", height: 20, fontWeight: 700, background: topDev >= 0 ? "rgba(232,201,126,0.15)" : "rgba(126,158,232,0.15)", color: topDev >= 0 ? "primary.main" : "secondary.main", border: `1px solid ${topDev >= 0 ? "rgba(232,201,126,0.3)" : "rgba(126,158,232,0.3)"}`}}
+                />
+            </Tooltip>
+
+            <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem" }}>
+                {profile.user_count.toLocaleString()} users
+            </Typography>
+        </Box>
+    );
+}
+
+function GenreModal({ profile, open, onClose }) {
+    if (!profile) return null;
+    return (
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth
+            PaperProps={{ sx: { background: "#16161a", border: "1px solid rgba(232,201,126,0.2)", borderRadius: 2 } }}
+        >
+            <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
+                <Typography variant="h6" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary" }}>
+                    {profile.genre}
+                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography variant="caption" color="text.secondary">
+                        {profile.user_count.toLocaleString()} users
+                    </Typography>
+                    <IconButton onClick={onClose} size="small" sx={{ color: "text.secondary" }}>
+                        <CloseIcon fontSize="small" />
+                    </IconButton>
+                </Box>
+            </DialogTitle>
+
+            <DialogContent>
+                <Box sx={{ display: "flex", justifyContent: "center", mb: 3, pt: 3 }}>
+                    <RadarChart profile={profile} size={280} expanded />
+                </Box>
+
+                <Typography variant="caption" color="text.secondary" sx={{
+                    display: "block", textAlign: "center", mb: 2,
+                    fontSize: "0.7rem", letterSpacing: "0.05em"
+                }}>
+                    Gold polygon = genre audience | Dashed = population average | Values show avg. score (deviation).
+                </Typography>
+
+                <Divider sx={{ mb: 2 }} />
+
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                    {TRAITS.map(t => {
+                        const { avg, deviation } = profile.traits[t];
+                        const pct = (avg / 10) * 100;
+                        const devColor = deviation > 0.05 ? "#e8c97e"
+                            : deviation < -0.05 ? "#7e9ee8" : "#9a9082";
+                        return (
+                            <Box key={t}>
+                                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
+                                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.75rem" }}>
+                                        {TRAIT_LABELS[t]}
+                                    </Typography>
+                                    <Box sx={{ display: "flex", gap: 1.5 }}>
+                                        <Typography variant="caption" sx={{ color: "text.primary", fontSize: "0.75rem" }}>
+                                            {avg.toFixed(2)}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ color: devColor, fontWeight: 700, fontSize: "0.75rem" }}>
+                                            {deviation >= 0 ? "+" : ""}{deviation.toFixed(3)}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                                <Box sx={{ height: 5, borderRadius: 1, background: "rgba(255,255,255,0.05)", overflow: "hidden" }}>
+                                    <Box sx={{height: "100%", width: `${pct}%`, borderRadius: 1, background: "linear-gradient(90deg, rgba(232,201,126,0.6), rgba(232,201,126,1))",}} />
+                                </Box>
+                            </Box>
+                        );
+                    })}
+                </Box>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function GenreProfiles() {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [selected, setSelected] = useState(null);
+    const [sortBy, setSortBy] = useState("genre");
+    const [genreFilter, setGenreFilter] = useState("");
+    const [correlationCache, setCorrelationCache] = useState({});
+
+    useEffect(() => {
+        (async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const result = await getGenreProfiles(null, 100);
+                setData(result);
+            } catch {
+                setError("Failed to load genre profiles.");
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, []);
+
+    useEffect(() => {
+    if (!TRAITS.includes(sortBy)) return;
+    if (correlationCache[sortBy]) return;
+    (async () => {
+        try {
+            const result = await getTraitGenreCorrelations(sortBy);
+            const lookup = {};
+            result.forEach(row => {
+                lookup[row.genre] = row.correlations[sortBy]?.r ?? 0;
+            });
+            setCorrelationCache(prev => ({ ...prev, [sortBy]: lookup }));
+        } catch { }
+    })();
+}, [sortBy]);
+
+const sorted = [...data]
+    .filter(d => !genreFilter || d.genre === genreFilter)
+    .sort((a, b) => {
+        if (sortBy === "genre") return a.genre.localeCompare(b.genre);
+        if (sortBy === "users") return b.user_count - a.user_count;
+        const lookup = correlationCache[sortBy];
+        if (lookup) {
+            return (lookup[b.genre] ?? 0) - (lookup[a.genre] ?? 0);
+        }
+        const aVal = a.traits[sortBy]?.deviation ?? 0;
+        const bVal = b.traits[sortBy]?.deviation ?? 0;
+        return bVal - aVal;
+    });
+
+    return (
+        <Box>
+            <Box sx={{ mb: 3 }}>
+                <Typography variant="h5" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}>
+                    Genre Audience Profiles.
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                    Each radar shows the personality profile of that genre's audience against the population average. The trait below each chart shows the trait that stands out the most, so up arrow means above average, down arrow means below. Sorts by a trait to rank genres by how strongly that trait's audience prefers them. Click any card to expand.
+                </Typography>
+            </Box>
+            <Box sx={{mb: 3, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2}}>
+                <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "0.65rem" }}>
+                    Sort by
+                </Typography>
+                <ToggleButtonGroup value={sortBy} exclusive onChange={(_, v) => {if (v) {setSortBy(v); if (TRAITS.includes(v)) setGenreFilter("");}}} size="small"
+                    sx={{flexWrap: "wrap", gap: 0.5, "& .MuiToggleButton-root": { border: "1px solid rgba(232,201,126,0.2)", color: "text.secondary", fontSize: "0.7rem", py: 0.3, px: 1, "&.Mui-selected": { background: "rgba(232,201,126,0.12)", color: "primary.main", borderColor: "primary.main" }}}}>
+                    <ToggleButton value="genre">A To Z</ToggleButton>
+                    <ToggleButton value="users">Most Users</ToggleButton>
+                    {TRAITS.map(t => (
+                        <ToggleButton key={t} value={t}>{TRAIT_SHORT[t]}</ToggleButton>
+                    ))}
+                </ToggleButtonGroup>
+                <Box sx={{mt: 2}}>
+                    <FormControl size="small" sx={{
+                        minWidth: 180,
+                        "& .MuiOutlinedInput-root": {
+                            "& fieldset": {borderColor: "rgba(232,201,126,0.2)"},
+                            "&:hover fieldset": {borderColor: "rgba(232,201,126,0.4)"},
+                            "&.Mui-focused fieldset": {borderColor: "#e8c97e"},
+                        },
+                        "& .MuiInputLabel-root.Mui-focused": {color: "#e8c97e"},
+                        "& .MuiInputLabel-root": {color: "#9a9082" },
+                        "& .MuiSelect-select": {color: "#f0ece3", fontSize: "0.82rem" },
+                    }}>
+                        <InputLabel>Filter by Genre</InputLabel>
+                        <Select value={genreFilter} label="Filter by genre" onChange={e => setGenreFilter(e.target.value)}
+                            MenuProps={{ PaperProps: { sx: { background: "#16161a", border: "1px solid rgba(232,201,126,0.15)" } } }}>
+                            <MenuItem value=""><em style={{ color: "#9a9082" }}>All Genres</em></MenuItem>
+                            {data.map(d => <MenuItem key={d.genre} value={d.genre} sx={{fontSize: "0.82rem", "&:hover": {background: "rgba(232,201,126,0.08)"} }}>{d.genre}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+                </Box>
+            </Box>
+
+            {loading && (
+                <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+                    <CircularProgress color="primary" size={32} thickness={2.5} />
+                </Box>
+            )}
+            {error && <Alert severity="error">{error}</Alert>}
+
+            {!loading && !error && (
+                <Grid container spacing={2}>
+                    {sorted.map(profile => (
+                        <Grid item xs={6} sm={4} md={3} lg={2} key={profile.genre}>
+                            <GenreCard profile={profile} onClick={() => setSelected(profile)} />
+                        </Grid>
+                    ))}
+                </Grid>
+            )}
+
+            <GenreModal
+                profile={selected}
+                open={Boolean(selected)}
+                onClose={() => setSelected(null)}
+            />
+        </Box>
+    );
+}
+
 
 function rToColor(r) {
     if (r === null || r === undefined) return "rgba(255,255,255,0.04)";
@@ -35,110 +376,83 @@ function rToColor(r) {
     }
 }
 
-function rToTextColor(r) {
-    if (!r) return "text.secondary";
-    return Math.abs(r) > 0.05 ? "text.primary" : "text.secondary";
-}
-
-function SectionHeader({icon, title, subtitle }) {
-    return (
-        <Box sx={{mb: 3 }}>
-            <Box sx={{display: "flex", alignItems: "center", gap: 1.5, mb: 0.5}}>
-                {icon}
-                <Typography variant="h5" sx={{fontFamily: "Playfair Display, serif", color: "text.primary"}}>
-                    {title}
-                </Typography>
-            </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ml: 4.5}}>
-                {subtitle}
-            </Typography>
-        </Box>
-    );
-}
-
-function CorrelationHeatmap({ data, loading, error }) {
+function CorrelationHeatmap(){
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [activeTrait, setActiveTrait] = useState(null);
 
-    const {genres, lookup} = (() => {
-        if (!data || !Array.isArray(data)) return {genres: [], lookup: {}};
-        const genreSet = data.map(row => row.genre);
+    const load = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            setData(await getTraitGenreCorrelations(activeTrait));
+        } catch {
+            setError("Failed to load correlation dataa");
+        } finally {
+            setLoading(false);
+        }
+    }, [activeTrait]);
+
+    useEffect(() => {load();}, [load]);
+
+    const { genres, lookup } = (() => {
+        if (!data || !Array.isArray(data)) return { genres: [], lookup: {} };
         const lkp = {};
         data.forEach(row => {
             lkp[row.genre] = {};
-            Object.entries(row.correlations).forEach(([t, v]) => {
-                lkp[row.genre][t] = v.r;
-            });
+            Object.entries(row.correlations).forEach(([t, v]) => { lkp[row.genre][t] = v.r;});
         });
-        return {genres: genreSet, lookup: lkp};
+        return {genres: data.map(r => r.genre), lookup: lkp};
     })();
 
     const visibleTraits = activeTrait ? [activeTrait] : TRAITS;
 
     return (
         <Box>
-            <SectionHeader
-                icon={<PsychologyIcon sx={{color: "primary.main", fontSize: 22}} />}
-                title="Trait–Genre Correlations"
-                subtitle="Pearson r between each personality trait and normalised genre preference. Gold = positive correlation, blue = negative."
-            />
+            <Box sx={{ mb: 3 }}>
+                <Typography variant="h5" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}>
+                    Trait - Genre Correlations
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                    Pearson 'r' between each personality trait and normalised genre preference. Gold = trait drives preference, blue = trait suppresses it.
+                </Typography>
+            </Box>
 
             <Box sx={{mb: 2.5}}>
                 <Typography variant="caption" color="text.secondary" sx={{display: "block", mb: 1, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "0.65rem"}}>
                     Filter by trait
                 </Typography>
-                <ToggleButtonGroup
-                    value={activeTrait}
-                    exclusive
-                    onChange={(_, v) => setActiveTrait(v)}
-                    size="small"
+                <ToggleButtonGroup value={activeTrait} exclusive onChange={(_, v) => setActiveTrait(v)} size="small"
                     sx={{
                         flexWrap: "wrap", gap: 0.5,
                         "& .MuiToggleButton-root": {
                             border: "1px solid rgba(232,201,126,0.2)",
-                            color: "text.secondary",
-                            fontSize: "0.72rem",
-                            py: 0.4, px: 1.2,
-                            "&.Mui-selected": {
-                                background: "rgba(232,201,126,0.15)",
-                                color: "primary.main",
-                                borderColor: "primary.main",
+                            color: "text.secondary", fontSize: "0.72rem", py: 0.4, px: 1.2,
+                            "&.Mui-selected": { background: "rgba(232,201,126,0.15)", color: "primary.main", borderColor: "primary.main",
                             },
                         },
                     }}
                 >
-                    {TRAITS.map(t => (
-                        <ToggleButton key={t} value={t}>{TRAIT_LABELS[t]}</ToggleButton>
-                    ))}
+                    {TRAITS.map(t =>  <ToggleButton key={t} value={t}>{TRAIT_LABELS[t]}</ToggleButton>)}
                 </ToggleButtonGroup>
             </Box>
 
-            {loading && (
-                <Box sx={{display: "flex", justifyContent: "center", py: 6}}>
-                    <CircularProgress color="primary" size={32} thickness={2.5} />
-                </Box>
-            )}
+            {loading && <Box sx={{display: "flex", justifyContent: "center", py: 6}}> <CircularProgress color="primary" size={32} thickness={2.5} /></Box>}
             {error && <Alert severity="error">{error}</Alert>}
 
             {!loading && !error && genres.length > 0 && (
                 <Box sx={{overflowX: "auto"}}>
-                    <Box
-                        sx={{
+                    <Box sx={{
                             display: "grid",
                             gridTemplateColumns: `140px repeat(${visibleTraits.length}, 1fr)`,
                             minWidth: visibleTraits.length * 110 + 140,
                             border: "1px solid rgba(232,201,126,0.1)",
-                            borderRadius: 1,
-                            overflow: "hidden",
-                       }}
-                    >
+                            borderRadius: 1, overflow: "hidden",
+                       }}>
                         <Box sx={{background: "rgba(232,201,126,0.06)", p: 1, borderBottom: "1px solid rgba(232,201,126,0.1)"}} />
                         {visibleTraits.map(t => (
-                            <Box key={t} sx={{
-                                background: "rgba(232,201,126,0.06)",
-                                p: 1, textAlign: "center",
-                                borderBottom: "1px solid rgba(232,201,126,0.1)",
-                                borderLeft: "1px solid rgba(232,201,126,0.08)",
-                            }}>
+                            <Box key={t} sx={{ background: "rgba(232,201,126,0.06)", p: 1, textAlign: "center", borderBottom: "1px solid rgba(232,201,126,0.1)", borderLeft: "1px solid rgba(232,201,126,0.08)"}}>
                                 <Typography variant="caption" sx={{color: "primary.main", fontWeight: 700, fontSize: "0.68rem", letterSpacing: "0.06em" }}>
                                     {TRAIT_LABELS[t]}
                                 </Typography>
@@ -147,17 +461,9 @@ function CorrelationHeatmap({ data, loading, error }) {
 
                         {genres.map((genre, gi) => (
                             <>
-                                <Box key={`label-${genre}`} sx={{
-                                    p: 1,
-                                    display: "flex", alignItems: "center",
-                                    borderBottom: gi < genres.length - 1 ? "1px solid rgba(232,201,126,0.06)" : "none",
-                                    background: gi % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
-                                }}>
-                                    <Typography variant="caption" sx={{fontWeight: 600, color: "text.primary", fontSize: "0.78rem" }}>
-                                        {genre}
-                                    </Typography>
+                                <Box key={`label-${genre}`} sx={{ p: 1, display: "flex", alignItems: "center", borderBottom: gi < genres.length - 1 ? "1px solid rgba(232,201,126,0.06)" : "none", background: gi % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)"}}>
+                                    <Typography variant="caption" sx={{fontWeight: 600, color: "text.primary", fontSize: "0.78rem" }}>{genre}</Typography>
                                 </Box>
-
                                 {visibleTraits.map(t => {
                                     const r = lookup[genre]?.[t];
                                     return (
@@ -171,7 +477,7 @@ function CorrelationHeatmap({ data, loading, error }) {
                                                 transition: "filter 0.15s",
                                                 "&:hover": {filter: "brightness(1.3)"},
                                             }}>
-                                                <Typography variant="caption" sx={{ color: rToTextColor(r), fontWeight: 600, fontSize: "0.75rem"}}>
+                                                <Typography variant="caption" sx={{ fontWeight: 600, fontSize: "0.75rem", color: Math.abs(r || 0) > 0.05 ? "text.primary" : "text.secondary" }}>
                                                     {r !== null && r !== undefined ? r.toFixed(3) : "—"}
                                                 </Typography>
                                             </Box>
@@ -198,191 +504,21 @@ function CorrelationHeatmap({ data, loading, error }) {
     );
 }
 
-const DEVIATION_MAX = 0.3;
-
-function DeviationBar({value}) {
-    const pct = Math.min(Math.abs(value) / DEVIATION_MAX, 1) * 100;
-    const positive = value >= 0;
-    return (
-        <Box sx={{display: "flex", alignItems: "center", gap: 1}}>
-            <Box sx={{flex: 1, display: "flex", justifyContent: "flex-end"}}>
-                {!positive && (
-                    <Box sx={{
-                        height: 6, width: `${pct}%`, borderRadius: "3px 0 0 3px",
-                        background: "linear-gradient(90deg, rgba(126,158,232,0.3), rgba(126,158,232,0.8))",
-                   }} />
-                )}
-            </Box>
-            <Box sx={{ width: 1, height: 14, background: "rgba(232,201,126,0.25)", flexShrink: 0 }} />
-            <Box sx={{ flex: 1 }}>
-                {positive && (
-                    <Box sx={{
-                        height: 6, width: `${pct}%`, borderRadius: "0 3px 3px 0",
-                        background: "linear-gradient(90deg, rgba(232,201,126,0.8), rgba(232,201,126,0.3))",
-                    }} />
-                )}
-            </Box>
-        </Box>
-    );
-}
-
-function GenreProfileCard({profile }) {
-    return (
-        <Box sx={{
-            border: "1px solid rgba(232,201,126,0.1)",
-            borderRadius: 1.5,
-            p: 2,
-            background: "#16161a",
-            "&:hover": {borderColor: "rgba(232,201,126,0.3)" },
-            transition: "border-color 0.2s",
-        }}>
-            <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-                <Typography variant="h6" sx={{ fontFamily: "Playfair Display, serif", fontSize: "1rem", color: "text.primary" }}>
-                    {profile.genre}
-                </Typography>
-                <Chip label={`${profile.user_count.toLocaleString()} users`} size="small"
-                    sx={{ fontSize: "0.65rem", height: 20, color: "text.secondary", background: "rgba(255,255,255,0.05)" }} />
-            </Box>
-
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {TRAITS.map(t => {
-                    const {avg, deviation } = profile.traits[t];
-                    return (
-                        <Box key={t}>
-                            <Box sx={{display: "flex", justifyContent: "space-between", mb: 0.25 }}>
-                                <Typography variant="caption" sx={{color: "text.secondary", fontSize: "0.7rem" }}>
-                                    {TRAIT_LABELS[t]}
-                                </Typography>
-                                <Box sx={{display: "flex", gap: 1, alignItems: "center" }}>
-                                    <Typography variant="caption" sx={{color: "text.secondary", fontSize: "0.68rem" }}>
-                                        avg {avg.toFixed(2)}
-                                    </Typography>
-                                    <Typography variant="caption" sx={{
-                                        fontSize: "0.68rem", fontWeight: 700,
-                                        color: deviation >= 0 ? "primary.main" : "secondary.main",
-                                    }}>
-                                        {deviation >= 0 ? "+" : ""}{deviation.toFixed(3)}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                            <DeviationBar value={deviation} />
-                        </Box>
-                    );
-                })}
-            </Box>
-        </Box>
-    );
-}
-
-function GenreProfiles({ data, loading, error }) {
-    const [genreFilter, setGenreFilter] = useState("");
-
-    const allGenres = data.map(d => d.genre);
-    const visible   = genreFilter ? data.filter(d => d.genre === genreFilter) : data;
-
-    return (
-        <Box>
-            <SectionHeader
-                icon={<PsychologyIcon sx={{ color: "primary.main", fontSize: 22}} />}
-                title="Genre Audience Profiles"
-                subtitle="Average Big Five personality scores of each genre's audience. Bars show deviation from the overall user population mean."
-            />
-
-            <Box sx={{ mb: 3, maxWidth: 260}}>
-                <FormControl fullWidth size="small">
-                    <InputLabel>Filter by genre</InputLabel>
-                    <Select
-                        value={genreFilter}
-                        label="Filter by genre"
-                        onChange={e => setGenreFilter(e.target.value)}
-                    >
-                        <MenuItem value=""><em>All genres</em></MenuItem>
-                        {allGenres.map(g => <MenuItem key={g} value={g}>{g}</MenuItem>)}
-                    </Select>
-                </FormControl>
-            </Box>
-
-            {loading && (
-                <Box sx={{ display: "flex", justifyContent: "center", py: 6}}>
-                    <CircularProgress color="primary" size={32} thickness={2.5} />
-                </Box>
-            )}
-            {error && <Alert severity="error">{error}</Alert>}
-
-            {!loading && !error && (
-                <Grid container spacing={2}>
-                    {visible.map(profile => (
-                        <Grid item xs={12} sm={6} md={4} lg={3} key={profile.genre}>
-                            <GenreProfileCard profile={profile} />
-                        </Grid>
-                    ))}
-                </Grid>
-            )}
-        </Box>
-    );
-}
-
 export default function PersonalityTraits() {
-    const [tab, setTab] = useState("correlation");
-    const [correlationData, setCorrelationData] = useState([]);
-    const [correlationLoading, setCorrelationLoading] = useState(true);
-    const [correlationError, setCorrelationError] = useState(null);
-    const [profilesData, setProfilesData] = useState([]);
-    const [profilesLoading, setProfilesLoading] = useState(false);
-    const [profilesError, setProfilesError] = useState(null);
-    const [profilesRequested, setProfilesRequested] = useState(false);
-
-    useEffect(() => {
-        (async () => {
-            setCorrelationLoading(true);
-            setCorrelationError(null);
-            try {
-                const result = await getTraitGenreCorrelations();
-                setCorrelationData(result);
-            } catch {
-                setCorrelationError("Failed to load correlation data.");
-            } finally {
-                setCorrelationLoading(false);
-            }
-        })();
-    }, []);
-
-    useEffect(() => {
-        if (tab !== "profiles" || profilesRequested || profilesLoading) {
-            return;
-        }
-
-        (async () => {
-            setProfilesRequested(true);
-            setProfilesLoading(true);
-            setProfilesError(null);
-            try {
-                const result = await getGenreProfiles(null, 100);
-                setProfilesData(result);
-            } catch {
-                setProfilesError("Failed to load genre profiles.");
-            } finally {
-                setProfilesLoading(false);
-            }
-        })();
-    }, [tab, profilesRequested, profilesLoading]);
+    const [tab, setTab] = useState("profiles");
 
     return (
         <Box sx={{p: {xs: 2, md: 4}, maxWidth: 1400, mx: "auto"}}>
             <Box sx={{mb: 4}}>
                 <Typography variant="h4" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}>
-                    Personality & Viewing Preferences
+                    Personality & Viewing Preferences.
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Explore how Big Five personality traits relate to genre preferences — supporting targeted marketing and personalised content strategy.
+                    Explore how Five personality traits relate to genre preferences:
                 </Typography>
             </Box>
 
-            <ToggleButtonGroup
-                value={tab}
-                exclusive
-                onChange={(_, v) => v && setTab(v)}
-                size="small"
+            <ToggleButtonGroup value={tab} exclusive onChange={(_, v) => v && setTab(v)} size="small"
                 sx={{
                     mb: 4,
                     "& .MuiToggleButton-root": {
@@ -398,26 +534,14 @@ export default function PersonalityTraits() {
                     },
                 }}
             >
-                <ToggleButton value="correlation">Trait–Genre Correlations</ToggleButton>
+                <ToggleButton value="correlation">Trait - Genre Correlations</ToggleButton>
                 <ToggleButton value="profiles">Genre Audience Profiles</ToggleButton>
             </ToggleButtonGroup>
 
             <Divider sx={{ mb: 4 }} />
 
-            {tab === "correlation" && (
-                <CorrelationHeatmap
-                    data={correlationData}
-                    loading={correlationLoading}
-                    error={correlationError}
-                />
-            )}
-            {tab === "profiles" && (
-                <GenreProfiles
-                    data={profilesData}
-                    loading={profilesLoading}
-                    error={profilesError}
-                />
-            )}
+            {tab === "profiles"     && <GenreProfiles />}
+            {tab === "correlation"  && <CorrelationHeatmap />}
         </Box>
     );
 }
