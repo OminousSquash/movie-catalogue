@@ -3,7 +3,11 @@ from database.database import get_db
 from backend.DTOs.signup_dto import SignupDTO
 from backend.DTOs.login_dto import LoginDTO
 from database.services.login_signup_service import login_service, signup_service
-from backend.security.dependencies import get_current_user
+from backend.security.dependencies import security
+from backend.security.auth_utils import block_token, is_token_blocked, SECRET_KEY, ACCESS_TOKEN_EXPIRE_HOURS, ALGORITHM
+import time
+from jose import jwt, JWTError
+from fastapi import HTTPException
 
 router = APIRouter(prefix="/account", tags=["account handling"])
 
@@ -20,3 +24,18 @@ def signup(
     db = Depends(get_db)
 ):
     return signup_service(signup_dto=signup_dto, db=db)
+
+@router.post("/logout")
+def logout(
+    token = Depends(security)
+):
+    raw_token = token.credentials
+    if not is_token_blocked(raw_token):
+        try:
+            payload = jwt.decode(raw_token, SECRET_KEY, algorithms=[ALGORITHM])
+            remaining = int(payload["exp"] - time.time())
+            if remaining > 0:
+                block_token(raw_token, remaining)
+        except JWTError:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    return {"message": "Logged Out"}
