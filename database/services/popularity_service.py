@@ -1,6 +1,7 @@
 from mysql.connector import Error, MySQLConnection
 from fastapi import HTTPException, status
 from backend.utils.redis_client import redis_client
+from backend.utils.json_utils import make_json_safe
 import json
 
 PAGE_SIZE = 50
@@ -31,7 +32,8 @@ def get_popularity_report_service(
         cursor.execute(popularity_query)
         result = cursor.fetchall()
 
-        redis_client.set(cache_key, json.dumps(result), ex=3600)
+        redis_result = make_json_safe(result)
+        redis_client.set(cache_key, json.dumps(redis_result), ex=3600)
         return result
 
     except Error:

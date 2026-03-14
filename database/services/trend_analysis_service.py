@@ -2,6 +2,7 @@ from mysql.connector import MySQLConnection, Error
 from backend.DTOs.genre_contributor_trend_analysis_dto import GenreContributorTrendAnalysisDTO
 from fastapi import HTTPException, status
 from backend.utils.redis_client import redis_client
+from backend.utils.json_utils import make_json_safe
 import json
 
 def get_genre_trend_service(db: MySQLConnection):
@@ -31,7 +32,8 @@ def get_genre_trend_service(db: MySQLConnection):
         cursor.execute(trend_analytics_query)
         result = cursor.fetchall()
 
-        redis_client.set(cache_key, json.dumps(result), ex=3600)
+        redis_result = make_json_safe(result)
+        redis_client.set(cache_key, json.dumps(redis_result), ex=3600)
 
         return result
 
@@ -111,7 +113,8 @@ def get_contributor_trends_service(
 
         cursor.execute(query, params)
         result = cursor.fetchall()
-        redis_client.set(cache_key, json.dumps(result), ex=3600)
+        redis_result = make_json_safe(result)
+        redis_client.set(cache_key, json.dumps(redis_result), ex=3600)
         return result
 
     except HTTPException:

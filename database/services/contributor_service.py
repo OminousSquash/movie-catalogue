@@ -1,6 +1,7 @@
 from mysql.connector import Error, MySQLConnection
 from fastapi import HTTPException, status
 from backend.utils.redis_client import redis_client
+from backend.utils.json_utils import make_json_safe
 import json
 
 def get_contributor_info_service(
@@ -78,7 +79,9 @@ def get_contributor_info_service(
         contributor_info["popular_works"] = [
             movie["primary_title"] for movie in popular_movies
         ]
-        redis_client.set(cache_key, json.dumps(contributor_info), ex=3600)
+
+        safe_contributor_info = make_json_safe(contributor_info)
+        redis_client.set(cache_key, json.dumps(safe_contributor_info), ex=3600)
 
         return contributor_info
 
