@@ -8,7 +8,7 @@ import json
 traits = ["openness", "agreeableness", "emotional_stability", "conscientiousness", "extraversion"]
 # these are fixed also
 POPULATION_MEANS = {"openness": 5.37280, "agreeableness": 4.21538, "emotional_stability": 4.56401, "conscientiousness": 4.66401, "extraversion": 3.48022} 
-# I wroked out these value and hardcoded them to save time when processing as our dataset isn't going to change
+# I worked out these value and hardcoded them to save time when processing as our dataset isn't going to change
 
 
 def get_personality_genre_correlations_service(
