@@ -1,7 +1,7 @@
 from mysql.connector import MySQLConnection, Error
 from fastapi import HTTPException, status
 import pandas as pd
-from redis_client import redis_client
+from database.services.redis_client import redis_client
 import json
 
 
