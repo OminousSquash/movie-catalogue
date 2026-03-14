@@ -3,6 +3,7 @@ import { Box, Dialog, DialogContent } from "@mui/material";
 import AppRoutes from "./AppRoutes";
 import NavBar from "./components/NavBar";
 import LoginSignup from "./pages/LoginSignup";
+import { logout } from "./services/authService";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -14,9 +15,15 @@ function App() {
     setIsAuthenticated(true);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      localStorage.removeItem("access_token");
+      setIsAuthenticated(false);
+    }
   };
 
   return (

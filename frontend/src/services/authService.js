@@ -14,3 +14,8 @@ export const signup = async ({ username, password }) => {
   const response = await api.post("/account/signup", { username, password });
   return normalizeAuthResponse(response.data);
 };
+
+export const logout = async() => {
+  const response = await api.post("/account/logout");
+  return response.data;
+}
