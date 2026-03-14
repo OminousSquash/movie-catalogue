@@ -20,9 +20,16 @@ def _validate_genres_exist(cursor, genres: list[str]):
             detail="One or more genres are not found"
         )
 
-def get_rating_harshness_service(db:MySQLConnection):
+def get_rating_harshness_service(db: MySQLConnection):
     try:
-        cursor = db.cursor(dictionary = True)
+        cache_key = "viewer_harshness"
+
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return json.loads(cached_result)
+
+        cursor = db.cursor(dictionary=True)
+
         query = """
         SELECT 
         CASE 
@@ -36,15 +43,27 @@ def get_rating_harshness_service(db:MySQLConnection):
             FROM dataset_user_ratings
             GROUP BY dataset_user_id
         ) AS user_avgs
-        GROUP BY rater_type; 
+        GROUP BY rater_type;
         """
+
         cursor.execute(query)
-        return cursor.fetchall()
+        result = cursor.fetchall()
+
+        redis_client.setex(cache_key, 3600, json.dumps(result))
+
+        return result
+
     except Error:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
 def get_low_rating_genres_service(db:MySQLConnection):
     try:
+        cache_key = "low_rating_genres"
+
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return json.loads(cached_result)
+
         cursor = db.cursor(dictionary=True)
 
         query = """
