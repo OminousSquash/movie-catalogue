@@ -1,5 +1,4 @@
 from mysql.connector import MySQLConnection, Error
-from sklearn.cluster import KMeans
 from fastapi import HTTPException, status
 import pandas as pd
 from redis_client import redis_client
