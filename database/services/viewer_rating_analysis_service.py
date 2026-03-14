@@ -49,7 +49,7 @@ def get_rating_harshness_service(db: MySQLConnection):
         cursor.execute(query)
         result = cursor.fetchall()
 
-        redis_client.setex(cache_key, 3600, json.dumps(result))
+        redis_client.set(cache_key, json.dumps(result), ex=3600)
 
         return result
 
@@ -87,7 +87,9 @@ def get_low_rating_genres_service(db:MySQLConnection):
         """
 
         cursor.execute(query)
-        return cursor.fetchall()
+        result = cursor.fetchall()
+        redis_client.set(cache_key, json.dumps(result), ex=3600)
+        return result
     except Error:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
@@ -137,7 +139,7 @@ def get_correlation_matrix_service(db: MySQLConnection):
 
         result = correlation_matrix.to_dict()
 
-        redis_client.setex(cache_key, 3600, json.dumps(result))
+        redis_client.set(cache_key, json.dumps(result), ex=3600)
 
         return result
 
@@ -152,6 +154,12 @@ def get_correlation_matrix_service(db: MySQLConnection):
 
 def get_conditional_low_rating_service(db: MySQLConnection, genre_a: str, genre_b: str):
     try:
+
+        cache_key = f"low_rating_genres:{genre_a}:{genre_b}"
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return json.loads(cached_result)
+
         cursor = db.cursor(dictionary=True)
         _validate_genres_exist(cursor, [genre_a, genre_b])
 
@@ -184,12 +192,15 @@ def get_conditional_low_rating_service(db: MySQLConnection, genre_a: str, genre_
         else:
             probability = result["users_low_in_b_given_a"] / result["users_low_in_a"]
 
-        return {
+        result_data =  {
             "genre_a": genre_a,
             "genre_b": genre_b,
             "probability": round(probability, 3),
             "sample_size": result["users_low_in_a"]
         }
+
+        redis_client.set(cache_key, json.dumps(result_data), ex=3600)
+        return result_data
     except HTTPException:
         raise
     except Error:
@@ -200,6 +211,11 @@ def get_conditional_low_rating_service(db: MySQLConnection, genre_a: str, genre_
 
 def get_conditional_high_rating_service(db: MySQLConnection, genre_a: str, genre_b: str):
     try:
+        cache_key = f"conditional_high_rating:{genre_a}:{genre_b}"
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return json.loads(cached_result)
+
         cursor = db.cursor(dictionary=True)
         _validate_genres_exist(cursor, [genre_a, genre_b])
 
@@ -235,12 +251,15 @@ def get_conditional_high_rating_service(db: MySQLConnection, genre_a: str, genre
         else:
             probability = result["users_high_in_b_given_a"] / result["users_high_in_a"]
 
-        return {
+        result_data = {
             "genre_a": genre_a,
             "genre_b": genre_b,
             "probability": round(probability, 3),
             "sample_size": result["users_high_in_a"]
         }
+
+        redis_client.set(cache_key, json.dumps(result_data), ex=3600)
+        return result_data
     except HTTPException:
         raise
     except Error:
