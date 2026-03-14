@@ -1,12 +1,20 @@
 from mysql.connector import MySQLConnection, Error
 from backend.DTOs.genre_contributor_trend_analysis_dto import GenreContributorTrendAnalysisDTO
 from fastapi import HTTPException, status
+from backend.utils.redis_client import redis_client
+from backend.utils.json_utils import make_json_safe
+import json
 
-def get_genre_trend_service(
-    db: MySQLConnection
-):
+def get_genre_trend_service(db: MySQLConnection):
     try:
-        cursor = db.cursor(dictionary = True)
+        cache_key = "genre_trends"
+
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return json.loads(cached_result)
+
+        cursor = db.cursor(dictionary=True)
+
         trend_analytics_query = """
         SELECT  
             STDDEV(m.average_rating) AS std_rating,
@@ -20,8 +28,15 @@ def get_genre_trend_service(
         GROUP BY g.genre, decade
         ORDER BY decade DESC, total_votes DESC
         """
+
         cursor.execute(trend_analytics_query)
-        return cursor.fetchall()
+        result = cursor.fetchall()
+
+        redis_result = make_json_safe(result)
+        redis_client.set(cache_key, json.dumps(redis_result), ex=3600)
+
+        return result
+
     except Error:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
 
@@ -30,6 +45,18 @@ def get_contributor_trends_service(
     genre_contributor_dto: GenreContributorTrendAnalysisDTO
 ):
     try:
+        genres = genre_contributor_dto.genres or []
+        last_decade = genre_contributor_dto.last_decade
+
+        genres_key = ",".join(sorted(genres)) if genres else "all"
+        decade_key = "last_decade" if last_decade else "all_time"
+
+        cache_key = f"contributor_trends:{genres_key}:{decade_key}"
+
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return json.loads(cached_result)
+
         cursor = db.cursor(dictionary=True)
 
         query = """
@@ -85,7 +112,11 @@ def get_contributor_trends_service(
         """
 
         cursor.execute(query, params)
-        return cursor.fetchall()
+        result = cursor.fetchall()
+        redis_result = make_json_safe(result)
+        redis_client.set(cache_key, json.dumps(redis_result), ex=3600)
+        return result
+
     except HTTPException:
         raise
     except Error:

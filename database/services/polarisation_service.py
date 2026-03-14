@@ -1,10 +1,21 @@
 from mysql.connector import Error, MySQLConnection
 from fastapi import HTTPException, status
+from backend.utils.redis_client import redis_client
+from backend.utils.json_utils import make_json_safe
+import json
 
 def polarisation_metrics_service(
     db: MySQLConnection
 ):
     try:
+        
+        cache_key = "polarisation_metrics"
+
+        cached_result = redis_client.get(cache_key)
+        if cached_result:
+            return json.loads(cached_result)
+
+        
         cursor = db.cursor(dictionary = True)
         stats_query = """
         WITH ranked AS (
@@ -52,6 +63,10 @@ def polarisation_metrics_service(
         GROUP BY g.genre_id, g.genre, iq.q1, iq.q3
         """
         cursor.execute(stats_query)
-        return cursor.fetchall()
+        result = cursor.fetchall()
+        redis_result = make_json_safe(result)
+        redis_client.set(cache_key, json.dumps(redis_result), ex=3600)
+        return result
+
     except Error:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
