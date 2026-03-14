@@ -195,7 +195,7 @@ export default function ViewerRatingPairExplorer() {
                                         <Typography variant="caption" color="text.secondary">
                                             Negative carry-over
                                         </Typography>
-                                        <Typography variant="h4" sx={{ mt: 0.4, fontFamily: "Playfair Display, serif" }}>
+                                        <Typography variant="h4" sx={{ mt: 0.4 }}>
                                             {((lowData.probability ?? 0) * 100).toFixed(1)}%
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.4 }}>
@@ -208,7 +208,7 @@ export default function ViewerRatingPairExplorer() {
                                         <Typography variant="caption" color="text.secondary">
                                             Positive carry-over
                                         </Typography>
-                                        <Typography variant="h4" sx={{ mt: 0.4, fontFamily: "Playfair Display, serif" }}>
+                                        <Typography variant="h4" sx={{ mt: 0.4 }}>
                                             {((highData.probability ?? 0) * 100).toFixed(1)}%
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.4 }}>

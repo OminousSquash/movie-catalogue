@@ -47,7 +47,7 @@ export default function RecentMovies({ isAuthenticated = false }) {
                 <Box sx={{ mb: 3 }}>
                     <Typography
                         variant="h4"
-                        sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}
+                        sx={{ color: "text.primary", mb: 0.5 }}
                     >
                         Recent Movies
                     </Typography>

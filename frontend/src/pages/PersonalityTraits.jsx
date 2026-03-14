@@ -148,7 +148,6 @@ function GenreCard({ profile, onClick }) {
             transition: "all 0.2s",
         }}>
             <Typography variant="subtitle2" sx={{
-                fontFamily: "Playfair Display, serif",
                 color: "text.primary",
                 fontSize: "0.85rem",
                 textAlign: "center",
@@ -180,7 +179,7 @@ function GenreModal({ profile, open, onClose }) {
             PaperProps={{ sx: { background: "#16161a", border: "1px solid rgba(232,201,126,0.2)", borderRadius: 2 } }}
         >
             <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
-                <Typography variant="h6" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary" }}>
+                <Typography variant="h6" sx={{ color: "text.primary" }}>
                     {profile.genre}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -296,8 +295,8 @@ const sorted = [...data]
     return (
         <Box>
             <Box sx={{ mb: 3 }}>
-                <Typography variant="h5" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}>
-                    Genre Audience Profiles.
+                <Typography variant="h5" sx={{ color: "text.primary", mb: 0.5 }}>
+                    Genre Audience Profiles
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                     Each radar shows the personality profile of that genre's audience against the population average. The trait below each chart shows the trait that stands out the most, so up arrow means above average, down arrow means below. Sorts by a trait to rank genres by how strongly that trait's audience prefers them. Click any card to expand.
@@ -411,7 +410,7 @@ function CorrelationHeatmap(){
     return (
         <Box>
             <Box sx={{ mb: 3 }}>
-                <Typography variant="h5" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}>
+                <Typography variant="h5" sx={{ color: "text.primary", mb: 0.5 }}>
                     Trait - Genre Correlations
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -510,8 +509,8 @@ export default function PersonalityTraits() {
     return (
         <Box sx={{p: {xs: 2, md: 4}, maxWidth: 1400, mx: "auto"}}>
             <Box sx={{mb: 4}}>
-                <Typography variant="h4" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}>
-                    Personality & Viewing Preferences.
+                <Typography variant="h4" sx={{ color: "text.primary", mb: 0.5 }}>
+                    Personality & Viewing Preferences
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                     Explore how Five personality traits relate to genre preferences:

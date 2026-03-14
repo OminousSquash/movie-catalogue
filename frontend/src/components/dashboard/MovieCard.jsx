@@ -127,7 +127,6 @@ const MovieCard = ({
           to={movie?.tconst ? `/movies/${movie.tconst}` : undefined}
           sx={{
             display: "block",
-            fontFamily: "Playfair Display, serif",
             fontSize: "1rem",
             fontWeight: 600,
             lineHeight: 1.3,

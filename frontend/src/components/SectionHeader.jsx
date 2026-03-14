@@ -7,7 +7,7 @@ export default function SectionHeader({ icon, title, subtitle, chip }) {
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     {icon}
                     <Box>
-                        <Typography variant="h5" sx={{ fontFamily: "Playfair Display, serif" }}>
+                        <Typography variant="h5" sx={{}}>
                             {title}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">

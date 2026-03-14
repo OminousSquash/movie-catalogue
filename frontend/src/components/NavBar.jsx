@@ -77,7 +77,6 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
             sx={{
               mr: 3,
               display: { xs: 'none', md: 'flex' },
-              fontFamily: 'Playfair Display, serif',
               fontWeight: 700,
               letterSpacing: '.15rem',
               color: 'primary.main',
@@ -140,7 +139,6 @@ function NavBar({ isAuthenticated, onLoginClick, onLogout }) {
               mr: 2,
               display: { xs: 'flex', md: 'none' },
               flexGrow: 1,
-              fontFamily: 'Playfair Display, serif',
               fontWeight: 700,
               color: 'primary.main',
               textDecoration: 'none',

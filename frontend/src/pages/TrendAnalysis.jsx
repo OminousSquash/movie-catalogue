@@ -70,7 +70,7 @@ function SectionHeader({ icon, title, subtitle }) {
         <Box sx={{ mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5 }}>
                 {icon}
-                <Typography variant="h5" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary" }}>
+                <Typography variant="h5" sx={{ color: "text.primary" }}>
                     {title}
                 </Typography>
             </Box>
@@ -165,7 +165,7 @@ function GenreTrendChart() {
                         <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                             Most improved genre
                         </Typography>
-                        <Typography variant="subtitle2" sx={{ color: "primary.main", fontFamily: "Playfair Display, serif" }}>
+                        <Typography variant="subtitle2" sx={{ color: "primary.main" }}>
                             {summaryStats.genre}
                         </Typography>
                         <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 700 }}>
@@ -182,7 +182,7 @@ function GenreTrendChart() {
                     <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                         Decades tracked
                     </Typography>
-                    <Typography variant="subtitle2" sx={{ color: "primary.main", fontFamily: "Playfair Display, serif" }}>
+                    <Typography variant="subtitle2" sx={{ color: "primary.main" }}>
                         {allDecades.length}
                     </Typography>
                     <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 700 }}>
@@ -198,7 +198,7 @@ function GenreTrendChart() {
                     <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                         Genres available
                     </Typography>
-                    <Typography variant="subtitle2" sx={{ color: "primary.main", fontFamily: "Playfair Display, serif" }}>
+                    <Typography variant="subtitle2" sx={{ color: "primary.main" }}>
                         {allGenres.length}
                     </Typography>
                     <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 700 }}>
@@ -411,7 +411,7 @@ function ContributorTrendChart({ allGenres }) {
                             <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                                 #1 contributor
                             </Typography>
-                            <Typography variant="subtitle2" sx={{ color: "primary.main", fontFamily: "Playfair Display, serif" }}>
+                            <Typography variant="subtitle2" sx={{ color: "primary.main" }}>
                                 {data[0].name}
                             </Typography>
                         </Box>
@@ -540,7 +540,7 @@ export default function TrendAnalysis() {
     return (
         <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1100, mx: "auto" }}>
             <Box sx={{ mb: 4 }}>
-                <Typography variant="h4" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}>
+                <Typography variant="h4" sx={{ color: "text.primary", mb: 0.5 }}>
                     Trend Analysis
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
