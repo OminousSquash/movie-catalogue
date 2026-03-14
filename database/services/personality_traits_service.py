@@ -2,11 +2,13 @@ from mysql.connector import Error, MySQLConnection
 from fastapi import HTTPException, status
 from backend.DTOs.personality_correlation_dto import PersonalityCorrelationDTO
 from backend.DTOs.genre_profiles_dto import GenreProfilesDTO
+from backend.utils.redis_client import redis_client
+import json
 
 traits = ["openness", "agreeableness", "emotional_stability", "conscientiousness", "extraversion"]
 # these are fixed also
 POPULATION_MEANS = {"openness": 5.37280, "agreeableness": 4.21538, "emotional_stability": 4.56401, "conscientiousness": 4.66401, "extraversion": 3.48022} 
-# I wroked out these value and hardcoded them to save time when processing as our dataset isn't going to change 
+# I wroked out these value and hardcoded them to save time when processing as our dataset isn't going to change
 
 
 def get_personality_genre_correlations_service(
@@ -15,6 +17,13 @@ def get_personality_genre_correlations_service(
 ):
     a = personality_corr_dto.personality_or_genre_a
     b = personality_corr_dto.personality_or_genre_b
+    
+    cache_key = f"personality_genre_correlation:{a}:{b}"
+
+    cache_result = redis_client.get(cache_key)
+    if cache_result:
+        return json.loads(cache_result)
+
 
     if a and a not in traits:
         raise HTTPException(
@@ -141,12 +150,21 @@ def get_personality_genre_correlations_service(
     if a:
         results.sort(key=lambda x: x["correlations"][a]["r"], reverse=True)
 
+    redis_client.set(cache_key, json.dumps(results), ex=3600)
+
     return results
 
 def get_genre_personality_profiles_service(
     genre_profile_dto: GenreProfilesDTO,
     db:MySQLConnection
 ):
+
+    cache_key = f"genre_personality_profile:{genre_profile_dto.genre}:{genre_profile_dto.minimum_no_users}"
+    cache_result = redis_client.get(cache_key)
+    if cache_result:
+        return json.loads(cache_result)
+
+
     genre_filter_clause = ""
     params = []
     if genre_profile_dto.genre:
@@ -209,4 +227,5 @@ def get_genre_personality_profiles_service(
             }
         results.append(entry)
 
+    redis_client.set(cache_key, json.dumps(results), ex=3600)
     return results
