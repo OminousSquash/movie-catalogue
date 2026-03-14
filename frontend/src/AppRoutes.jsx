@@ -51,7 +51,13 @@ function AppRoutes({ isAuthenticated }) {
           </ProtectedRoute>
         }
       />
-      <Route path="/view-lists" element={<ViewLists />} />
+      <Route 
+        path="/view-lists" 
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated} >
+            <ViewLists />
+          </ProtectedRoute>
+        } />
       <Route path="/lists/:listId" element={<ListDetails isAuthenticated={isAuthenticated} />} />
       <Route path="/movies/:tconst" element={<MovieDetails />} />
       <Route path="/contributors/:nconst" element={<ContributorDetails />} />
