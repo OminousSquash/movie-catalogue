@@ -101,7 +101,7 @@ function PopularityChart() {
     return (
         <Box>
             <Box sx={{ mb: 3 }}>
-                <Typography variant="h5" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}>
+                <Typography variant="h5" sx={{ color: "text.primary", mb: 0.5 }}>
                     Genre Popularity
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -122,7 +122,7 @@ function PopularityChart() {
                             <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                                 #{i + 1} by rating
                             </Typography>
-                            <Typography variant="subtitle2" sx={{ color: "primary.main", fontFamily: "Playfair Display, serif" }}>
+                            <Typography variant="subtitle2" sx={{ color: "primary.main" }}>
                                 {d.genre}
                             </Typography>
                             <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 700 }}>
@@ -221,7 +221,7 @@ function PolarisationChart() {
     return (
         <Box>
             <Box sx={{ mb: 3 }}>
-                <Typography variant="h5" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}>
+                <Typography variant="h5" sx={{ color: "text.primary", mb: 0.5 }}>
                     Genre Polarisation
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -242,7 +242,7 @@ function PolarisationChart() {
                             <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.65rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                                 Most polarising genre
                             </Typography>
-                            <Typography variant="subtitle2" sx={{ color: "primary.main", fontFamily: "Playfair Display, serif" }}>
+                            <Typography variant="subtitle2" sx={{ color: "primary.main" }}>
                                 {data[0].genre}
                             </Typography>
                         </Box>
@@ -334,7 +334,7 @@ export default function GenreReports() {
     return (
         <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 1100, mx: "auto" }}>
             <Box sx={{ mb: 4 }}>
-                <Typography variant="h4" sx={{ fontFamily: "Playfair Display, serif", color: "text.primary", mb: 0.5 }}>
+                <Typography variant="h4" sx={{ color: "text.primary", mb: 0.5 }}>
                     Genre Popularity & Polarisation
                 </Typography>
                 <Typography variant="body2" color="text.secondary">

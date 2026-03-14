@@ -90,7 +90,7 @@ const FilterPanel = ({
     <Box component="form" onSubmit={handleSubmit}>
       <Typography
         variant="h6"
-        sx={{ fontFamily: "Playfair Display, serif", mb: 2, color: "text.primary" }}
+        sx={{ mb: 2, color: "text.primary" }}
       >
         Filters
       </Typography>
