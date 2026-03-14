@@ -13,7 +13,11 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
-    IconButton
+    IconButton,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { getTraitGenreCorrelations, getGenreProfiles } from "../services/personalityService";
@@ -242,6 +246,8 @@ function GenreProfiles() {
     const [error, setError] = useState(null);
     const [selected, setSelected] = useState(null);
     const [sortBy, setSortBy] = useState("genre");
+    const [genreFilter, setGenreFilter] = useState("");
+    const [correlationCache, setCorrelationCache] = useState({});
 
     useEffect(() => {
         (async () => {
@@ -258,10 +264,33 @@ function GenreProfiles() {
         })();
     }, []);
 
-    const sorted = [...data].sort((a, b) => {
+    useEffect(() => {
+    if (!TRAITS.includes(sortBy)) return;
+    if (correlationCache[sortBy]) return;
+    (async () => {
+        try {
+            const result = await getTraitGenreCorrelations(sortBy);
+            const lookup = {};
+            result.forEach(row => {
+                lookup[row.genre] = row.correlations[sortBy]?.r ?? 0;
+            });
+            setCorrelationCache(prev => ({ ...prev, [sortBy]: lookup }));
+        } catch { }
+    })();
+}, [sortBy]);
+
+const sorted = [...data]
+    .filter(d => !genreFilter || d.genre === genreFilter)
+    .sort((a, b) => {
         if (sortBy === "genre") return a.genre.localeCompare(b.genre);
         if (sortBy === "users") return b.user_count - a.user_count;
-        return Math.abs(b.traits[sortBy]?.deviation || 0) - (a.traits[sortBy]?.deviation || 0);
+        const lookup = correlationCache[sortBy];
+        if (lookup) {
+            return (lookup[b.genre] ?? 0) - (lookup[a.genre] ?? 0);
+        }
+        const aVal = a.traits[sortBy]?.deviation ?? 0;
+        const bVal = b.traits[sortBy]?.deviation ?? 0;
+        return bVal - aVal;
     });
 
     return (
@@ -274,11 +303,11 @@ function GenreProfiles() {
                     Each radar shows the Big Five personality profile of that genre's audience. Gold = above population average, dashed = population mean. Click any card to expand.
                 </Typography>
             </Box>
-            <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+            <Box sx={{mb: 3, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2}}>
                 <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "0.65rem" }}>
                     Sort by
                 </Typography>
-                <ToggleButtonGroup value={sortBy} exclusive onChange={(_, v) => v && setSortBy(v)} size="small"
+                <ToggleButtonGroup value={sortBy} exclusive onChange={(_, v) => {if (v) {setSortBy(v); if (TRAITS.includes(v)) setGenreFilter("");}}} size="small"
                     sx={{flexWrap: "wrap", gap: 0.5, "& .MuiToggleButton-root": { border: "1px solid rgba(232,201,126,0.2)", color: "text.secondary", fontSize: "0.7rem", py: 0.3, px: 1, "&.Mui-selected": { background: "rgba(232,201,126,0.12)", color: "primary.main", borderColor: "primary.main" }}}}>
                     <ToggleButton value="genre">A To Z</ToggleButton>
                     <ToggleButton value="users">Most Users</ToggleButton>
@@ -286,6 +315,26 @@ function GenreProfiles() {
                         <ToggleButton key={t} value={t}>{TRAIT_SHORT[t]}</ToggleButton>
                     ))}
                 </ToggleButtonGroup>
+                <Box sx={{mt: 2}}>
+                    <FormControl size="small" sx={{
+                        minWidth: 180,
+                        "& .MuiOutlinedInput-root": {
+                            "& fieldset": {borderColor: "rgba(232,201,126,0.2)"},
+                            "&:hover fieldset": {borderColor: "rgba(232,201,126,0.4)"},
+                            "&.Mui-focused fieldset": {borderColor: "#e8c97e"},
+                        },
+                        "& .MuiInputLabel-root.Mui-focused": {color: "#e8c97e"},
+                        "& .MuiInputLabel-root": {color: "#9a9082" },
+                        "& .MuiSelect-select": {color: "#f0ece3", fontSize: "0.82rem" },
+                    }}>
+                        <InputLabel>Filter by Genre</InputLabel>
+                        <Select value={genreFilter} label="Filter by genre" onChange={e => setGenreFilter(e.target.value)}
+                            MenuProps={{ PaperProps: { sx: { background: "#16161a", border: "1px solid rgba(232,201,126,0.15)" } } }}>
+                            <MenuItem value=""><em style={{ color: "#9a9082" }}>All Genres</em></MenuItem>
+                            {data.map(d => <MenuItem key={d.genre} value={d.genre} sx={{fontSize: "0.82rem", "&:hover": {background: "rgba(232,201,126,0.08)"} }}>{d.genre}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+                </Box>
             </Box>
 
             {loading && (
