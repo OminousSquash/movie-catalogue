@@ -25,6 +25,8 @@ def get_genre_trend_service(db: MySQLConnection):
         FROM movies m
         JOIN movie_genres mg ON m.tconst = mg.tconst
         JOIN genres g ON g.genre_id = mg.genre_id
+        WHERE g.genre IS NOT NULL
+        AND g.genre <> 'N'
         GROUP BY g.genre, decade
         ORDER BY decade DESC, total_votes DESC
         """
