@@ -1,7 +1,17 @@
 
-Commands: 
+How to run: 
 
-`docker compose up --build` in root folder to start application
+Navigate to (movie-posters drive)[https://drive.google.com/file/d/1LpZGcC_2ZAYR-GuYA1tOkQJdbrsIIGy1/view?usp=sharing] and unzip that folder in /datasets
+
+Create a .env file and place it in the root folder of the application
+
+You require 2 keys:
+1. SECRET_KEY used in JWT token generation. Generate a 32 byte random string and use that
+2. TMDB_ACCESS_TOKEN used in sending API requests to TMDB to fetch movie data. This is optional - only generate if you wish to run the scrapers in imdb_scraper.py. Visit [TMDB Getting Started Guide](https://developer.themoviedb.org/docs/getting-started) to create a free key. 
+
+Look at .test_env to see the format of the expected env file
+
+run `docker compose up --build` in root folder to start application
 
 Whenever changes are made to the database or endpoints run these commands:
 ```bash
@@ -9,7 +19,7 @@ docker compose down -v
 rm -rf ./mysql
 docker compose up --build
 ```
-
+Once docker has booted up, go to http://localhost:5173 to view the frontend
 
 For devs:
 
@@ -18,9 +28,6 @@ Branch naming convention should be devname/purpose-of-branch eg: vsrinivasan/cre
 
 Raw data source downloaded from: https://datasets.imdbws.com/ 
 Download and store in datasets/IMDb/raw
-
-Before starting the application run the following command from /backend/utils/:
-`python imdb_scraper.py`
 
 For testing endpoints using Swagger on localhost:8000
 
@@ -40,6 +47,4 @@ Code Quality/Format:
 1. All endpoints must be defined in /backend/controllers as a *_controller.py file
 2. All interactions with the database through SQL commands must be defined in *_service.py files
 3. Use DTOs for any JSON bodies for POST/PUT/DELETE request
-4. No inline CSS. All styling for a React component must be in a separate file with the same name as the component it is styling. Eg: MenuDropdown.jsx component is styled by MenuDropdown.css
-5. Use Materia UI components as much as possible. Reference: [Material UI API](https://mui.com/material-ui/getting-started/)
-
+4. Use Material UI components as much as possible. Reference: [Material UI API](https://mui.com/material-ui/getting-started/)
