@@ -1,4 +1,3 @@
-
 How to run: 
 
 Navigate to (movie-posters drive)[https://drive.google.com/file/d/1LpZGcC_2ZAYR-GuYA1tOkQJdbrsIIGy1/view?usp=sharing] and unzip that folder in /datasets
@@ -30,9 +29,6 @@ Raw data source downloaded from: https://datasets.imdbws.com/
 Download and store in datasets/IMDb/raw
 
 For testing endpoints using Swagger on localhost:8000
-
-For starting frontend, go to /frontend and run:
-`npm run dev`
 
 For testing authentication and user lists (see [user_list_crud_controller.py](backend/controllers/user_list_crud_controller.py) and [login_signup_controller.py](/backend/controllers/login_signup_controller.py]) use Postman [Link to download](https://www.postman.com/downloads/]))
 
